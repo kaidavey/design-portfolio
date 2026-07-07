@@ -22,6 +22,13 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     },
     {
+      name: 'order',
+      title: 'Display Order',
+      type: 'number',
+      description: 'Controls the order in which case studies appear (lower numbers first)',
+      validation: (Rule) => Rule.required().integer().min(0),
+    },
+    {
       name: 'year',
       title: 'Year',
       type: 'number',

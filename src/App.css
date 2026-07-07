@@ -1,9 +1,8 @@
-/* Home page layout */
+/* Shell - Shared layout for Home and CaseStudy */
 
-.home-page {
+.shell {
   position: relative;
   width: 100%;
-  max-width: 100%;
   min-height: 100svh;
   overflow-x: hidden;
   background-color: #f9f9f9;
@@ -12,7 +11,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.home-page__bg {
+.shell__bg {
   position: absolute;
   inset: 0;
   background-image: url(https://app.paper.design/file-assets/01KWM3MAWXZNV08ENZMGME6W21/01KWNGPAW86HW89TA47JYVYPX0.png);
@@ -23,10 +22,40 @@
   pointer-events: none;
 }
 
-.home-page__sidebar {
+.shell__dock {
   position: fixed;
   bottom: clamp(16px, 2.5vw, 30px);
   left: 50%;
-  transform: translateY(-50%);
+  transform: translateX(-50%);
   z-index: 10;
+}
+
+.shell__container {
+  position: relative;
+  min-height: 100svh;
+  padding: clamp(24px, 4vw, 48px);
+  container-type: inline-size; /* Establishes @container context */
+}
+
+/* Compact state - contained reading width */
+.shell__container--compact {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Expanded state - full viewport width */
+.shell__container--expanded {
+  max-width: none;
+  margin: 0;
+}
+
+.shell__header {
+  margin-bottom: clamp(24px, 3vw, 40px);
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.shell__content {
+  /* Content inherits container context from parent */
 }

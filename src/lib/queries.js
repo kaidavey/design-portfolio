@@ -98,15 +98,40 @@ export async function getCaseStudyBySlug(slug) {
 // Fetch all case studies (for listing page)
 export async function getAllCaseStudies() {
   const query = `
-    *[_type == "caseStudy"] | order(year desc) {
+    *[_type == "caseStudy"] | order(order asc) {
       _id,
       title,
       slug,
       year,
       role,
+      order,
       coverImage
     }
   `
 
   return await client.fetch(query)
+}
+
+// Simple cache for prefetching
+const caseStudyCache = new Map()
+
+export function getCachedCaseStudy(slug) {
+  return caseStudyCache.get(slug)
+}
+
+export function setCachedCaseStudy(slug, data) {
+  caseStudyCache.set(slug, data)
+}
+
+export async function prefetchCaseStudy(slug) {
+  if (!slug || caseStudyCache.has(slug)) return
+
+  try {
+    const data = await getCaseStudyBySlug(slug)
+    if (data) {
+      caseStudyCache.set(slug, data)
+    }
+  } catch (error) {
+    console.error('Prefetch error:', error)
+  }
 }
