@@ -102,6 +102,7 @@ export async function getAllCaseStudies() {
       _id,
       title,
       slug,
+      description,
       year,
       role,
       order,

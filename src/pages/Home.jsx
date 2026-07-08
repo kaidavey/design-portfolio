@@ -16,13 +16,13 @@ function HomeHeader() {
   })
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between w-full">
       {/* Left: Name and title */}
-      <div className="flex flex-col items-start gap-0">
-        <h1 className="tracking-tight font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-[28px]">
+      <div className="flex flex-col items-start gap-2.5">
+        <h1 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-[28px]/8.5">
           Kai Davey
         </h1>
-        <p className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#2F2F2F] text-[20px]">
+        <p className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-xl/6">
           Design Engineer & CS at UCLA
         </p>
       </div>
@@ -32,7 +32,7 @@ function HomeHeader() {
         {/* Location status */}
         <div className="flex items-center gap-1.5">
           <Clock className="w-[18px] h-[18px] text-[#0000004D]" strokeWidth={1.5} />
-          <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-[18px]">
+          <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-lg/5.5">
             Seattle · {seattleTime}
           </span>
         </div>
@@ -48,7 +48,7 @@ export default function Home() {
   const { caseStudies, loading } = useCaseStudies()
 
   return (
-    <Shell header={<HomeHeader />}>
+    <Shell header={<HomeHeader className="w-full" />}>
       {loading ? (
         <div className="flex items-center justify-center py-24">
           <div className="text-lg text-gray-400">Loading case studies...</div>
@@ -74,16 +74,16 @@ export default function Home() {
 
               {/* Title below - not in a card */}
               <div className="flex items-start gap-2">
-                <h2 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-lg leading-snug">
+                <h2 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-lg/5.5">
                   {caseStudy.title}
                 </h2>
-                {caseStudy.subtitle && (
+                {caseStudy.description && (
                   <>
-                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-lg leading-snug">
+                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-lg/5.5">
                       /
                     </span>
-                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-lg leading-snug">
-                      {caseStudy.subtitle}
+                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-lg/5.5">
+                      {caseStudy.description}
                     </span>
                   </>
                 )}

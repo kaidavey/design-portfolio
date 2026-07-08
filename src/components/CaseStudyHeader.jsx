@@ -17,7 +17,7 @@ export default function CaseStudyHeader({
   onClose,
 }) {
   // Button base styles matching Paper design
-  const buttonBaseClass = "w-[50px] h-[50px] rounded-full flex items-center justify-center text-[20px] border border-[#DEDEDE] shadow-sm hover:shadow-md transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+  const buttonBaseClass = "w-[50px] h-[50px] rounded-full flex items-center justify-center text-[36px] border border-[#DEDEDE] shadow-sm hover:shadow-md transition-all disabled:opacity-30 disabled:cursor-not-allowed"
   const buttonBgClass = "bg-[radial-gradient(50%_50%_at_50%_50%,#FFFFFF_0%,#F2F2F2_100%)]"
 
   return (
