@@ -22,6 +22,20 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     },
     {
+      name: 'description',
+      title: 'Short Description',
+      type: 'string',
+      description: 'Brief description shown on the home page (recommended 50-100 characters)',
+      validation: (Rule) => Rule.max(150),
+    },
+    {
+      name: 'order',
+      title: 'Display Order',
+      type: 'number',
+      description: 'Controls the order in which case studies appear (lower numbers first)',
+      validation: (Rule) => Rule.required().integer().min(0),
+    },
+    {
       name: 'year',
       title: 'Year',
       type: 'number',
