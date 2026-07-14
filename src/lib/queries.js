@@ -87,6 +87,20 @@ export async function getCaseStudyBySlug(slug) {
           title,
           paragraphs,
           subtitle
+        },
+
+        // textRowTwoColumn
+        _type == "textRowTwoColumn" => {
+          section,
+          title,
+          leftParagraphs,
+          rightParagraphs
+        },
+
+        // imageFull
+        _type == "imageFull" => {
+          image,
+          caption
         }
       }
     }

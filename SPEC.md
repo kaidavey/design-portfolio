@@ -88,6 +88,66 @@ Reference: clean off-white textured background, generous whitespace, centered co
 
 ---
 
+## Visual Effects
+
+### Progressive Blur (Top Edge Dissolve)
+
+The case study gray container features a **progressive blur** at its top edge that makes scrolling content softly blur and dissolve as it approaches the frame boundary, instead of being hard-clipped.
+
+**Component:** `ProgressiveBlur` at `src/components/core/ProgressiveBlur.jsx`
+
+**Props:**
+- `edge`: `'top' | 'bottom' | 'left' | 'right'` (default: `'top'`) — which edge to blur
+- `size`: string (default: `'160px'`) — height/width of the blurred region
+- `maxBlur`: number (default: `12`) — base blur radius in px (compounds to much higher at edge)
+- `layers`: number (default: `6`) — number of stacked blur layers (6 recommended, max 8)
+- `tint`: boolean (default: `false`) — whether to fade container background to fully opaque at edge
+- `tintColor`: string (default: `'rgb(240, 240, 240)'`) — color to fade to when tint is enabled
+- `debug`: boolean (default: `false`) — show colored mask geometry instead of blur
+- `className`: string — escape hatch for additional classes
+
+**How it works:**
+
+A single `backdrop-filter: blur()` layer produces a constant blur that can only fade in/out — it reads as "a blurry strip," not a smooth progressive dissolve. True progressive blur requires stacking N layers with **cumulative ramp masks** where blur compounds down the stack:
+
+**Algorithm (cumulative ramps, NOT bands):**
+1. `blur(k) = maxBlur / 2^(N-1-k)` — geometric progression, doubles each layer toward edge
+2. `start(k) = (k / N) * 100` — percentage where this layer begins to fade in
+3. `end(k) = ((k+1) / N) * 100` — percentage where this layer becomes fully opaque
+4. `mask(k) = linear-gradient(<dir>, transparent start%, black end%)` — **TWO stops only**
+
+Each layer fades in over its own range. Because `backdrop-filter` samples the composited result of sibling layers painted earlier, blur accumulates naturally. Layer 0 (weakest blur) renders first, layer N-1 (strongest blur) last.
+
+**Why not bands?** An earlier implementation used narrow masked bands (transparent → opaque → opaque → transparent) where each layer was isolated to a window. This produces visible seams at every band boundary. The cumulative ramp approach eliminates seams entirely because there are no hard cutoffs — layer 0's bottom edge is a soft fade-in from zero opacity, and layers compound smoothly.
+
+**Integration:**
+
+The overlay is mounted as a direct child of the case study gray container (`CaseStudy.jsx:213`). The component uses `position: sticky` to stay fixed at the edge while content scrolls (Model A: scroll container with `overflow-y: auto`). The wrapper is constrained to `size` height/width. Child blur layers are absolutely positioned within the sticky wrapper and extend past the container's padding (`py-10` and `px-9`) via negative offsets to reach the actual frame edges.
+
+**Critical stacking-context caveats:**
+
+- `backdrop-filter` samples whatever is painted **behind** the element in the same stacking context
+- Ancestors with `transform`, `filter`, `will-change`, or `perspective` create a containing block / stacking context that can silently break `backdrop-filter`
+- The site uses `transform`-based swipe navigation between case studies (Framer Motion). The blur layers do NOT have `transform` themselves, so they remain in the same context as the scrolling content and sample it correctly during transitions
+- Safari requires `-webkit-backdrop-filter` in addition to standard `backdrop-filter` or it will render nothing
+- Each layer is `pointer-events: none` so the overlay never intercepts clicks or scroll
+- `border-radius: inherit` on each layer ensures the blur respects the gray container's `rounded-tl-[70px] rounded-tr-[70px]` corners
+
+**Tuning:**
+
+Keep `layers` at 6–8. Each layer re-samples the backdrop; this is fill-rate intensive. Because blur now compounds, `maxBlur={12}` produces far more blur at the edge than the old band approach. A larger `size` (120px+) gives a gentler falloff; smaller values feel more aggressive.
+
+Current settings in `CaseStudy.jsx:213`: `size="120px"`, `maxBlur={12}`, `layers={6}`, `tint={true}`.
+
+Set `debug={true}` to see the mask geometry as colored stripes instead of blur — useful for diagnosing mask placement.
+
+**Do not regress the algorithm:**
+- Do not simplify back to a single blur layer — produces a "blurry strip," not a progressive dissolve
+- Do not return to narrow masked bands (four-stop gradients with hard cutoffs) — produces visible seams at band boundaries
+- The cumulative ramp approach with two-stop masks and compounding blur is load-bearing
+
+---
+
 ## Deliverable
 
 1. `SPEC.md` saved at repo root (this document).

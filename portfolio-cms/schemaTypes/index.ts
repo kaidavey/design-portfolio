@@ -8,6 +8,8 @@ import callToAction from './blocks/callToAction'
 import textBlockCentered from './blocks/textBlockCentered'
 import textCardRow from './blocks/textCardRow'
 import textColumns from './blocks/textColumns'
+import textRowTwoColumn from './blocks/textRowTwoColumn'
+import imageFull from './blocks/imageFull'
 
 // Document types
 import caseStudy from './caseStudy'
@@ -23,6 +25,8 @@ export const schemaTypes = [
   textBlockCentered,
   textCardRow,
   textColumns,
+  textRowTwoColumn,
+  imageFull,
   // Documents
   caseStudy,
 ]

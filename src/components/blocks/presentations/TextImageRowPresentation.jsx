@@ -16,9 +16,9 @@ export default function TextImageRowPresentation({
   imageAlt,
 }) {
   return (
-    <div className="flex flex-col @lg:flex-row items-start @lg:items-center gap-8 @lg:justify-between max-w-readable @lg:max-w-none mx-auto">
+    <div className="flex flex-col @lg:flex-row items-start @lg:items-center gap-8 @lg:justify-between w-full">
       {/* Text column */}
-      <div className="flex flex-col items-start gap-4 flex-1">
+      <div className="flex flex-col items-start gap-4 flex-1 w-full">
         <h2 className="tracking-tight font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-2xl">
           {title}
         </h2>

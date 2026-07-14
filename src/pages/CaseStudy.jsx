@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, X } from 'lucide-react'
+import { Maximize2 } from 'lucide-react'
 import { useCaseStudies, useNeighborPrefetch } from '../hooks/useCaseStudies'
+import { CASE_STUDY_LAYOUT } from '../config/caseStudyLayout'
 import Shell from '../components/Shell'
 import CaseStudyBody from '../components/CaseStudyBody'
+import ProgressiveBlur from '../components/core/ProgressiveBlur'
 
 // Centered breadcrumb navigation
 function CaseStudyNavigation({ title }) {
@@ -39,55 +41,17 @@ function CaseStudyNavigation({ title }) {
   )
 }
 
-// Control buttons (prev/next/expand/close)
-function CaseStudyControls({ hasPrev, hasNext, isExpanded, onPrev, onNext, onToggleExpand, onClose }) {
-  const buttonBaseClass = "w-[50px] h-[50px] rounded-full flex items-center justify-center border border-[#F1F1F1] hover:shadow-md transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-  const buttonBgClass = "bg-[radial-gradient(ellipse_96.655%_118.59%_at_50%_34.53%,oklch(97%_0_0)_45.01%,oklch(77.6%_0_0)_100%)] [box-shadow:rgba(0,0,0,0.1)_0px_-1px_1px_inset,#FFFFFF_-1px_1px_0px_inset]"
-
+// Expand button - only shown in compact mode (icon only, no frame)
+function ExpandButton({ onToggleExpand }) {
   return (
-    <div className="flex items-center justify-between w-full">
-      {/* Left: Prev/Next */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={onPrev}
-          disabled={!hasPrev}
-          aria-label="Previous case study"
-          className={`${buttonBaseClass} ${buttonBgClass}`}
-        >
-          <ChevronLeft className="w-5 h-5 text-[#2F2F2F]" strokeWidth={2} />
-        </button>
-        <button
-          onClick={onNext}
-          disabled={!hasNext}
-          aria-label="Next case study"
-          className={`${buttonBaseClass} ${buttonBgClass}`}
-        >
-          <ChevronRight className="w-5 h-5 text-[#2F2F2F]" strokeWidth={2} />
-        </button>
-      </div>
-
-      {/* Right: Expand/Close */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={onToggleExpand}
-          aria-label={isExpanded ? 'Collapse' : 'Expand'}
-          className={`${buttonBaseClass} ${buttonBgClass}`}
-        >
-          {isExpanded ? (
-            <Minimize2 className="w-4 h-4 text-[#2F2F2F]" strokeWidth={2} />
-          ) : (
-            <Maximize2 className="w-4 h-4 text-[#2F2F2F]" strokeWidth={2} />
-          )}
-        </button>
-        <button
-          onClick={onClose}
-          aria-label="Close and return to work"
-          className={`${buttonBaseClass} ${buttonBgClass}`}
-        >
-          <X className="w-5 h-5 text-black" strokeWidth={2.5} />
-        </button>
-      </div>
-    </div>
+    <button
+      onClick={onToggleExpand}
+      aria-label="Expand"
+      className="flex items-center justify-center hover:opacity-70 transition-opacity cursor-pointer"
+      style={{ transform: 'rotate(90deg)' }}
+    >
+      <Maximize2 className="w-[17.5px] h-[17.5px] text-[#3A3A3A]" strokeWidth={2} />
+    </button>
   )
 }
 
@@ -155,14 +119,13 @@ export default function CaseStudy() {
   }
 
   function handleToggleExpand() {
-    setIsExpanded(!isExpanded)
-  }
-
-  function handleClose() {
-    navigate('/')
+    setIsExpanded(true)
   }
 
   function handleDragEnd(_e, info) {
+    // Only allow swipe in compact mode
+    if (isExpanded) return
+
     const threshold = 80
     const velocity = info.velocity.x
 
@@ -200,32 +163,25 @@ export default function CaseStudy() {
     damping: 34,
   }
 
+  // Get layout config
+  const layoutConfig = isExpanded ? CASE_STUDY_LAYOUT.expanded : CASE_STUDY_LAYOUT.compact
+
   return (
     <Shell
       header={<CaseStudyNavigation title={currentStudy?.title} />}
       isExpanded={isExpanded}
+      preventScroll={!isExpanded}
     >
-      {/* Gray rounded container holding controls + content */}
-      <div className="flex items-center justify-center w-full">
-        <div
-          className="flex flex-col items-center gap-12 p-12 rounded-tl-[70px] rounded-tr-[70px] [backdrop-filter:blur(8px)] [box-shadow:rgba(255,255,255,0.5)_-2px_2px_0px_inset,rgba(0,0,0,0.05)_-6px_20px_30px_1px] bg-[rgba(240,240,240,0.8)] border-t-2 border-l-2 border-r-2 border-[#D8D8D8]"
-          style={{
-            width: 'clamp(700px, 95%, 1100px)'
-          }}
-        >
-          {/* Controls at top of container */}
-          <CaseStudyControls
-            hasPrev={hasPrev}
-            hasNext={hasNext}
-            isExpanded={isExpanded}
-            onPrev={navigateToPrev}
-            onNext={navigateToNext}
-            onToggleExpand={handleToggleExpand}
-            onClose={handleClose}
-          />
-
-          {/* Case study content with swipe animation */}
-          <div className="relative overflow-hidden w-full">
+      <div className="relative w-full pt-[64px]" style={{ minHeight: isExpanded ? 'auto' : '100vh' }}>
+        {isExpanded ? (
+          /* EXPANDED MODE: No gray container, content directly on page */
+          <div
+            className="mx-auto"
+            style={{
+              width: layoutConfig.contentWidth,
+              maxWidth: layoutConfig.contentMaxWidth || 'none',
+            }}
+          >
             <AnimatePresence initial={false} custom={direction} mode="wait">
               <motion.div
                 key={slug}
@@ -235,20 +191,84 @@ export default function CaseStudy() {
                 animate="center"
                 exit="exit"
                 transition={transition}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.2}
-                onDragEnd={handleDragEnd}
-                ref={scrollContainerRef}
-                style={{ cursor: 'grab' }}
-                onMouseDown={(e) => (e.currentTarget.style.cursor = 'grabbing')}
-                onMouseUp={(e) => (e.currentTarget.style.cursor = 'grab')}
               >
                 <CaseStudyBody slug={slug} />
               </motion.div>
             </AnimatePresence>
           </div>
-        </div>
+        ) : (
+          /* COMPACT MODE: Gray container fixed to bottom */
+          <>
+            {/* Gray container */}
+            <div
+              ref={scrollContainerRef}
+              className="fixed left-1/2 bottom-0 flex flex-col items-center px-9 py-10 rounded-tl-[70px] rounded-tr-[70px] [backdrop-filter:blur(8px)] [box-shadow:rgba(255,255,255,0.5)_-2px_2px_0px_inset,rgba(0,0,0,0.05)_-6px_20px_30px_1px] bg-[rgba(240,240,240,0.8)] border-t-2 border-l-2 border-r-2 border-[#D8D8D8] overflow-y-auto overflow-x-hidden case-study-scroll relative"
+              style={{
+                width: layoutConfig.containerWidth,
+                maxWidth: layoutConfig.containerMaxWidth || 'none',
+                height: layoutConfig.containerHeight,
+                transform: 'translateX(-50%)',
+                zIndex: 5, // Below dock (z-index: 10) but above background
+              }}
+            >
+              {/* Content area wrapper - button positioned relative to this */}
+              <div
+                className="relative w-full"
+                style={{
+                  width: layoutConfig.contentWidthPercent,
+                  paddingTop: layoutConfig.contentPaddingTop,
+                  paddingBottom: layoutConfig.contentPaddingBottom,
+                }}
+              >
+              {/* Expand button at top-right of content area, vertically centered with first block */}
+              <div
+                className="absolute right-0 z-10"
+                style={{
+                  top: '36px' // Offset to vertically center with ~50px Hero block
+                }}
+              >
+                <ExpandButton onToggleExpand={handleToggleExpand} />
+              </div>
+
+              {/* Content */}
+              <AnimatePresence initial={false} custom={direction} mode="wait">
+                <motion.div
+                  key={slug}
+                  custom={direction}
+                  variants={variants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={transition}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.2}
+                  onDragEnd={handleDragEnd}
+                  style={{ cursor: 'grab' }}
+                  onMouseDown={(e) => (e.currentTarget.style.cursor = 'grabbing')}
+                  onMouseUp={(e) => (e.currentTarget.style.cursor = 'grab')}
+                >
+                  <CaseStudyBody slug={slug} />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Blur overlay wrapper - fixed to match gray container position */}
+          <div
+            className="fixed left-1/2 bottom-0 rounded-tl-[70px] rounded-tr-[70px] pointer-events-none"
+            style={{
+              width: layoutConfig.containerWidth,
+              maxWidth: layoutConfig.containerMaxWidth || 'none',
+              height: layoutConfig.containerHeight,
+              transform: 'translateX(-50%)',
+              zIndex: 6, // Above gray container (z-index: 5) to overlay the blur
+            }}
+          >
+            <ProgressiveBlur />
+          </div>
+        </>
+        )}
       </div>
     </Shell>
   )

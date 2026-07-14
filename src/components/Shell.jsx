@@ -9,9 +9,9 @@ import NavBar from './core/navbar'
  * - Container with @container context
  * - Swappable header slot
  */
-export default function Shell({ header, children, isExpanded = false }) {
+export default function Shell({ header, children, isExpanded = false, preventScroll = false, isHome = false }) {
   return (
-    <div className="shell">
+    <div className={`shell ${preventScroll ? 'shell--no-scroll' : ''}`}>
       <div className="shell__bg" aria-hidden="true" />
 
       {/* Bottom dock */}
@@ -31,7 +31,7 @@ export default function Shell({ header, children, isExpanded = false }) {
         )}
 
         {/* Content area */}
-        <div className="shell__content">
+        <div className={`shell__content ${isHome ? 'shell__content--home' : ''}`}>
           {children}
         </div>
       </main>

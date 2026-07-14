@@ -2,7 +2,7 @@ import { urlFor } from '../../lib/sanity'
 
 export default function ImageTextGrid({ block }) {
   return (
-    <div className={`flex items-center justify-center gap-${block.columns.length === 3 ? '4' : '6'} w-192.5 h-89 antialiased`}>
+    <div className={`flex flex-col @md:flex-row items-center justify-center gap-${block.columns.length === 3 ? '4' : '6'} w-full antialiased`}>
       {block.columns.map((column, index) => (
         <div key={index} className="flex flex-col items-start gap-4 self-stretch flex-1">
           <img

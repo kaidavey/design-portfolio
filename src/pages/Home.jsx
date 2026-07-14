@@ -28,7 +28,7 @@ function HomeHeader() {
       </div>
 
       {/* Right: Location and music status */}
-      <div className="flex flex-col items-end gap-0.5">
+      <div className="flex flex-col items-end gap-2">
         {/* Location status */}
         <div className="flex items-center gap-1.5">
           <Clock className="w-[18px] h-[18px] text-[#0000004D]" strokeWidth={1.5} />
@@ -48,13 +48,13 @@ export default function Home() {
   const { caseStudies, loading } = useCaseStudies()
 
   return (
-    <Shell header={<HomeHeader className="w-full" />}>
+    <Shell header={<HomeHeader />} isHome={true}>
       {loading ? (
         <div className="flex items-center justify-center py-24">
           <div className="text-lg text-gray-400">Loading case studies...</div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 @md:grid-cols-2 gap-9">
+        <div className="grid grid-cols-1 @md:grid-cols-2 gap-9 py-[48px]">
           {caseStudies.map((caseStudy) => (
             <Link
               key={caseStudy._id}

@@ -7,6 +7,8 @@ import CallToAction from './blocks/CallToAction'
 import TextBlockCentered from './blocks/TextBlockCentered'
 import TextCardRow from './blocks/TextCardRow'
 import TextColumns from './blocks/TextColumns'
+import TextRowTwoColumn from './blocks/TextRowTwoColumn'
+import ImageFull from './blocks/ImageFull'
 
 // Block registry - add new block types here
 const blockRegistry = {
@@ -19,6 +21,8 @@ const blockRegistry = {
   textBlockCentered: TextBlockCentered,
   textCardRow: TextCardRow,
   textColumns: TextColumns,
+  textRowTwoColumn: TextRowTwoColumn,
+  imageFull: ImageFull,
 }
 
 export default function BlockRenderer({ blocks }) {

@@ -1,6 +1,6 @@
 export default function CallToAction({ block }) {
   return (
-    <div className="flex overflow-clip rounded-[20px] items-center px-6 py-5 justify-between [box-shadow:#FFFFFF_-1px_2px_0px_inset] bg-[#F2F2F2] border border-solid border-[#DEDEDE] antialiased">
+    <div className="flex flex-col @md:flex-row overflow-clip rounded-[20px] items-start @md:items-center gap-4 px-6 py-5 justify-between w-full [box-shadow:#FFFFFF_-1px_2px_0px_inset] bg-[#F2F2F2] border border-solid border-[#DEDEDE] antialiased">
       <div className="flex flex-col items-start gap-2">
         <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-base/5">
           {block.title}

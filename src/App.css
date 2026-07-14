@@ -11,6 +11,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Prevent scrolling on case study page (compact mode) */
+.shell--no-scroll {
+  overflow: hidden;
+  height: 100svh;
+}
+
 .shell__bg {
   position: absolute;
   inset: 0;
@@ -37,9 +43,9 @@
   container-type: inline-size; /* Establishes @container context */
 }
 
-/* Compact state - contained reading width */
+/* Compact state - full width for case study, constrained for home */
 .shell__container--compact {
-  max-width: 900px;
+  /* No max-width here - let content control their own widths */
   margin: 0 auto;
 }
 
@@ -58,4 +64,26 @@
 
 .shell__content {
   /* Content inherits container context from parent */
+}
+
+/* Home page header and content max-width */
+.shell__container--compact .shell__header {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Only constrain content width on home page (has the home class) */
+.shell__container--compact .shell__content.shell__content--home {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Hide scrollbar in case study content area */
+.case-study-scroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.case-study-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }

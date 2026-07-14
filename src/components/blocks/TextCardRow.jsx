@@ -2,11 +2,11 @@ import { urlFor } from '../../lib/sanity'
 
 export default function TextCardRow({ block }) {
   return (
-    <div className="flex items-start gap-4 w-192.5 antialiased">
+    <div className="flex flex-col @md:flex-row items-stretch gap-4 w-full antialiased">
       {block.cards.map((card, index) => (
         <div
           key={index}
-          className="flex overflow-clip rounded-[20px] flex-col items-start gap-9 p-6 flex-1 [box-shadow:#FFFFFF_-1px_2px_0px_inset] bg-[#F2F2F2] border border-solid border-[#DEDEDE]"
+          className="flex overflow-clip rounded-[20px] flex-col items-start gap-9 p-6 flex-1 w-full [box-shadow:#FFFFFF_-1px_2px_0px_inset] bg-[#F2F2F2] border border-solid border-[#DEDEDE]"
         >
           {card.icon && (
             <img

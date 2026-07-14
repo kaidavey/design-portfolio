@@ -1,6 +1,6 @@
 export default function ProjectDetails({ block }) {
   return (
-    <div className="flex items-start gap-5 justify-between antialiased">
+    <div className="flex flex-col @md:flex-row items-start gap-5 justify-between w-full antialiased">
       <div className="flex flex-col items-start gap-2">
         <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-sm/4.5">
           Role
