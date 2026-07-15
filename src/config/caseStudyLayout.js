@@ -9,7 +9,7 @@ export const CASE_STUDY_LAYOUT = {
     containerWidth: '90%',
 
     // Maximum width for the gray container (set to null for no max)
-    containerMaxWidth: '950px',
+    containerMaxWidth: '1000px',
 
     // Gray container height as percentage of viewport
     containerHeight: '87vh', // ~87% of viewport height from Paper design

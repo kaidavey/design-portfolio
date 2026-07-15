@@ -61,6 +61,7 @@ export default function CaseStudy() {
   const { caseStudies } = useCaseStudies()
   const [isExpanded, setIsExpanded] = useState(false)
   const [direction, setDirection] = useState(0)
+  const [isScrolled, setIsScrolled] = useState(false)
   const scrollContainerRef = useRef(null)
 
   // Get current index and neighbors
@@ -79,8 +80,22 @@ export default function CaseStudy() {
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0
+      setIsScrolled(false)
     }
   }, [slug])
+
+  // Track scroll position to show/hide blur
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current
+    if (!scrollContainer) return
+
+    function handleScroll() {
+      setIsScrolled(scrollContainer.scrollTop > 0)
+    }
+
+    scrollContainer.addEventListener('scroll', handleScroll)
+    return () => scrollContainer.removeEventListener('scroll', handleScroll)
+  }, [])
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -202,7 +217,7 @@ export default function CaseStudy() {
             {/* Gray container */}
             <div
               ref={scrollContainerRef}
-              className="fixed left-1/2 bottom-0 flex flex-col items-center px-9 py-10 rounded-tl-[70px] rounded-tr-[70px] [backdrop-filter:blur(8px)] [box-shadow:rgba(255,255,255,0.5)_-2px_2px_0px_inset,rgba(0,0,0,0.05)_-6px_20px_30px_1px] bg-[rgba(240,240,240,0.8)] border-t-2 border-l-2 border-r-2 border-[#D8D8D8] overflow-y-auto overflow-x-hidden case-study-scroll relative"
+              className={`fixed left-1/2 bottom-0 flex flex-col items-center px-9 py-10 rounded-tl-[70px] rounded-tr-[70px] [backdrop-filter:blur(8px)] [box-shadow:rgba(255,255,255,0.5)_-2px_2px_0px_inset,rgba(0,0,0,0.05)_-6px_20px_30px_1px] bg-[rgba(240,240,240,0.8)] overflow-y-auto overflow-x-hidden case-study-scroll relative border-t-2 border-l-2 border-r-2 ${!isScrolled ? 'border-[#D8D8D8]' : 'border-transparent'}`}
               style={{
                 width: layoutConfig.containerWidth,
                 maxWidth: layoutConfig.containerMaxWidth || 'none',
@@ -254,19 +269,35 @@ export default function CaseStudy() {
             </div>
           </div>
 
-          {/* Blur overlay wrapper - fixed to match gray container position */}
-          <div
-            className="fixed left-1/2 bottom-0 rounded-tl-[70px] rounded-tr-[70px] pointer-events-none"
-            style={{
-              width: layoutConfig.containerWidth,
-              maxWidth: layoutConfig.containerMaxWidth || 'none',
-              height: layoutConfig.containerHeight,
-              transform: 'translateX(-50%)',
-              zIndex: 6, // Above gray container (z-index: 5) to overlay the blur
-            }}
-          >
-            <ProgressiveBlur />
-          </div>
+          {/* Blur overlay wrapper - only shown when scrolled */}
+          {isScrolled && (
+            <div
+              className="fixed left-1/2 bottom-0 rounded-tl-[70px] rounded-tr-[70px] pointer-events-none"
+              style={{
+                width: layoutConfig.containerWidth,
+                maxWidth: layoutConfig.containerMaxWidth || 'none',
+                height: layoutConfig.containerHeight,
+                transform: 'translateX(-50%)',
+                zIndex: 6, // Above gray container (z-index: 5) to overlay the blur
+              }}
+            >
+              <ProgressiveBlur />
+            </div>
+          )}
+
+          {/* Border overlay - only shown when scrolled to prevent blur from affecting it */}
+          {isScrolled && (
+            <div
+              className="fixed left-1/2 bottom-0 rounded-tl-[70px] rounded-tr-[70px] pointer-events-none border-t-2 border-l-2 border-r-2 border-[#D8D8D8]"
+              style={{
+                width: layoutConfig.containerWidth,
+                maxWidth: layoutConfig.containerMaxWidth || 'none',
+                height: layoutConfig.containerHeight,
+                transform: 'translateX(-50%)',
+                zIndex: 7, // Above blur (z-index: 6) to stay crisp
+              }}
+            />
+          )}
         </>
         )}
       </div>
