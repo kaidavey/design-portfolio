@@ -183,7 +183,11 @@ export default function CaseStudy() {
 
   return (
     <Shell
-      header={<CaseStudyNavigation title={currentStudy?.title} />}
+      header={
+        <div style={{ visibility: 'hidden' }}>
+          <CaseStudyNavigation title={currentStudy?.title} />
+        </div>
+      }
       isExpanded={isExpanded}
       preventScroll={!isExpanded}
     >
@@ -212,72 +216,78 @@ export default function CaseStudy() {
             </AnimatePresence>
           </div>
         ) : (
-          /* COMPACT MODE: Gray container fixed to bottom */
+          /* COMPACT MODE: Gray container floating centered */
           <>
-            {/* Gray container */}
+            {/* Gray container - fixed, does not scroll */}
             <div
-              ref={scrollContainerRef}
-              className={`fixed left-1/2 bottom-0 flex flex-col items-center px-9 py-10 rounded-tl-[70px] rounded-tr-[70px] [backdrop-filter:blur(8px)] [box-shadow:rgba(255,255,255,0.5)_-2px_2px_0px_inset,rgba(0,0,0,0.05)_-6px_20px_30px_1px] bg-[rgba(240,240,240,0.8)] overflow-y-auto overflow-x-hidden case-study-scroll relative border-t-2 border-l-2 border-r-2 ${!isScrolled ? 'border-[#D8D8D8]' : 'border-transparent'}`}
+              className="fixed"
               style={{
+                left: '50%',
+                top: layoutConfig.containerVerticalOffset,
                 width: layoutConfig.containerWidth,
-                maxWidth: layoutConfig.containerMaxWidth || 'none',
+                maxWidth: layoutConfig.containerMaxWidth,
                 height: layoutConfig.containerHeight,
+                maxHeight: layoutConfig.containerMaxHeight,
                 transform: 'translateX(-50%)',
+                borderRadius: layoutConfig.containerBorderRadius,
+                borderWidth: layoutConfig.containerBorderWidth,
+                borderStyle: 'solid',
+                borderColor: isScrolled ? 'transparent' : layoutConfig.containerBorderColor,
+                backgroundColor: layoutConfig.containerBackgroundColor,
+                backdropFilter: `blur(${layoutConfig.containerBackdropBlur})`,
+                boxShadow: layoutConfig.containerBoxShadow,
                 zIndex: 5, // Below dock (z-index: 10) but above background
               }}
             >
-              {/* Content area wrapper - button positioned relative to this */}
+              {/* Scrollable inner container */}
               <div
-                className="relative w-full"
+                ref={scrollContainerRef}
+                className="flex flex-col overflow-y-auto overflow-x-hidden case-study-scroll h-full w-full"
                 style={{
-                  width: layoutConfig.contentWidthPercent,
                   paddingTop: layoutConfig.contentPaddingTop,
+                  paddingRight: layoutConfig.contentPaddingRight,
                   paddingBottom: layoutConfig.contentPaddingBottom,
+                  paddingLeft: layoutConfig.contentPaddingLeft,
+                  gap: layoutConfig.contentGap,
                 }}
               >
-              {/* Expand button at top-right of content area, vertically centered with first block */}
-              <div
-                className="absolute right-0 z-10"
-                style={{
-                  top: '36px' // Offset to vertically center with ~50px Hero block
-                }}
-              >
-                <ExpandButton onToggleExpand={handleToggleExpand} />
+                {/* Content */}
+                <AnimatePresence initial={false} custom={direction} mode="wait">
+                  <motion.div
+                    key={slug}
+                    custom={direction}
+                    variants={variants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={transition}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.2}
+                    onDragEnd={handleDragEnd}
+                    style={{ cursor: 'grab' }}
+                    onMouseDown={(e) => (e.currentTarget.style.cursor = 'grabbing')}
+                    onMouseUp={(e) => (e.currentTarget.style.cursor = 'grab')}
+                  >
+                    <CaseStudyBody slug={slug} expandButton={<ExpandButton onToggleExpand={handleToggleExpand} />} />
+                  </motion.div>
+                </AnimatePresence>
               </div>
-
-              {/* Content */}
-              <AnimatePresence initial={false} custom={direction} mode="wait">
-                <motion.div
-                  key={slug}
-                  custom={direction}
-                  variants={variants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={transition}
-                  drag="x"
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.2}
-                  onDragEnd={handleDragEnd}
-                  style={{ cursor: 'grab' }}
-                  onMouseDown={(e) => (e.currentTarget.style.cursor = 'grabbing')}
-                  onMouseUp={(e) => (e.currentTarget.style.cursor = 'grab')}
-                >
-                  <CaseStudyBody slug={slug} />
-                </motion.div>
-              </AnimatePresence>
             </div>
-          </div>
 
           {/* Blur overlay wrapper - only shown when scrolled */}
           {isScrolled && (
             <div
-              className="fixed left-1/2 bottom-0 rounded-tl-[70px] rounded-tr-[70px] pointer-events-none"
+              className="fixed pointer-events-none"
               style={{
+                left: '50%',
+                top: layoutConfig.containerVerticalOffset,
                 width: layoutConfig.containerWidth,
-                maxWidth: layoutConfig.containerMaxWidth || 'none',
+                maxWidth: layoutConfig.containerMaxWidth,
                 height: layoutConfig.containerHeight,
+                maxHeight: layoutConfig.containerMaxHeight,
                 transform: 'translateX(-50%)',
+                borderRadius: layoutConfig.containerBorderRadius,
                 zIndex: 6, // Above gray container (z-index: 5) to overlay the blur
               }}
             >
@@ -288,12 +298,19 @@ export default function CaseStudy() {
           {/* Border overlay - only shown when scrolled to prevent blur from affecting it */}
           {isScrolled && (
             <div
-              className="fixed left-1/2 bottom-0 rounded-tl-[70px] rounded-tr-[70px] pointer-events-none border-t-2 border-l-2 border-r-2 border-[#D8D8D8]"
+              className="fixed pointer-events-none"
               style={{
+                left: '50%',
+                top: layoutConfig.containerVerticalOffset,
                 width: layoutConfig.containerWidth,
-                maxWidth: layoutConfig.containerMaxWidth || 'none',
+                maxWidth: layoutConfig.containerMaxWidth,
                 height: layoutConfig.containerHeight,
+                maxHeight: layoutConfig.containerMaxHeight,
                 transform: 'translateX(-50%)',
+                borderRadius: layoutConfig.containerBorderRadius,
+                borderWidth: layoutConfig.containerBorderWidth,
+                borderStyle: 'solid',
+                borderColor: layoutConfig.containerBorderColor,
                 zIndex: 7, // Above blur (z-index: 6) to stay crisp
               }}
             />

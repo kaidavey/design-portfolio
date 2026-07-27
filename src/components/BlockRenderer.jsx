@@ -25,7 +25,7 @@ const blockRegistry = {
   imageFull: ImageFull,
 }
 
-export default function BlockRenderer({ blocks }) {
+export default function BlockRenderer({ blocks, expandButton }) {
   if (!blocks || !Array.isArray(blocks)) {
     return null
   }
@@ -38,6 +38,16 @@ export default function BlockRenderer({ blocks }) {
         // Skip silently if block type has no registered component
         if (!Component) {
           return null
+        }
+
+        // For the first block (Hero), render it with the expand button
+        if (index === 0 && expandButton) {
+          return (
+            <div key={block._key || index} className="flex items-center justify-between w-full">
+              <Component block={block} />
+              <div className="shrink-0">{expandButton}</div>
+            </div>
+          )
         }
 
         return <Component key={block._key || index} block={block} />

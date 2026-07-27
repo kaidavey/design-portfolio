@@ -4,7 +4,7 @@ import { useCaseStudy } from '../hooks/useCaseStudies'
 import { urlFor } from '../lib/sanity'
 import BlockRenderer from './BlockRenderer'
 
-export default function CaseStudyBody({ slug }) {
+export default function CaseStudyBody({ slug, expandButton }) {
   const { caseStudy, loading, error } = useCaseStudy(slug)
   const [showViewSolution, setShowViewSolution] = useState(true)
 
@@ -34,7 +34,7 @@ export default function CaseStudyBody({ slug }) {
   return (
     <div className="space-y-12">
       {/* Case Study Body - Blocks adapt to container via @container queries */}
-      <BlockRenderer blocks={caseStudy.body} />
+      <BlockRenderer blocks={caseStudy.body} expandButton={expandButton} />
     </div>
   )
 }

@@ -1,25 +1,59 @@
 /**
  * Case Study Layout Configuration
+ *
+ * Based on Paper design (1512×1150 artboard):
+ * - Container: 1048px × 715px
+ * - Positioned at y=196px from top (allowing breadcrumbs at y=57px)
+ * - Centered horizontally with vertical offset of -21.5px from center
  */
 
 export const CASE_STUDY_LAYOUT = {
-  // Compact mode (with gray container at bottom)
+  // Compact mode (floating centered container)
   compact: {
-    // Gray container width as percentage of viewport
-    containerWidth: '90%',
+    // Gray container responsive width (1048px / 1512px = 69.3%)
+    containerWidth: '60vw',
 
-    // Maximum width for the gray container (set to null for no max)
-    containerMaxWidth: '1000px',
+    // Maximum width for the gray container
+    containerMaxWidth: '1048px',
 
-    // Gray container height as percentage of viewport
-    containerHeight: '87vh', // ~87% of viewport height from Paper design
+    // Gray container responsive height (715px / 1150px = 62.2%)
+    containerHeight: '75vh',
 
-    // Content width as percentage of container (content inside gray box)
-    contentWidthPercent: '90%',
+    // Maximum height for the gray container
+    containerMaxHeight: '715px',
 
-    // Vertical padding for content blocks inside gray container
-    contentPaddingTop: '40px',
-    contentPaddingBottom: '40px',
+    // Vertical offset from center as percentage of viewport height (-21.5px / 1150px = -1.87vh)
+    // Negative = shift up, positive = shift down
+    containerVerticalOffset: '10vh',
+
+    // Border radius for all corners (60px from your specification)
+    containerBorderRadius: '60px',
+
+    // Border width
+    containerBorderWidth: '2px',
+
+    // Border color
+    containerBorderColor: '#D8D8D8',
+
+    // Background color (with alpha for blur effect)
+    containerBackgroundColor: 'rgba(242, 242, 242, 0.8)',
+
+    // Backdrop blur amount
+    containerBackdropBlur: '8px',
+
+    // Box shadow
+    containerBoxShadow:
+      'rgba(255, 255, 255, 0.5) -2px 2px 0px inset, rgba(0, 0, 0, 0.04) 0px 10px 20px',
+
+    // Padding inside the container (content fills remaining space after padding)
+    // From Paper design: (1048px - 884px content) / 2 = 82px horizontal padding
+    contentPaddingTop: '80px',
+    contentPaddingRight: '90px',
+    contentPaddingBottom: '90px',
+    contentPaddingLeft: '90px',
+
+    // Gap between content blocks (Paper design shows 40px gap)
+    contentGap: '40px',
   },
 
   // Expanded mode (no gray container)
@@ -28,6 +62,6 @@ export const CASE_STUDY_LAYOUT = {
     contentWidth: '60%',
 
     // Maximum width for content blocks
-    contentMaxWidth: '907px', // Set to null or change to adjust max-width
+    contentMaxWidth: '907px',
   },
 }

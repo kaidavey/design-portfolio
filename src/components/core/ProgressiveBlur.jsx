@@ -11,7 +11,7 @@ export default function ProgressiveBlur() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 top-0 h-40"
+      className="pointer-events-none absolute inset-x-0 top-0 h-30"
       style={{ borderRadius: 'inherit' }}
     >
       {layers.map((layer, i) => {
