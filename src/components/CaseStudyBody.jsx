@@ -28,12 +28,10 @@ export default function CaseStudyBody({ slug, expandButton }) {
     return null
   }
 
-  // Check if we have metadata to display
   const hasMetadata = caseStudy.role || caseStudy.timeline || caseStudy.team || caseStudy.tools
 
   return (
     <div className="space-y-12">
-      {/* Case Study Body - Blocks adapt to container via @container queries */}
       <BlockRenderer blocks={caseStudy.body} expandButton={expandButton} />
     </div>
   )

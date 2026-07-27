@@ -8,7 +8,6 @@ import Shell from '../components/Shell'
 import CaseStudyBody from '../components/CaseStudyBody'
 import ProgressiveBlur from '../components/core/ProgressiveBlur'
 
-// Centered breadcrumb navigation
 function CaseStudyNavigation({ title }) {
   return (
     <nav className="flex items-center justify-center gap-2" aria-label="Breadcrumb">
@@ -41,7 +40,6 @@ function CaseStudyNavigation({ title }) {
   )
 }
 
-// Expand button - only shown in compact mode (icon only, no frame)
 function ExpandButton({ onToggleExpand }) {
   return (
     <button
@@ -64,7 +62,6 @@ export default function CaseStudy() {
   const [isScrolled, setIsScrolled] = useState(false)
   const scrollContainerRef = useRef(null)
 
-  // Get current index and neighbors
   const currentIndex = caseStudies.findIndex((cs) => cs.slug.current === slug)
   const hasPrev = currentIndex > 0
   const hasNext = currentIndex < caseStudies.length - 1
@@ -73,10 +70,8 @@ export default function CaseStudy() {
 
   const currentStudy = caseStudies[currentIndex]
 
-  // Prefetch neighbors
   useNeighborPrefetch(slug, caseStudies)
 
-  // Reset scroll to top when slug changes
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0
@@ -84,7 +79,6 @@ export default function CaseStudy() {
     }
   }, [slug])
 
-  // Track scroll position to show/hide blur
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current
     if (!scrollContainer) return
@@ -97,10 +91,8 @@ export default function CaseStudy() {
     return () => scrollContainer.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Handle keyboard navigation
   useEffect(() => {
     function handleKeyDown(e) {
-      // Ignore if focus is in input/textarea
       const target = e.target
       if (
         target.tagName === 'INPUT' ||
@@ -138,19 +130,16 @@ export default function CaseStudy() {
   }
 
   function handleDragEnd(_e, info) {
-    // Only allow swipe in compact mode
     if (isExpanded) return
 
     const threshold = 80
     const velocity = info.velocity.x
 
     if (info.offset.x > threshold || velocity > 300) {
-      // Dragged right = go to previous
       if (hasPrev) {
         navigateToPrev()
       }
     } else if (info.offset.x < -threshold || velocity < -300) {
-      // Dragged left = go to next
       if (hasNext) {
         navigateToNext()
       }
@@ -178,7 +167,6 @@ export default function CaseStudy() {
     damping: 34,
   }
 
-  // Get layout config
   const layoutConfig = isExpanded ? CASE_STUDY_LAYOUT.expanded : CASE_STUDY_LAYOUT.compact
 
   return (
@@ -193,7 +181,6 @@ export default function CaseStudy() {
     >
       <div className="relative w-full pt-[64px]" style={{ minHeight: isExpanded ? 'auto' : '100vh' }}>
         {isExpanded ? (
-          /* EXPANDED MODE: No gray container, content directly on page */
           <div
             className="mx-auto"
             style={{
@@ -216,9 +203,7 @@ export default function CaseStudy() {
             </AnimatePresence>
           </div>
         ) : (
-          /* COMPACT MODE: Gray container floating centered */
           <>
-            {/* Gray container - fixed, does not scroll */}
             <div
               className="fixed"
               style={{
@@ -236,10 +221,9 @@ export default function CaseStudy() {
                 backgroundColor: layoutConfig.containerBackgroundColor,
                 backdropFilter: `blur(${layoutConfig.containerBackdropBlur})`,
                 boxShadow: layoutConfig.containerBoxShadow,
-                zIndex: 5, // Below dock (z-index: 10) but above background
+                zIndex: 5,
               }}
             >
-              {/* Scrollable inner container */}
               <div
                 ref={scrollContainerRef}
                 className="flex flex-col overflow-y-auto overflow-x-hidden case-study-scroll h-full w-full"
@@ -251,7 +235,6 @@ export default function CaseStudy() {
                   gap: layoutConfig.contentGap,
                 }}
               >
-                {/* Content */}
                 <AnimatePresence initial={false} custom={direction} mode="wait">
                   <motion.div
                     key={slug}
@@ -275,46 +258,44 @@ export default function CaseStudy() {
               </div>
             </div>
 
-          {/* Blur overlay wrapper - only shown when scrolled */}
-          {isScrolled && (
-            <div
-              className="fixed pointer-events-none"
-              style={{
-                left: '50%',
-                top: layoutConfig.containerVerticalOffset,
-                width: layoutConfig.containerWidth,
-                maxWidth: layoutConfig.containerMaxWidth,
-                height: layoutConfig.containerHeight,
-                maxHeight: layoutConfig.containerMaxHeight,
-                transform: 'translateX(-50%)',
-                borderRadius: layoutConfig.containerBorderRadius,
-                zIndex: 6, // Above gray container (z-index: 5) to overlay the blur
-              }}
-            >
-              <ProgressiveBlur />
-            </div>
-          )}
+            {isScrolled && (
+              <div
+                className="fixed pointer-events-none"
+                style={{
+                  left: '50%',
+                  top: layoutConfig.containerVerticalOffset,
+                  width: layoutConfig.containerWidth,
+                  maxWidth: layoutConfig.containerMaxWidth,
+                  height: layoutConfig.containerHeight,
+                  maxHeight: layoutConfig.containerMaxHeight,
+                  transform: 'translateX(-50%)',
+                  borderRadius: layoutConfig.containerBorderRadius,
+                  zIndex: 6,
+                }}
+              >
+                <ProgressiveBlur />
+              </div>
+            )}
 
-          {/* Border overlay - only shown when scrolled to prevent blur from affecting it */}
-          {isScrolled && (
-            <div
-              className="fixed pointer-events-none"
-              style={{
-                left: '50%',
-                top: layoutConfig.containerVerticalOffset,
-                width: layoutConfig.containerWidth,
-                maxWidth: layoutConfig.containerMaxWidth,
-                height: layoutConfig.containerHeight,
-                maxHeight: layoutConfig.containerMaxHeight,
-                transform: 'translateX(-50%)',
-                borderRadius: layoutConfig.containerBorderRadius,
-                borderWidth: layoutConfig.containerBorderWidth,
-                borderStyle: 'solid',
-                borderColor: layoutConfig.containerBorderColor,
-                zIndex: 7, // Above blur (z-index: 6) to stay crisp
-              }}
-            />
-          )}
+            {isScrolled && (
+              <div
+                className="fixed pointer-events-none"
+                style={{
+                  left: '50%',
+                  top: layoutConfig.containerVerticalOffset,
+                  width: layoutConfig.containerWidth,
+                  maxWidth: layoutConfig.containerMaxWidth,
+                  height: layoutConfig.containerHeight,
+                  maxHeight: layoutConfig.containerMaxHeight,
+                  transform: 'translateX(-50%)',
+                  borderRadius: layoutConfig.containerBorderRadius,
+                  borderWidth: layoutConfig.containerBorderWidth,
+                  borderStyle: 'solid',
+                  borderColor: layoutConfig.containerBorderColor,
+                  zIndex: 7,
+                }}
+              />
+            )}
         </>
         )}
       </div>

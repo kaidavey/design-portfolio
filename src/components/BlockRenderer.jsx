@@ -10,7 +10,6 @@ import TextColumns from './blocks/TextColumns'
 import TextRowTwoColumn from './blocks/TextRowTwoColumn'
 import ImageFull from './blocks/ImageFull'
 
-// Block registry - add new block types here
 const blockRegistry = {
   projectDetails: ProjectDetails,
   hero: Hero,
@@ -35,12 +34,10 @@ export default function BlockRenderer({ blocks, expandButton }) {
       {blocks.map((block, index) => {
         const Component = blockRegistry[block._type]
 
-        // Skip silently if block type has no registered component
         if (!Component) {
           return null
         }
 
-        // For the first block (Hero), render it with the expand button
         if (index === 0 && expandButton) {
           return (
             <div key={block._key || index} className="flex items-center justify-between w-full">
