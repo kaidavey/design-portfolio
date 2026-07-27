@@ -1,17 +1,17 @@
 export default function ProgressiveBlur() {
   const layers = [
-    { blur: 0.5, from: 0,  to: 17 },
-    { blur: 1,   from: 17, to: 33 },
-    { blur: 2,   from: 33, to: 50 },
-    { blur: 4,   from: 50, to: 67 },
-    { blur: 8,   from: 67, to: 83 },
-    { blur: 16,  from: 83, to: 100 },
+    { blur: 0.25, from: 0,  to: 17 },
+    { blur: 0.5,   from: 17, to: 33 },
+    { blur: 1,   from: 33, to: 50 },
+    { blur: 2,   from: 50, to: 67 },
+    { blur: 4,   from: 67, to: 83 },
+    { blur: 8,  from: 83, to: 100 },
   ]
 
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 top-0 h-30"
+      className="pointer-events-none absolute inset-x-0 top-0 h-20"
       style={{ borderRadius: 'inherit' }}
     >
       {layers.map((layer, i) => {
