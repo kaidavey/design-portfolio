@@ -1,3 +1,5 @@
+import CaseStudyImage from '../../CaseStudyImage'
+
 /**
  * TextImageRowPresentation - Pure presentation component
  *
@@ -12,14 +14,14 @@ export default function TextImageRowPresentation({
   title,
   paragraphs = [],
   subtitle,
-  imageUrl,
+  imageSource,
   imageAlt,
 }) {
   return (
     <div className="flex flex-col @lg:flex-row items-start @lg:items-center gap-8 @lg:justify-between w-full">
       {/* Text column */}
       <div className="flex flex-col items-start gap-4 flex-1 w-full">
-        <h2 className="tracking-tight font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-2xl">
+        <h2 className="tracking-tight font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-fluid-subheading">
           {title}
         </h2>
         <div className="flex flex-col items-start gap-2 w-full">
@@ -41,10 +43,12 @@ export default function TextImageRowPresentation({
 
       {/* Image column */}
       <div className="flex-1 w-full @lg:w-auto @lg:max-w-md">
-        <img
-          src={imageUrl}
+        <CaseStudyImage
+          source={imageSource}
           alt={imageAlt}
-          className="w-full aspect-[16/10] rounded-[20px] object-cover"
+          sizes="(max-width: 640px) 92vw, 448px"
+          maxWidth={900}
+          className="w-full rounded-[20px] object-cover"
         />
       </div>
     </div>

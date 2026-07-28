@@ -1,4 +1,3 @@
-import { urlFor } from '../../lib/sanity'
 import TextImageRowPresentation from './presentations/TextImageRowPresentation'
 
 /**
@@ -13,7 +12,7 @@ export default function TextImageRow({ block }) {
       title={block.title}
       paragraphs={block.paragraphs || []}
       subtitle={block.subtitle}
-      imageUrl={urlFor(block.image).width(800).url()}
+      imageSource={block.image}
       imageAlt={block.title}
     />
   )

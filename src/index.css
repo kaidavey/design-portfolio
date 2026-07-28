@@ -1,6 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
 @import "tailwindcss";
 
+@theme {
+  /* Fluid type tokens — scale smoothly between 1440px and 1920px viewports */
+  --text-fluid-heading: clamp(1.5625rem, 1rem + 0.625vw, 1.75rem);
+  --text-fluid-heading--line-height: 1.214;
+
+  --text-fluid-subheading: clamp(1.3125rem, 0.75rem + 0.625vw, 1.5rem);
+  --text-fluid-subheading--line-height: 1.25;
+
+  --text-fluid-subheading-alt: clamp(1.125rem, 0.75rem + 0.4167vw, 1.25rem);
+  --text-fluid-subheading-alt--line-height: 1.2;
+}
+
 :root {
   font-synthesis: none;
   text-rendering: optimizeLegibility;

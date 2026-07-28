@@ -7,7 +7,7 @@ export default function TextColumns({ block }) {
             {block.section}
           </div>
         )}
-        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-2xl/7.5">
+        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-fluid-subheading">
           {block.title}
         </div>
       </div>

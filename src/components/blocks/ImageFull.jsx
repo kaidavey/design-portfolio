@@ -1,4 +1,3 @@
-import { urlFor } from '../../lib/sanity'
 import ImageFullPresentation from './presentations/ImageFullPresentation'
 
 /**
@@ -8,7 +7,7 @@ import ImageFullPresentation from './presentations/ImageFullPresentation'
 export default function ImageFull({ block }) {
   return (
     <ImageFullPresentation
-      imageUrl={urlFor(block.image).width(1600).url()}
+      imageSource={block.image}
       imageAlt={block.caption || 'Case study image'}
       caption={block.caption}
     />

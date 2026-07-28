@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import { Clock } from 'lucide-react'
 import { useCaseStudies } from '../hooks/useCaseStudies'
-import { urlFor } from '../lib/sanity'
 import Shell from '../components/Shell'
 import NowPlaying from '../components/NowPlaying'
+import CaseStudyImage from '../components/CaseStudyImage'
 
 // Home header slot: Bio + Status
 function HomeHeader() {
@@ -19,10 +19,10 @@ function HomeHeader() {
     <div className="flex items-center justify-between w-full">
       {/* Left: Name and title */}
       <div className="flex flex-col items-start gap-2.5">
-        <h1 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-[28px]/8.5">
+        <h1 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-fluid-heading">
           Kai Davey
         </h1>
-        <p className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-xl/6">
+        <p className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-fluid-subheading-alt">
           Design Engineer & CS at UCLA
         </p>
       </div>
@@ -64,9 +64,11 @@ export default function Home() {
               {/* Cover Image - separate white card */}
               {caseStudy.coverImage && (
                 <div className="w-full aspect-[455/328] rounded-[30px] overflow-hidden bg-white shadow-md hover:shadow-xl transition-all duration-300">
-                  <img
-                    src={urlFor(caseStudy.coverImage).width(800).height(580).url()}
+                  <CaseStudyImage
+                    source={caseStudy.coverImage}
                     alt={caseStudy.title}
+                    sizes="(max-width: 640px) 92vw, (max-width: 900px) 45vw, 440px"
+                    maxWidth={880}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>

@@ -10,7 +10,7 @@ export default function Hero({ block }) {
           className="w-12.5 h-12.5 shrink-0"
         />
       )}
-      <div className="tracking-[-0.02em] w-fit shrink-0 font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-[28px]/8.5">
+      <div className="tracking-[-0.02em] w-fit shrink-0 font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-fluid-heading">
         {block.title}
       </div>
     </div>
