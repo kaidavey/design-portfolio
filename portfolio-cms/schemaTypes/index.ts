@@ -10,6 +10,7 @@ import textCardRow from './blocks/textCardRow'
 import textColumns from './blocks/textColumns'
 import textRowTwoColumn from './blocks/textRowTwoColumn'
 import imageFull from './blocks/imageFull'
+import spacer from './blocks/spacer'
 
 // Document types
 import caseStudy from './caseStudy'
@@ -27,6 +28,7 @@ export const schemaTypes = [
   textColumns,
   textRowTwoColumn,
   imageFull,
+  spacer,
   // Documents
   caseStudy,
 ]

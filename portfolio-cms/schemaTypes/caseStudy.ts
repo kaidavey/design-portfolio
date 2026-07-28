@@ -88,6 +88,7 @@ export default defineType({
         { type: 'textBlockCentered' },
         { type: 'textCardRow' },
         { type: 'textColumns' },
+        { type: 'spacer' },
       ],
     },
   ],

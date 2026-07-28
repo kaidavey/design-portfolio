@@ -31,7 +31,7 @@ export default function CaseStudyBody({ slug, expandButton }) {
   const hasMetadata = caseStudy.role || caseStudy.timeline || caseStudy.team || caseStudy.tools
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8px">
       <BlockRenderer blocks={caseStudy.body} expandButton={expandButton} />
     </div>
   )

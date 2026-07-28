@@ -1,6 +1,6 @@
 export const CASE_STUDY_LAYOUT = {
   compact: {
-    containerWidth: '60vw',
+    containerWidth: '65vw',
     containerMaxWidth: '1048px',
     containerHeight: '75vh',
     containerMaxHeight: '715px',
