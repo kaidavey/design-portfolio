@@ -16,7 +16,7 @@ export default function NowPlaying({ track = 'Breathe', artist = 'Malcolm Todd',
   return (
     <div className="flex items-center gap-1.5">
       <Music className="w-[18px] h-[18px] text-[#0000004D]" strokeWidth={1.5} />
-      <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-lg/5.5">
+      <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-meta-value leading-[1.375rem]">
         {track} · {artist}
       </span>
     </div>

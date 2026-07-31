@@ -15,7 +15,7 @@ export default function TextBlockCentered({ block }) {
           )}
         </div>
       )}
-      <div className={`tracking-[-0.02em] text-center max-w-prose w-full font-['DM_Sans',system-ui,sans-serif] flex justify-center flex-wrap ${block.section || !block.title ? 'text-black' : 'text-[#0000004D]'} text-base/5`}>
+      <div className={`tracking-[-0.02em] text-center max-w-prose w-full font-['DM_Sans',system-ui,sans-serif] flex justify-center flex-wrap ${block.section || !block.title ? 'text-black' : 'text-[#0000004D]'} text-body leading-[1.25rem]`}>
         {block.body}
       </div>
     </div>

@@ -16,13 +16,13 @@ export default function TextColumns({ block }) {
           {block.paragraphs.map((paragraph, index) => (
             <div
               key={index}
-              className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] text-black text-base/5"
+              className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] text-black text-body leading-[1.25rem]"
             >
               {paragraph}
             </div>
           ))}
           {block.subtitle && (
-            <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-base/5">
+            <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-body leading-[1.25rem]">
               {block.subtitle}
             </div>
           )}

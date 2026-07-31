@@ -13,25 +13,25 @@ function CaseStudyNavigation({ title }) {
     <nav className="flex items-center justify-center gap-2" aria-label="Breadcrumb">
       <Link
         to="/"
-        className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-[18px] hover:text-[#2F2F2F] transition-colors"
+        className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-nav hover:text-[#2F2F2F] transition-colors"
       >
         Home
       </Link>
-      <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-[18px]">
+      <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-nav">
         /
       </span>
       <Link
         to="/"
-        className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-[18px] hover:text-[#2F2F2F] transition-colors"
+        className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-nav hover:text-[#2F2F2F] transition-colors"
       >
         Work
       </Link>
       {title && (
         <>
-          <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-[18px]">
+          <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-nav">
             /
           </span>
-          <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-black text-[18px] font-medium">
+          <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-black text-nav font-medium">
             {title}
           </span>
         </>

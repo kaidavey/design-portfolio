@@ -28,13 +28,13 @@ export default function TextImageRowPresentation({
           {paragraphs.map((paragraph, index) => (
             <p
               key={index}
-              className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-black text-base"
+              className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-black text-body leading-[1.25rem]"
             >
               {paragraph}
             </p>
           ))}
           {subtitle && (
-            <p className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-base">
+            <p className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-body leading-[1.25rem]">
               {subtitle}
             </p>
           )}

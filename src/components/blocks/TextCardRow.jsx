@@ -16,10 +16,10 @@ export default function TextCardRow({ block }) {
             />
           )}
           <div className="flex flex-col items-start gap-2 self-stretch">
-            <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-base/5">
+            <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-body leading-[1.25rem]">
               {card.subtitle}
             </div>
-            <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-base/5">
+            <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-body leading-[1.25rem]">
               {card.description}
             </div>
           </div>

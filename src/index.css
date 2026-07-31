@@ -3,14 +3,19 @@
 
 @theme {
   /* Fluid type tokens — scale smoothly between 1440px and 1920px viewports */
-  --text-fluid-heading: clamp(1.5625rem, 1rem + 0.625vw, 1.75rem);
+  --text-fluid-heading: clamp(1.4375rem, 0.875rem + 0.625vw, 1.625rem);
   --text-fluid-heading--line-height: 1.214;
 
-  --text-fluid-subheading: clamp(1.3125rem, 0.75rem + 0.625vw, 1.5rem);
+  --text-fluid-subheading: clamp(1.1875rem, 0.625rem + 0.625vw, 1.375rem);
   --text-fluid-subheading--line-height: 1.25;
 
-  --text-fluid-subheading-alt: clamp(1.125rem, 0.75rem + 0.4167vw, 1.25rem);
+  --text-fluid-subheading-alt: clamp(1.0625rem, 0.875rem + 0.2083vw, 1.125rem);
   --text-fluid-subheading-alt--line-height: 1.2;
+
+  /* Fixed role tokens — reduced ~8% from standard Tailwind sizes */
+  --text-meta-value: 1.0625rem;  /* 17px — ProjectDetails values, status items, card titles */
+  --text-nav: 1.0625rem;         /* 17px — Breadcrumb navigation */
+  --text-body: 0.9375rem;        /* 15px — Paragraphs, descriptions */
 }
 
 :root {

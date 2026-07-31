@@ -22,23 +22,23 @@ Defined in `src/index.css` using Tailwind CSS v4 `@theme` block:
 
 | Token | MIN Size | MAX Size | Clamp Expression | Line Height | Usage |
 |-------|----------|----------|------------------|-------------|-------|
-| `--text-fluid-heading` | 25px (1.5625rem) | 28px (1.75rem) | `clamp(1.5625rem, 1rem + 0.625vw, 1.75rem)` | 1.214 | Hero title, Home name |
-| `--text-fluid-subheading` | 21px (1.3125rem) | 24px (1.5rem) | `clamp(1.3125rem, 0.75rem + 0.625vw, 1.5rem)` | 1.25 | Block titles (TextColumns, TextBlockCentered, TextImageRow) |
-| `--text-fluid-subheading-alt` | 18px (1.125rem) | 20px (1.25rem) | `clamp(1.125rem, 0.75rem + 0.4167vw, 1.25rem)` | 1.2 | Home subtitle |
+| `--text-fluid-heading` | 23px (1.4375rem) | 26px (1.625rem) | `clamp(1.4375rem, 0.875rem + 0.625vw, 1.625rem)` | 1.214 | Hero title, Home name |
+| `--text-fluid-subheading` | 19px (1.1875rem) | 22px (1.375rem) | `clamp(1.1875rem, 0.625rem + 0.625vw, 1.375rem)` | 1.25 | Block titles (TextColumns, TextBlockCentered, TextImageRow) |
+| `--text-fluid-subheading-alt` | 17px (1.0625rem) | 18px (1.125rem) | `clamp(1.0625rem, 0.875rem + 0.2083vw, 1.125rem)` | 1.2 | Home subtitle |
 
 **Line-heights** are unitless ratios derived from the original pixel leading values to preserve vertical rhythm.
 
 ### Fixed Type Tokens
 
-These remain at fixed sizes (Tailwind utilities):
+These use custom theme tokens (reduced ~8% from standard Tailwind sizes):
 
-- **meta-value:** `text-lg` (18px) — Project details, status items, card titles
-- **nav:** `text-lg` (18px) — Breadcrumb navigation
-- **body:** `text-base` (16px) — Paragraphs, descriptions
+- **meta-value:** `--text-meta-value` (17px / 1.0625rem) — Project details, status items, card titles
+- **nav:** `--text-nav` (17px / 1.0625rem) — Breadcrumb navigation
+- **body:** `--text-body` (15px / 0.9375rem) — Paragraphs, descriptions
 - **meta-label:** `text-sm` (14px) — Uppercase labels (ROLE, TIMELINE, etc.)
 - **caption:** `text-sm` (14px) — Image captions
 
-**Accessibility floor:** Body text never drops below 14px effective size.
+**Accessibility floor:** All text sizes floored at 14px minimum.
 
 ### Zoom Safety
 
@@ -140,4 +140,4 @@ The `CaseStudyImage` component automatically pulls aspect-ratio from Sanity's `m
 
 ---
 
-**Last updated:** 2026-07-27
+**Last updated:** 2026-07-28

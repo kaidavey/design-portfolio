@@ -5,7 +5,7 @@ export default function ProjectDetails({ block }) {
         <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-sm/4.5">
           Role
         </div>
-        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-lg/5.5">
+        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-meta-value leading-[1.375rem]">
           {block.role}
         </div>
       </div>
@@ -13,7 +13,7 @@ export default function ProjectDetails({ block }) {
         <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-sm/4.5">
           Timeline
         </div>
-        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-lg/5.5">
+        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-meta-value leading-[1.375rem]">
           {block.timeline}
         </div>
       </div>
@@ -21,7 +21,7 @@ export default function ProjectDetails({ block }) {
         <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-sm/4.5">
           Team
         </div>
-        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-lg/5.5">
+        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-meta-value leading-[1.375rem]">
           {block.team}
         </div>
       </div>
@@ -29,7 +29,7 @@ export default function ProjectDetails({ block }) {
         <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-sm/4.5">
           Tools
         </div>
-        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-lg/5.5">
+        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-meta-value leading-[1.375rem]">
           {block.tools}
         </div>
       </div>

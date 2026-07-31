@@ -32,7 +32,7 @@ function HomeHeader() {
         {/* Location status */}
         <div className="flex items-center gap-1.5">
           <Clock className="w-[18px] h-[18px] text-[#0000004D]" strokeWidth={1.5} />
-          <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-lg/5.5">
+          <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-meta-value leading-[1.375rem]">
             Seattle · {seattleTime}
           </span>
         </div>
@@ -76,15 +76,15 @@ export default function Home() {
 
               {/* Title below - not in a card */}
               <div className="flex items-start gap-2">
-                <h2 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-lg/5.5">
+                <h2 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-meta-value leading-[1.375rem]">
                   {caseStudy.title}
                 </h2>
                 {caseStudy.description && (
                   <>
-                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-lg/5.5">
+                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-meta-value leading-[1.375rem]">
                       /
                     </span>
-                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-lg/5.5">
+                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-meta-value leading-[1.375rem]">
                       {caseStudy.description}
                     </span>
                   </>
