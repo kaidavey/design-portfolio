@@ -1,3 +1,5 @@
+import { useLayoutEffect, useRef, useState } from 'react'
+  import { useSuppressBlockEntrance } from '../context/BlockEntranceContext'
 import { motion } from 'framer-motion'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import ProjectDetails from './blocks/ProjectDetails'
@@ -14,11 +16,49 @@ import ImageFull from './blocks/ImageFull'
 import Spacer from './blocks/Spacer'
 
 function AnimatedBlock({ children, isFirst = false }) {
-  const { ref, isVisible } = useScrollAnimation()
+  const suppress = useSuppressBlockEntrance()
+  const nodeRef = useRef(null)
+  const { ref: observerRef, isVisible } = useScrollAnimation()
 
-  if (isFirst) {
+  // Captured once at mount — later context changes must not retroactively
+  // re-animate a block the user is already looking at.
+  //
+  // 'instant'  render at final state, no entrance (on-screen at mount)
+  // 'immediate' animate in right away (existing isFirst behaviour)
+  // 'scroll'   wait for the intersection observer
+  const [mode, setMode] = useState(() => {
+    if (suppress) return 'instant'
+    return isFirst ? 'immediate' : 'scroll'
+  })
+
+  // Blocks default to 'instant' so nothing on screen ever flashes at opacity 0.
+  // Anything that measures out below the fold gets handed back to the observer.
+  // This runs before paint, and those blocks are off-screen anyway, so the
+  // correction is invisible.
+  useLayoutEffect(() => {
+    if (mode !== 'instant' || !nodeRef.current) return
+    const { top } = nodeRef.current.getBoundingClientRect()
+    if (top >= window.innerHeight) setMode('scroll')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function setRefs(node) {
+    nodeRef.current = node
+    if (observerRef) observerRef.current = node
+  }
+
+  if (mode === 'instant') {
+    return (
+      <motion.div ref={setRefs} initial={false} animate={{ opacity: 1, y: 0 }}>
+        {children}
+      </motion.div>
+    )
+  }
+
+  if (mode === 'immediate') {
     return (
       <motion.div
+        ref={setRefs}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
@@ -30,7 +70,7 @@ function AnimatedBlock({ children, isFirst = false }) {
 
   return (
     <motion.div
-      ref={ref}
+      ref={setRefs}
       initial={{ opacity: 0, y: 20 }}
       animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
