@@ -4,7 +4,7 @@ export default function TextBlockCentered({ block }) {
       {(block.section || block.title) && (
         <div className="flex flex-col items-center gap-1 w-full">
           {block.section && (
-            <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-sm/4.5">
+            <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-section-label">
               {block.section}
             </div>
           )}

@@ -13,7 +13,7 @@ export default function ImageRow({ block }) {
             className="w-full rounded-[20px] object-cover"
           />
           {item.caption && (
-            <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-sm/4.5">
+            <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-caption">
               {item.caption}
             </div>
           )}

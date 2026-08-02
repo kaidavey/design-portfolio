@@ -19,12 +19,12 @@ export default function TextRowTwoColumnPresentation({
       {(section || title) && (
         <div className="flex flex-col items-start gap-1 w-full">
           {section && (
-            <div className="tracking-[-0.02em] uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-sm leading-[18px]">
+            <div className="tracking-[-0.02em] uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-section-label">
               {section}
             </div>
           )}
           {title && (
-            <h2 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-2xl leading-[30px]">
+            <h2 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-fluid-subheading">
               {title}
             </h2>
           )}
@@ -39,7 +39,7 @@ export default function TextRowTwoColumnPresentation({
             {leftParagraphs.map((paragraph, index) => (
               <p
                 key={index}
-                className="tracking-[-0.02em] w-full font-['DM_Sans',system-ui,sans-serif] text-black text-base leading-[20px]"
+                className="tracking-[-0.02em] w-full font-['DM_Sans',system-ui,sans-serif] text-black text-body leading-[1.25rem]"
               >
                 {paragraph}
               </p>
@@ -53,7 +53,7 @@ export default function TextRowTwoColumnPresentation({
             {rightParagraphs.map((paragraph, index) => (
               <p
                 key={index}
-                className="tracking-[-0.02em] w-full font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-base leading-[20px]"
+                className="tracking-[-0.02em] w-full font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-body leading-[1.25rem]"
               >
                 {paragraph}
               </p>

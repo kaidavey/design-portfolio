@@ -24,7 +24,7 @@ export default function ImageFullPresentation({ imageSource, imageAlt, caption }
 
       {/* Optional Caption */}
       {caption && (
-        <p className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-sm leading-[18px]">
+        <p className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-caption">
           {caption}
         </p>
       )}

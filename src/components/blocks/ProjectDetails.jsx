@@ -2,34 +2,34 @@ export default function ProjectDetails({ block }) {
   return (
     <div className="flex flex-col @md:flex-row items-start gap-5 justify-between w-full antialiased">
       <div className="flex flex-col items-start gap-2">
-        <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-sm/4.5">
+        <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-caption">
           Role
         </div>
-        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-meta-value leading-[1.375rem]">
+        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-body leading-[1.25rem]">
           {block.role}
         </div>
       </div>
       <div className="flex flex-col items-start gap-2">
-        <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-sm/4.5">
+        <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-caption">
           Timeline
         </div>
-        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-meta-value leading-[1.375rem]">
+        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-body leading-[1.25rem]">
           {block.timeline}
         </div>
       </div>
       <div className="flex flex-col items-start gap-2">
-        <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-sm/4.5">
+        <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-caption">
           Team
         </div>
-        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-meta-value leading-[1.375rem]">
+        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-body leading-[1.25rem]">
           {block.team}
         </div>
       </div>
       <div className="flex flex-col items-start gap-2">
-        <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-sm/4.5">
+        <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-caption">
           Tools
         </div>
-        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-meta-value leading-[1.375rem]">
+        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-body leading-[1.25rem]">
           {block.tools}
         </div>
       </div>
