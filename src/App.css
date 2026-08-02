@@ -5,7 +5,7 @@
   width: 100%;
   min-height: 100svh;
   overflow-x: hidden;
-  background-color: #f9f9f9;
+  background-color: #fafafa;
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -20,7 +20,7 @@
 .shell__bg {
   position: absolute;
   inset: 0;
-  background-image: url(https://app.paper.design/file-assets/01KWM3MAWXZNV08ENZMGME6W21/01KWNGPAW86HW89TA47JYVYPX0.png);
+  background-image: none; /* url(https://app.paper.design/file-assets/01KWM3MAWXZNV08ENZMGME6W21/01KWNGPAW86HW89TA47JYVYPX0.png); */
   background-position: center;
   background-size: cover;
   mix-blend-mode: luminosity;

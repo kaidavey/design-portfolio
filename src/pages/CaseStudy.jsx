@@ -179,7 +179,7 @@ export default function CaseStudy() {
       isExpanded={isExpanded}
       preventScroll={!isExpanded}
     >
-      <div className="relative w-full pt-[64px]" style={{ minHeight: isExpanded ? 'auto' : '100vh' }}>
+      <div className="relative w-full pt-[16px]" style={{ minHeight: isExpanded ? 'auto' : '100vh' }}>
         {isExpanded ? (
           <div
             className="mx-auto"
