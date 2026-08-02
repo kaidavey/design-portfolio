@@ -51,7 +51,7 @@ export default function Home() {
     <Shell header={<HomeHeader />} isHome={true}>
       {loading ? (
         <div className="flex items-center justify-center py-24">
-          <div className="text-lg text-gray-400">Loading case studies...</div>
+          <div className="text-lg text-gray-400">Hold tight...</div>
         </div>
       ) : (
         <div className="grid grid-cols-1 @md:grid-cols-2 gap-9 py-[48px]">

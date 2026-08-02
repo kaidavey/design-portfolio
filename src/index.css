@@ -3,25 +3,25 @@
 
 @theme {
   /* Fluid type tokens — scale smoothly between 1440px and 1920px viewports */
-  --text-fluid-heading: clamp(1.375rem, 0.8125rem + 0.625vw, 1.5625rem);
+  --text-fluid-heading: clamp(1.4375rem, 0.875rem + 0.625vw, 1.625rem);
   --text-fluid-heading--line-height: 1.214;
 
-  --text-fluid-subheading: clamp(1.125rem, 0.5625rem + 0.625vw, 1.3125rem);
+  --text-fluid-subheading: clamp(1.1875rem, 0.625rem + 0.625vw, 1.375rem);
   --text-fluid-subheading--line-height: 1.25;
 
-  --text-fluid-subheading-alt: clamp(1rem, 0.8125rem + 0.2083vw, 1.0625rem);
+  --text-fluid-subheading-alt: clamp(1.0625rem, 0.875rem + 0.2083vw, 1.125rem);
   --text-fluid-subheading-alt--line-height: 1.2;
 
-  /* Fixed role tokens — reduced ~12% from standard Tailwind sizes */
-  --text-meta-value: 1rem;       /* 16px — Status items, card titles */
-  --text-nav: 1rem;              /* 16px — Breadcrumb navigation */
-  --text-body: 0.875rem;         /* 14px — Paragraphs, descriptions, detail values */
+  /* Fixed role tokens — reduced ~8% from standard Tailwind sizes */
+  --text-meta-value: 1.0625rem;  /* 17px — Status items, card titles */
+  --text-nav: 1.0625rem;         /* 17px — Breadcrumb navigation */
+  --text-body: 0.9375rem;        /* 15px — Paragraphs, descriptions, detail values */
 
-  /* Fluid caption/label tokens — scale smoothly, floor at 12px */
-  --text-caption: clamp(0.75rem, 0.5625rem + 0.2083vw, 0.8125rem);  /* 12→13px — Image captions, detail labels */
+  /* Fluid caption/label tokens — scale smoothly, floor at 13px */
+  --text-caption: clamp(0.8125rem, 0.625rem + 0.2083vw, 0.875rem);  /* 13→14px — Image captions, detail labels */
   --text-caption--line-height: 1.286;
 
-  --text-section-label: clamp(0.75rem, 0.5625rem + 0.2083vw, 0.8125rem);  /* 12→13px — Section labels (uppercase) */
+  --text-section-label: clamp(0.8125rem, 0.625rem + 0.2083vw, 0.875rem);  /* 13→14px — Section labels (uppercase) */
   --text-section-label--line-height: 1.286;
 }
 

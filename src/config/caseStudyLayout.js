@@ -1,12 +1,12 @@
 export const CASE_STUDY_LAYOUT = {
   compact: {
-    containerWidth: '65vw',
+    containerWidth: '60vw',
     containerMaxWidth: '1048px',
     containerHeight: '75vh',
-    containerMaxHeight: '715px',
-    containerVerticalOffset: '10vh',
+    containerMaxHeight: '700px',
+    containerVerticalOffset: '8vh',
     containerBorderRadius: '60px',
-    containerBorderWidth: '2px',
+    containerBorderWidth: '1px',
     containerBorderColor: '#D8D8D8',
     containerBackgroundColor: 'rgba(242, 242, 242, 0.8)',
     containerBackdropBlur: '8px',

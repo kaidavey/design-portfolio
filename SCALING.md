@@ -22,23 +22,23 @@ Defined in `src/index.css` using Tailwind CSS v4 `@theme` block:
 
 | Token | MIN Size | MAX Size | Clamp Expression | Line Height | Usage |
 |-------|----------|----------|------------------|-------------|-------|
-| `--text-fluid-heading` | 22px (1.375rem) | 25px (1.5625rem) | `clamp(1.375rem, 0.8125rem + 0.625vw, 1.5625rem)` | 1.214 | Hero title, Home name |
-| `--text-fluid-subheading` | 18px (1.125rem) | 21px (1.3125rem) | `clamp(1.125rem, 0.5625rem + 0.625vw, 1.3125rem)` | 1.25 | Block titles (TextColumns, TextBlockCentered, TextImageRow, TextRowTwoColumn) |
-| `--text-fluid-subheading-alt` | 16px (1rem) | 17px (1.0625rem) | `clamp(1rem, 0.8125rem + 0.2083vw, 1.0625rem)` | 1.2 | Home subtitle |
-| `--text-caption` | 12px (0.75rem) | 13px (0.8125rem) | `clamp(0.75rem, 0.5625rem + 0.2083vw, 0.8125rem)` | 1.286 | Image captions, project detail labels |
-| `--text-section-label` | 12px (0.75rem) | 13px (0.8125rem) | `clamp(0.75rem, 0.5625rem + 0.2083vw, 0.8125rem)` | 1.286 | Section labels (uppercase) |
+| `--text-fluid-heading` | 23px (1.4375rem) | 26px (1.625rem) | `clamp(1.4375rem, 0.875rem + 0.625vw, 1.625rem)` | 1.214 | Hero title, Home name |
+| `--text-fluid-subheading` | 19px (1.1875rem) | 22px (1.375rem) | `clamp(1.1875rem, 0.625rem + 0.625vw, 1.375rem)` | 1.25 | Block titles (TextColumns, TextBlockCentered, TextImageRow, TextRowTwoColumn) |
+| `--text-fluid-subheading-alt` | 17px (1.0625rem) | 18px (1.125rem) | `clamp(1.0625rem, 0.875rem + 0.2083vw, 1.125rem)` | 1.2 | Home subtitle |
+| `--text-caption` | 13px (0.8125rem) | 14px (0.875rem) | `clamp(0.8125rem, 0.625rem + 0.2083vw, 0.875rem)` | 1.286 | Image captions, project detail labels |
+| `--text-section-label` | 13px (0.8125rem) | 14px (0.875rem) | `clamp(0.8125rem, 0.625rem + 0.2083vw, 0.875rem)` | 1.286 | Section labels (uppercase) |
 
 **Line-heights** are unitless ratios derived from the original pixel leading values to preserve vertical rhythm.
 
 ### Fixed Type Tokens
 
-These use custom theme tokens (reduced ~12% from standard Tailwind sizes):
+These use custom theme tokens (reduced ~8% from standard Tailwind sizes):
 
-- **meta-value:** `--text-meta-value` (16px / 1rem) — Status items, card titles
-- **nav:** `--text-nav` (16px / 1rem) — Breadcrumb navigation
-- **body:** `--text-body` (14px / 0.875rem) — Paragraphs, descriptions, project detail values
+- **meta-value:** `--text-meta-value` (17px / 1.0625rem) — Status items, card titles
+- **nav:** `--text-nav` (17px / 1.0625rem) — Breadcrumb navigation
+- **body:** `--text-body` (15px / 0.9375rem) — Paragraphs, descriptions, project detail values
 
-**Accessibility floor:** All text sizes floored at **12px minimum** (caption and section-label tokens).
+**Accessibility floor:** All text sizes floored at **13px minimum** (caption and section-label tokens).
 
 ### Zoom Safety
 
@@ -140,4 +140,4 @@ The `CaseStudyImage` component automatically pulls aspect-ratio from Sanity's `m
 
 ---
 
-**Last updated:** 2026-07-31
+**Last updated:** 2026-08-01
