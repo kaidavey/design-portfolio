@@ -9,21 +9,27 @@ import CaseStudyBody from '../components/CaseStudyBody'
 import ProgressiveBlur from '../components/core/ProgressiveBlur'
 import { BlockEntranceProvider } from '../context/BlockEntranceContext'
 
-// Expand transition: a two-phase morph.
+// Expand transition: a three-phase morph.
 //   Phase 1 (grow):      compact block column transforms to the exact width
-//                        and position of the expanded column, measured at
-//                        click time. Gray container does a slight scale-up
-//                        and fades out underneath it.
-//   Phase 2 (crossfade): geometries now match, so the compact blocks fade
-//                        out as the expanded blocks fade in — opacity only,
-//                        nothing moves during the swap.
+//                        and position of the expanded column, fully opaque
+//                        the whole way. The gray SKIN layer (a child behind
+//                        the blocks — see below) scales slightly and fades.
+//   Phase 2 (hold):      blocks rest at the arrived geometry for a beat so
+//                        the arrival is perceptible.
+//   Phase 3 (crossfade): opacity-only handoff to the expanded tree.
+//
+// Structural invariant: the container element itself must NEVER animate
+// opacity or scale — the blocks are its children, and parent opacity/scale
+// multiplies onto them, killing the morph. All visual exit animation lives
+// on the skin layer.
 const EXPAND = {
   ease: [0.4, 0, 0.2, 1], // matches easings.easeDefault
-  growDuration: 0.55,
+  growDuration: 0.6,
+  holdDuration: 0.1,
   crossfadeDuration: 0.22,
-  containerExitScale: 1.02,
-  containerExitDuration: 0.4,
-  swapMs: 800, // must cover (growDuration + crossfadeDuration) * 1000
+  skinExitScale: 1.02,
+  skinExitDuration: 0.4,
+  swapMs: 960, // must cover (grow + hold + crossfade) * 1000
 }
 
 function CaseStudyNavigation({ title }) {
@@ -84,8 +90,18 @@ export default function CaseStudy() {
   const expandedRef = useRef(null)
   const expandTimerRef = useRef(null)
 
+  // Measured morph geometry, computed once per expand in a layout effect
+  // (pre-paint). Compares the compact BLOCK COLUMN (the content inside the
+  // container, which is narrower than the container itself) against the
+  // expanded column's final rect:
+  //   scale — how much wider the expanded column is (> 1)
+  //   dx/dy — translation from the compact column's top-center to the
+  //           expanded column's top-center, in viewport px
   const [morph, setMorph] = useState(null)
 
+  // Both trees are mounted during the transition so there is something to
+  // cross-fade *to*. Without this the compact view fades to the page
+  // background and the expanded view hard-cuts in.
   const showExpanded = isExpanded || isAnimating
   const showCompact = !isExpanded
 
@@ -122,6 +138,11 @@ export default function CaseStudy() {
     return () => clearTimeout(expandTimerRef.current)
   }, [])
 
+  // FLIP measurement. Runs in the same commit that mounts the expanded tree
+  // (isAnimating → true), before the browser paints and before any animation
+  // has ticked, so both rects are untransformed truth in shared viewport
+  // coordinates. The expanded wrapper animates opacity only, so its rect is
+  // its exact final geometry.
   useLayoutEffect(() => {
     if (!isAnimating) return
     const c = compactContentRef.current?.getBoundingClientRect()
@@ -223,20 +244,21 @@ export default function CaseStudy() {
   const compactConfig = CASE_STUDY_LAYOUT.compact
   const expandedConfig = CASE_STUDY_LAYOUT.expanded
 
-  // Gray container (and its overlay siblings): slight scale-up and fade,
-  // finishing during the grow phase. The blocks — not the container — carry
-  // the morph now.
-  const exitAnimate = isAnimating
-    ? { scale: EXPAND.containerExitScale, opacity: 0 }
+  // Gray skin layer (and the overlay siblings): slight scale-up and fade,
+  // finishing during the grow phase. Applied ONLY to elements with no block
+  // descendants.
+  const skinAnimate = isAnimating
+    ? { scale: EXPAND.skinExitScale, opacity: 0 }
     : { scale: 1, opacity: 1 }
-  const exitTransition = {
-    scale: { duration: EXPAND.containerExitDuration, ease: EXPAND.ease },
-    opacity: { duration: EXPAND.containerExitDuration, ease: EXPAND.ease },
+  const skinTransition = {
+    scale: { duration: EXPAND.skinExitDuration, ease: EXPAND.ease },
+    opacity: { duration: EXPAND.skinExitDuration, ease: EXPAND.ease },
   }
 
+  const crossfadeDelay = EXPAND.growDuration + EXPAND.holdDuration
+
   // Compact block column: transforms to the measured expanded geometry over
-  // the grow phase, holds fully opaque the whole way, then fades out only
-  // once it has arrived (opacity delay = growDuration).
+  // the grow phase, holds fully opaque through grow + hold, then fades out.
   const blockMorphAnimate =
     isAnimating && morph
       ? {
@@ -251,21 +273,21 @@ export default function CaseStudy() {
     y: { duration: EXPAND.growDuration, ease: EXPAND.ease },
     scale: { duration: EXPAND.growDuration, ease: EXPAND.ease },
     opacity: {
-      delay: EXPAND.growDuration,
+      delay: crossfadeDelay,
       duration: EXPAND.crossfadeDuration,
       ease: 'linear',
     },
   }
 
   // Expanded column: mounted at final geometry from the first frame, no
-  // transform ever. Invisible through the grow phase, then fades in exactly
-  // as the compact column fades out.
+  // transform ever. Invisible through grow + hold, then fades in exactly as
+  // the compact column fades out.
   const enterAnimate = isAnimating
     ? { opacity: [0, 1] }
     : { opacity: 1 }
   const enterTransition = isAnimating
     ? {
-        delay: EXPAND.growDuration,
+        delay: crossfadeDelay,
         duration: EXPAND.crossfadeDuration,
         ease: 'linear',
       }
@@ -317,7 +339,7 @@ export default function CaseStudy() {
 
         {showCompact && (
           <>
-            <motion.div
+            <div
               className="fixed"
               style={{
                 left: '50%',
@@ -327,26 +349,34 @@ export default function CaseStudy() {
                 height: compactConfig.containerHeight,
                 maxHeight: compactConfig.containerMaxHeight,
                 borderRadius: compactConfig.containerBorderRadius,
-                borderWidth: compactConfig.containerBorderWidth,
-                borderStyle: 'solid',
-                borderColor: isScrolled ? 'transparent' : compactConfig.containerBorderColor,
-                backgroundColor: compactConfig.containerBackgroundColor,
-                backdropFilter: `blur(${compactConfig.containerBackdropBlur})`,
-                boxShadow: compactConfig.containerBoxShadow,
                 zIndex: 5,
-                x: '-50%',
+                transform: 'translateX(-50%)',
                 // Un-clip during the grow: the block column expands past the
-                // container's edges while the container fades out beneath it.
+                // container's edges while the skin fades out beneath it.
                 overflow: isAnimating ? 'visible' : 'hidden',
                 pointerEvents: isAnimating ? 'none' : 'auto',
-                transformOrigin: 'top center',
               }}
-              animate={exitAnimate}
-              transition={exitTransition}
             >
+              {/* Skin: all of the container's paint lives here, behind the
+                  blocks, so it can fade without taking the blocks with it. */}
+              <motion.div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  borderRadius: compactConfig.containerBorderRadius,
+                  borderWidth: compactConfig.containerBorderWidth,
+                  borderStyle: 'solid',
+                  borderColor: isScrolled ? 'transparent' : compactConfig.containerBorderColor,
+                  backgroundColor: compactConfig.containerBackgroundColor,
+                  backdropFilter: `blur(${compactConfig.containerBackdropBlur})`,
+                  boxShadow: compactConfig.containerBoxShadow,
+                  transformOrigin: 'top center',
+                }}
+                animate={skinAnimate}
+                transition={skinTransition}
+              />
               <div
                 ref={scrollContainerRef}
-                className="flex flex-col case-study-scroll h-full w-full"
+                className="relative flex flex-col case-study-scroll h-full w-full"
                 style={{
                   paddingTop: compactConfig.contentPaddingTop,
                   paddingRight: compactConfig.contentPaddingRight,
@@ -385,7 +415,7 @@ export default function CaseStudy() {
                   </motion.div>
                 </AnimatePresence>
               </div>
-            </motion.div>
+            </div>
 
             {isScrolled && (
               <motion.div
@@ -402,8 +432,8 @@ export default function CaseStudy() {
                   x: '-50%',
                   transformOrigin: 'top center',
                 }}
-                animate={exitAnimate}
-                transition={exitTransition}
+                animate={skinAnimate}
+                transition={skinTransition}
               >
                 <ProgressiveBlur />
               </motion.div>
@@ -427,8 +457,8 @@ export default function CaseStudy() {
                   x: '-50%',
                   transformOrigin: 'top center',
                 }}
-                animate={exitAnimate}
-                transition={exitTransition}
+                animate={skinAnimate}
+                transition={skinTransition}
               />
             )}
           </>
