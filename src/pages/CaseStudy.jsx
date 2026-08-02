@@ -9,19 +9,6 @@ import CaseStudyBody from '../components/CaseStudyBody'
 import ProgressiveBlur from '../components/core/ProgressiveBlur'
 import { BlockEntranceProvider } from '../context/BlockEntranceContext'
 
-// Expand transition: a three-phase morph.
-//   Phase 1 (grow):      compact block column transforms to the exact width
-//                        and position of the expanded column, fully opaque
-//                        the whole way. The gray SKIN layer (a child behind
-//                        the blocks — see below) scales slightly and fades.
-//   Phase 2 (hold):      blocks rest at the arrived geometry for a beat so
-//                        the arrival is perceptible.
-//   Phase 3 (crossfade): opacity-only handoff to the expanded tree.
-//
-// Structural invariant: the container element itself must NEVER animate
-// opacity or scale — the blocks are its children, and parent opacity/scale
-// multiplies onto them, killing the morph. All visual exit animation lives
-// on the skin layer.
 const EXPAND = {
   ease: [0.4, 0, 0.2, 1], // matches easings.easeDefault
   growDuration: 0.6,
@@ -90,18 +77,8 @@ export default function CaseStudy() {
   const expandedRef = useRef(null)
   const expandTimerRef = useRef(null)
 
-  // Measured morph geometry, computed once per expand in a layout effect
-  // (pre-paint). Compares the compact BLOCK COLUMN (the content inside the
-  // container, which is narrower than the container itself) against the
-  // expanded column's final rect:
-  //   scale — how much wider the expanded column is (> 1)
-  //   dx/dy — translation from the compact column's top-center to the
-  //           expanded column's top-center, in viewport px
   const [morph, setMorph] = useState(null)
 
-  // Both trees are mounted during the transition so there is something to
-  // cross-fade *to*. Without this the compact view fades to the page
-  // background and the expanded view hard-cuts in.
   const showExpanded = isExpanded || isAnimating
   const showCompact = !isExpanded
 
@@ -138,11 +115,6 @@ export default function CaseStudy() {
     return () => clearTimeout(expandTimerRef.current)
   }, [])
 
-  // FLIP measurement. Runs in the same commit that mounts the expanded tree
-  // (isAnimating → true), before the browser paints and before any animation
-  // has ticked, so both rects are untransformed truth in shared viewport
-  // coordinates. The expanded wrapper animates opacity only, so its rect is
-  // its exact final geometry.
   useLayoutEffect(() => {
     if (!isAnimating) return
     const c = compactContentRef.current?.getBoundingClientRect()
@@ -150,8 +122,9 @@ export default function CaseStudy() {
     if (!c || !x || !c.width || !x.width) return
 
     setMorph({
-      scale: x.width / c.width,
-      dx: x.left + x.width / 2 - (c.left + c.width / 2),
+      fromWidth: c.width,
+      toWidth: x.width,
+      dx: x.left - c.left,
       dy: x.top - c.top,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -257,21 +230,19 @@ export default function CaseStudy() {
 
   const crossfadeDelay = EXPAND.growDuration + EXPAND.holdDuration
 
-  // Compact block column: transforms to the measured expanded geometry over
-  // the grow phase, holds fully opaque through grow + hold, then fades out.
   const blockMorphAnimate =
     isAnimating && morph
       ? {
+          width: [morph.fromWidth, morph.toWidth],
           x: morph.dx,
           y: morph.dy,
-          scale: morph.scale,
           opacity: 0,
         }
       : null // fall through to the normal slug-swap variants
   const blockMorphTransition = {
+    width: { duration: EXPAND.growDuration, ease: EXPAND.ease },
     x: { duration: EXPAND.growDuration, ease: EXPAND.ease },
     y: { duration: EXPAND.growDuration, ease: EXPAND.ease },
-    scale: { duration: EXPAND.growDuration, ease: EXPAND.ease },
     opacity: {
       delay: crossfadeDelay,
       duration: EXPAND.crossfadeDuration,
@@ -279,9 +250,6 @@ export default function CaseStudy() {
     },
   }
 
-  // Expanded column: mounted at final geometry from the first frame, no
-  // transform ever. Invisible through grow + hold, then fades in exactly as
-  // the compact column fades out.
   const enterAnimate = isAnimating
     ? { opacity: [0, 1] }
     : { opacity: 1 }
@@ -306,6 +274,7 @@ export default function CaseStudy() {
       <div
         className="relative w-full pt-[16px]"
         style={{ minHeight: showExpanded ? 'auto' : '100vh' }}
+        style={{ paddingBottom: showExpanded ? '15vh' : '' }}
       >
         {showExpanded && (
           <motion.div
@@ -403,7 +372,8 @@ export default function CaseStudy() {
                     onDragEnd={handleDragEnd}
                     style={{
                       cursor: 'grab',
-                      transformOrigin: 'top center',
+                      transformOrigin: 'top left',
+                      flexShrink: 0,
                     }}
                     onMouseDown={(e) => (e.currentTarget.style.cursor = 'grabbing')}
                     onMouseUp={(e) => (e.currentTarget.style.cursor = 'grab')}
