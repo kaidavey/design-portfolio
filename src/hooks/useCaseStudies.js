@@ -68,24 +68,14 @@ export function useCaseStudy(slug) {
   return { caseStudy, loading, error }
 }
 
-// Hook to get neighbors and prefetch them
-export function useNeighborPrefetch(slug, caseStudies) {
+// Hook to prefetch neighbor case studies
+export function useNeighborPrefetch(prevSlug, nextSlug) {
   useEffect(() => {
-    if (!slug || !caseStudies.length) return
-
-    const currentIndex = caseStudies.findIndex((cs) => cs.slug.current === slug)
-    if (currentIndex === -1) return
-
-    // Prefetch previous
-    if (currentIndex > 0) {
-      const prevSlug = caseStudies[currentIndex - 1].slug.current
+    if (prevSlug) {
       prefetchCaseStudy(prevSlug)
     }
-
-    // Prefetch next
-    if (currentIndex < caseStudies.length - 1) {
-      const nextSlug = caseStudies[currentIndex + 1].slug.current
+    if (nextSlug) {
       prefetchCaseStudy(nextSlug)
     }
-  }, [slug, caseStudies])
+  }, [prevSlug, nextSlug])
 }
