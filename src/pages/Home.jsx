@@ -4,6 +4,7 @@ import { useCaseStudies } from '../hooks/useCaseStudies'
 import Shell from '../components/Shell'
 import NowPlaying from '../components/NowPlaying'
 import CaseStudyImage from '../components/CaseStudyImage'
+import ProgressiveBlur from '../components/core/ProgressiveBlur'
 
 // Home header slot: Bio + Status
 function HomeHeader() {
@@ -49,6 +50,17 @@ export default function Home() {
 
   return (
     <Shell header={<HomeHeader />} isHome={true}>
+      {/* Progressive blur at top of page */}
+      <div
+        className="fixed pointer-events-none left-0 right-0"
+        style={{
+          top: 0,
+          zIndex: 10,
+        }}
+      >
+        <ProgressiveBlur />
+      </div>
+
       {loading ? (
         <div className="flex items-center justify-center py-24">
           <div className="text-lg text-gray-400">Hold tight...</div>

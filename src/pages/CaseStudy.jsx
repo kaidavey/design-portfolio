@@ -91,10 +91,16 @@ function NavMorphProxy({ role, from, to, fromRadius, toRadius, coverUrl, config 
     role === 'grow'
       ? {
           delay: nm.growDuration * nm.coverFadeStart,
-          duration: nm.growDuration * (1 - nm.coverFadeStart),
+          duration: 0.2, // Fixed fast fade (was: nm.growDuration * (1 - nm.coverFadeStart))
           ease: nm.ease,
         }
       : { duration: nm.growDuration * (1 - nm.coverFadeStart), ease: nm.ease }
+
+  // Shrinking proxy waits for growing proxy's crossfade to complete before fading
+  const opacityFadeDelay =
+    role === 'shrink'
+      ? nm.growDuration + nm.proxyFadeDuration // Wait for grow proxy to finish
+      : nm.growDuration // Start when arriving
 
   return (
     <motion.div
@@ -120,7 +126,7 @@ function NavMorphProxy({ role, from, to, fromRadius, toRadius, coverUrl, config 
         width: geo,
         height: geo,
         borderRadius: geo,
-        opacity: { delay: nm.growDuration, duration: nm.proxyFadeDuration, ease: 'linear' },
+        opacity: { delay: opacityFadeDelay, duration: nm.proxyFadeDuration, ease: 'linear' },
       }}
       style={{
         position: 'absolute',
@@ -201,7 +207,9 @@ export default function CaseStudy() {
   // so all rects are frozen truth from the pre-navigation layout. Null
   // when no morph is running.
   const [navMorph, setNavMorph] = useState(null)
+  const [blocksSuppressed, setBlocksSuppressed] = useState(false)
   const navMorphTimerRef = useRef(null)
+  const blocksTimerRef = useRef(null)
   const containerRef = useRef(null)
   const prevPeekCardRef = useRef(null)
   const nextPeekCardRef = useRef(null)
@@ -252,6 +260,7 @@ export default function CaseStudy() {
     return () => {
       clearTimeout(expandTimerRef.current)
       clearTimeout(navMorphTimerRef.current)
+      clearTimeout(blocksTimerRef.current)
     }
   }, [])
 
@@ -317,6 +326,11 @@ export default function CaseStudy() {
       return false
     }
     clearTimeout(navMorphTimerRef.current)
+    clearTimeout(blocksTimerRef.current)
+
+    // Suppress block animations initially
+    setBlocksSuppressed(true)
+
     setNavMorph({
       dir,
       container,
@@ -325,10 +339,16 @@ export default function CaseStudy() {
       enteringStudy,
       leavingStudy: currentStudy,
     })
-    navMorphTimerRef.current = setTimeout(
-      () => setNavMorph(null),
-      compactConfig.navMorph.totalMs
-    )
+
+    // Unsuppress blocks once content is mostly visible
+    // Content starts at contentEnterDelay (0.5s) + most of contentEnterDuration (0.2s of 0.25s)
+    const blocksDelay = (compactConfig.navMorph.contentEnterDelay + 0.2) * 1000
+    blocksTimerRef.current = setTimeout(() => setBlocksSuppressed(false), blocksDelay)
+
+    navMorphTimerRef.current = setTimeout(() => {
+      setNavMorph(null)
+      setBlocksSuppressed(false)
+    }, compactConfig.navMorph.totalMs)
     return true
   }
 
@@ -429,13 +449,17 @@ export default function CaseStudy() {
   // Gray skin layer (and the overlay siblings): slight scale-up and fade,
   // finishing during the grow phase. Applied ONLY to elements with no block
   // descendants.
-  const skinAnimate = isAnimating
-    ? { scale: EXPAND.skinExitScale, opacity: 0 }
+  const skinAnimate = isAnimating || navMorph
+    ? { scale: isAnimating ? EXPAND.skinExitScale : 1, opacity: 0 }
     : { scale: 1, opacity: 1 }
-  const skinTransition = {
-    scale: { duration: EXPAND.skinExitDuration, ease: EXPAND.ease },
-    opacity: { duration: EXPAND.skinExitDuration, ease: EXPAND.ease },
-  }
+  const skinTransition = isAnimating
+    ? {
+        scale: { duration: EXPAND.skinExitDuration, ease: EXPAND.ease },
+        opacity: { duration: EXPAND.skinExitDuration, ease: EXPAND.ease },
+      }
+    : {
+        opacity: { duration: 0.12, ease: 'linear' },
+      }
 
   const crossfadeDelay = EXPAND.growDuration + EXPAND.holdDuration
 
@@ -624,10 +648,12 @@ export default function CaseStudy() {
                     onMouseDown={(e) => (e.currentTarget.style.cursor = 'grabbing')}
                     onMouseUp={(e) => (e.currentTarget.style.cursor = 'grab')}
                   >
-                    <CaseStudyBody
-                      slug={slug}
-                      expandButton={<ExpandButton onToggleExpand={handleToggleExpand} />}
-                    />
+                    <BlockEntranceProvider suppress={blocksSuppressed}>
+                      <CaseStudyBody
+                        slug={slug}
+                        expandButton={<ExpandButton onToggleExpand={handleToggleExpand} />}
+                      />
+                    </BlockEntranceProvider>
                   </motion.div>
                 </AnimatePresence>
               </div>

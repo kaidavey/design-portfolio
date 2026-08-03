@@ -111,9 +111,12 @@ const CaseStudyPeek = forwardRef(function CaseStudyPeek(
         pointerEvents: interactive ? 'auto' : 'none',
         cursor: interactive ? 'pointer' : 'default',
       }}
-      // Expand handoff: plain fade only. Not the skin treatment — peeks do
+      // Expand handoff: slide away and fade. Not the skin treatment — peeks do
       // not scale to 1.02 and take no part in the expand morph.
-      animate={{ opacity: isAnimating ? 0 : 1 }}
+      animate={{
+        x: isAnimating ? (side === 'prev' ? -200 : 200) : 0,
+        opacity: isAnimating ? 0 : 1,
+      }}
       transition={{ duration: peek.fadeOutDuration, ease: nm.ease }}
       onClick={interactive ? onClick : undefined}
       role={study ? 'button' : undefined}

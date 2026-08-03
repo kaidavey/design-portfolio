@@ -19,6 +19,7 @@ function AnimatedBlock({ children, isFirst = false }) {
   const suppress = useSuppressBlockEntrance()
   const nodeRef = useRef(null)
   const { ref: observerRef, isVisible } = useScrollAnimation()
+  const [hasBeenUnsuppressed, setHasBeenUnsuppressed] = useState(!suppress)
 
   // Captured once at mount — later context changes must not retroactively
   // re-animate a block the user is already looking at.
@@ -26,10 +27,28 @@ function AnimatedBlock({ children, isFirst = false }) {
   // 'instant'  render at final state, no entrance (on-screen at mount)
   // 'immediate' animate in right away (existing isFirst behaviour)
   // 'scroll'   wait for the intersection observer
+  // 'suppressed' waiting for suppress to become false
   const [mode, setMode] = useState(() => {
-    if (suppress) return 'instant'
+    if (suppress) return 'suppressed'
     return isFirst ? 'immediate' : 'scroll'
   })
+
+  // When suppress changes from true to false, trigger animations
+  useLayoutEffect(() => {
+    if (!suppress && !hasBeenUnsuppressed && mode === 'suppressed') {
+      setHasBeenUnsuppressed(true)
+      // Check if element is in viewport
+      if (isFirst) {
+        setMode('immediate')
+      } else if (nodeRef.current) {
+        const { top } = nodeRef.current.getBoundingClientRect()
+        // If on-screen, animate immediately; otherwise wait for scroll
+        setMode(top < window.innerHeight ? 'immediate' : 'scroll')
+      } else {
+        setMode('scroll')
+      }
+    }
+  }, [suppress, hasBeenUnsuppressed, mode, isFirst])
 
   // Blocks default to 'instant' so nothing on screen ever flashes at opacity 0.
   // Anything that measures out below the fold gets handed back to the observer.
@@ -45,6 +64,14 @@ function AnimatedBlock({ children, isFirst = false }) {
   function setRefs(node) {
     nodeRef.current = node
     if (observerRef) observerRef.current = node
+  }
+
+  if (mode === 'suppressed') {
+    return (
+      <motion.div ref={setRefs} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 0, y: 20 }}>
+        {children}
+      </motion.div>
+    )
   }
 
   if (mode === 'instant') {
