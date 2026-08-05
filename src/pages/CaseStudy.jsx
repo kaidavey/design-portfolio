@@ -41,25 +41,25 @@ function CaseStudyNavigation({ title }) {
     <nav className="flex items-center justify-center gap-2" aria-label="Breadcrumb">
       <Link
         to="/"
-        className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-nav hover:text-[#2F2F2F] transition-colors"
+        className="tracking-tight font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-muted)] text-nav hover:[color:var(--color-text-secondary)] transition-colors"
       >
         Home
       </Link>
-      <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-nav">
+      <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-muted)] text-nav">
         /
       </span>
       <Link
         to="/"
-        className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-nav hover:text-[#2F2F2F] transition-colors"
+        className="tracking-tight font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-muted)] text-nav hover:[color:var(--color-text-secondary)] transition-colors"
       >
         Work
       </Link>
       {title && (
         <>
-          <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-nav">
+          <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-muted)] text-nav">
             /
           </span>
-          <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-black text-nav font-medium">
+          <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-primary)] text-nav font-medium">
             {title}
           </span>
         </>
@@ -76,7 +76,7 @@ function ExpandButton({ onToggleExpand }) {
       className="flex items-center justify-center hover:opacity-70 transition-opacity cursor-pointer"
       style={{ transform: 'rotate(90deg)' }}
     >
-      <Maximize2 className="w-[17.5px] h-[17.5px] text-[#3A3A3A]" strokeWidth={2} />
+      <Maximize2 className="w-[17.5px] h-[17.5px] [color:var(--color-text-secondary)]" strokeWidth={2} />
     </button>
   )
 }
@@ -375,7 +375,7 @@ export default function CaseStudy() {
                     borderWidth: COMPACT.containerBorderWidth,
                     borderStyle: 'solid',
                     borderColor: isScrolled ? 'transparent' : COMPACT.containerBorderColor,
-                    backgroundColor: COMPACT.containerBackgroundColor,
+                    background: COMPACT.containerBackgroundColor,
                     backdropFilter: `blur(${COMPACT.containerBackdropBlur})`,
                     boxShadow: COMPACT.containerBoxShadow,
                     transformOrigin: 'top center',

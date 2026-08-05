@@ -2,17 +2,20 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { MotionConfig, LazyMotion, domMax } from 'motion/react'
+import { ThemeProvider } from './contexts/ThemeContext'
 import './index.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <MotionConfig reducedMotion="user">
-        <LazyMotion features={domMax} strict>
-          <App />
-        </LazyMotion>
-      </MotionConfig>
+      <ThemeProvider>
+        <MotionConfig reducedMotion="user">
+          <LazyMotion features={domMax} strict>
+            <App />
+          </LazyMotion>
+        </MotionConfig>
+      </ThemeProvider>
     </BrowserRouter>
   </StrictMode>,
 )

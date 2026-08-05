@@ -20,10 +20,10 @@ function HomeHeader() {
     <div className="flex items-center justify-between w-full">
       {/* Left: Name and title */}
       <div className="flex flex-col items-start gap-2.5">
-        <h1 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-fluid-heading">
+        <h1 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-secondary)] text-fluid-heading">
           Kai Davey
         </h1>
-        <p className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-fluid-subheading-alt">
+        <p className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-secondary)] text-fluid-subheading-alt">
           Design Engineer & CS at UCLA
         </p>
       </div>
@@ -32,8 +32,8 @@ function HomeHeader() {
       <div className="flex flex-col items-end gap-2">
         {/* Location status */}
         <div className="flex items-center gap-1.5">
-          <Clock className="w-[18px] h-[18px] text-[#0000004D]" strokeWidth={1.5} />
-          <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-meta-value leading-[1.375rem]">
+          <Clock className="w-[18px] h-[18px] [color:var(--color-text-muted)]" strokeWidth={1.5} />
+          <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-muted)] text-meta-value leading-[1.375rem]">
             Seattle · {seattleTime}
           </span>
         </div>
@@ -75,7 +75,7 @@ export default function Home() {
             >
               {/* Cover Image - separate white card */}
               {caseStudy.coverImage && (
-                <div className="w-full aspect-[455/328] rounded-[30px] overflow-hidden bg-white shadow-md hover:shadow-xl transition-all duration-300">
+                <div className="w-full aspect-[455/328] rounded-[30px] overflow-hidden [background-color:var(--color-bg-container-solid)] shadow-md hover:shadow-xl transition-all duration-300">
                   <CaseStudyImage
                     source={caseStudy.coverImage}
                     alt={caseStudy.title}
@@ -88,15 +88,15 @@ export default function Home() {
 
               {/* Title below - not in a card */}
               <div className="flex items-start gap-2">
-                <h2 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-meta-value leading-[1.375rem]">
+                <h2 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-primary)] text-meta-value leading-[1.375rem]">
                   {caseStudy.title}
                 </h2>
                 {caseStudy.description && (
                   <>
-                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-meta-value leading-[1.375rem]">
+                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-muted)] text-meta-value leading-[1.375rem]">
                       /
                     </span>
-                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-meta-value leading-[1.375rem]">
+                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-muted)] text-meta-value leading-[1.375rem]">
                       {caseStudy.description}
                     </span>
                   </>

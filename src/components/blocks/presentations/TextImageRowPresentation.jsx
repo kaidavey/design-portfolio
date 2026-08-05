@@ -21,20 +21,20 @@ export default function TextImageRowPresentation({
     <div className="flex flex-col @lg:flex-row items-start @lg:items-center gap-8 @lg:justify-between w-full">
       {/* Text column */}
       <div className="flex flex-col items-start gap-4 flex-1 w-full">
-        <h2 className="tracking-tight font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-fluid-subheading">
+        <h2 className="tracking-tight font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-primary)] text-fluid-subheading">
           {title}
         </h2>
         <div className="flex flex-col items-start gap-2 w-full">
           {paragraphs.map((paragraph, index) => (
             <p
               key={index}
-              className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-black text-body leading-[1.25rem]"
+              className="tracking-tight font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-primary)] text-body leading-[1.25rem]"
             >
               {paragraph}
             </p>
           ))}
           {subtitle && (
-            <p className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-body leading-[1.25rem]">
+            <p className="tracking-tight font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-muted)] text-body leading-[1.25rem]">
               {subtitle}
             </p>
           )}

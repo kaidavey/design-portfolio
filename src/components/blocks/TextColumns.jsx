@@ -3,11 +3,11 @@ export default function TextColumns({ block }) {
     <div className="flex flex-col @md:flex-row items-start justify-between w-full gap-6 antialiased">
       <div className="flex items-start gap-1 flex-col flex-1 w-full">
         {block.section && (
-          <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium text-[#0000004D] text-section-label">
+          <div className="tracking-[-0.02em] w-fit uppercase font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-muted)] text-section-label">
             {block.section}
           </div>
         )}
-        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium text-black text-fluid-subheading">
+        <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-primary)] text-fluid-subheading">
           {block.title}
         </div>
       </div>
@@ -16,13 +16,13 @@ export default function TextColumns({ block }) {
           {block.paragraphs.map((paragraph, index) => (
             <div
               key={index}
-              className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] text-black text-body leading-[1.25rem]"
+              className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-primary)] text-body leading-[1.25rem]"
             >
               {paragraph}
             </div>
           ))}
           {block.subtitle && (
-            <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-body leading-[1.25rem]">
+            <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-muted)] text-body leading-[1.25rem]">
               {block.subtitle}
             </div>
           )}

@@ -5,10 +5,11 @@
   width: 100%;
   min-height: 100svh;
   overflow-x: hidden;
-  background-color: #fafafa;
+  background-color: var(--color-bg-primary);
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease;
 }
 
 /* Prevent scrolling on case study page (compact mode) */

@@ -6,7 +6,7 @@ export default function TextCardRow({ block }) {
       {block.cards.map((card, index) => (
         <div
           key={index}
-          className="flex overflow-clip rounded-[20px] flex-col items-start gap-9 p-6 flex-1 w-full [box-shadow:#FFFFFF_-1px_2px_0px_inset] bg-[#F2F2F2] border border-solid border-[#DEDEDE]"
+          className="flex overflow-clip rounded-[20px] flex-col items-start gap-9 p-6 flex-1 w-full [box-shadow:var(--shadow-block-inset)] [background:var(--color-bg-block)] border border-solid [border-color:var(--color-border-block)] transition-all duration-300"
         >
           {card.icon && (
             <img
@@ -16,10 +16,10 @@ export default function TextCardRow({ block }) {
             />
           )}
           <div className="flex flex-col items-start gap-2 self-stretch">
-            <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] font-medium text-[#2F2F2F] text-body leading-[1.25rem]">
+            <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-secondary)] text-body leading-[1.25rem]">
               {card.subtitle}
             </div>
-            <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-body leading-[1.25rem]">
+            <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-muted)] text-body leading-[1.25rem]">
               {card.description}
             </div>
           </div>

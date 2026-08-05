@@ -1,9 +1,11 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Briefcase, Mail } from 'lucide-react'
+import { Home, Briefcase, Mail, Moon, Sun } from 'lucide-react'
+import { useTheme } from '../../contexts/ThemeContext'
 
 export default function NavBar() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { isDark, toggleTheme } = useTheme()
 
   const handleHomeClick = () => {
     navigate('/')
@@ -24,7 +26,7 @@ export default function NavBar() {
   }
 
   return (
-    <div className="[font-synthesis:none] flex overflow-clip rounded-full items-center gap-2 p-1.5 justify-center [box-shadow:#00000005_0px_4px_8px] bg-white border border-solid border-[#F0F0F0] antialiased">
+    <div className="[font-synthesis:none] flex overflow-clip rounded-full items-center gap-2 p-1.5 justify-center [box-shadow:#00000005_0px_4px_8px] [background-color:var(--color-bg-container-solid)] border border-solid [border-color:var(--color-border)] antialiased transition-colors duration-300">
       <NavButton
         icon={<Home className="w-5 h-5" strokeWidth={1.5} />}
         onClick={handleHomeClick}
@@ -40,6 +42,11 @@ export default function NavBar() {
         icon={<Mail className="w-5 h-5" strokeWidth={1.5} />}
         onClick={handleMailClick}
         label="Mail"
+      />
+      <NavButton
+        icon={isDark ? <Sun className="w-5 h-5" strokeWidth={1.5} /> : <Moon className="w-5 h-5" strokeWidth={1.5} />}
+        onClick={toggleTheme}
+        label={isDark ? "Light mode" : "Dark mode"}
       />
       <div className="w-[0.8px] h-6.5 rounded-full shrink-0 bg-[#DDDDDD]" />
       <div
@@ -63,10 +70,10 @@ export function NavButton({ icon, onClick, isActive = false, label }) {
           ? 'linear-gradient(in oklab 90deg, oklab(95.5% 0 0) -24.56%, oklab(97.5% 0 0) 113.82%)'
           : '',
       }}
-      className={`w-10 h-10 flex justify-center items-center transition-all ${
+      className={`w-10 h-10 flex justify-center items-center transition-all [color:var(--color-text-primary)] ${
         isActive
-          ? 'bg-[#FAFAFA] rounded-full [box-shadow:#FFFFFF_-0.5px_1.2px_0px_inset] bg-origin-border [border-width:1.2px] border-solid border-[#EAEAEA]'
-          : 'hover:bg-gray-50'
+          ? '[background-color:var(--color-bg-primary)] rounded-full [box-shadow:var(--shadow-container-inset)] bg-origin-border [border-width:1.2px] border-solid [border-color:var(--color-border)]'
+          : 'hover:opacity-70'
       }`}
     >
       {icon}
