@@ -1,4 +1,4 @@
-export default function ProgressiveBlur({ borderRadius = '60px' }) {
+export default function ProgressiveBlur() {
   const layers = [
     { blur: 0.25, from: 0,  to: 17 },
     { blur: 0.5,   from: 17, to: 33 },
@@ -11,11 +11,8 @@ export default function ProgressiveBlur({ borderRadius = '60px' }) {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 top-0 h-20 overflow-hidden"
-      style={{
-        borderTopLeftRadius: borderRadius,
-        borderTopRightRadius: borderRadius,
-      }}
+      className="pointer-events-none absolute inset-x-0 top-0 h-20"
+      style={{ borderRadius: 'inherit' }}
     >
       {layers.map((layer, i) => {
         const mask = `linear-gradient(to top, transparent ${layer.from}%, black ${layer.to}%)`
@@ -24,8 +21,7 @@ export default function ProgressiveBlur({ borderRadius = '60px' }) {
             key={i}
             className="absolute inset-0"
             style={{
-              borderTopLeftRadius: borderRadius,
-              borderTopRightRadius: borderRadius,
+              borderRadius: 'inherit',
               backdropFilter: `blur(${layer.blur}px)`,
               WebkitBackdropFilter: `blur(${layer.blur}px)`,
               maskImage: mask,
