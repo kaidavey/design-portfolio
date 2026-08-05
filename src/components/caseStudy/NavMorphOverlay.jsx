@@ -70,10 +70,10 @@ function NavMorphProxy({ role, from, to, fromRadius, toRadius, coverUrl, config 
         // Solid fill, deliberately NOT the translucent container color and
         // NOT backdrop-filtered — two extra backdrop roots in flight is a
         // compositing bill with wrong sampling mid-travel anyway. Behind
-        // the container it lands on sits the plain gray page, so solid
-        // #F2F2F2 with the container's border + shadow reads as the same
-        // surface at the crossfade.
-        backgroundColor: '#F2F2F2',
+        // the container it lands on sits the plain background page, so the
+        // solid morph proxy color with the container's border + shadow reads
+        // as the same surface at the crossfade.
+        backgroundColor: 'var(--color-bg-morph-proxy)',
         border: `${config.containerBorderWidth} solid ${config.containerBorderColor}`,
         boxShadow: config.containerBoxShadow,
         willChange: 'top, left, width, height',
