@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { getCoverUrl } from '../CaseStudyPeek'
+import { buildNavMorphTimeline } from '../../config/navMorphTimeline'
 
 // Overlay proxies for the navigation morph. Two leaf cards (skin + cover
 // image, no block content, no backdrop-filter) travel between the measured
@@ -11,13 +12,26 @@ import { getCoverUrl } from '../CaseStudyPeek'
 // proxies are leaves, so per-frame layout is cheap. Same deliberate
 // exception to the no-layout-animation rule as the expand block morph.
 //
+// Both proxies are OPAQUE and sit exactly on their endpoint rects, which is
+// what lets the content beneath them be swapped with a hard cut instead of a
+// crossfade. Never make these translucent without re-deriving the reveal.
+//
 // role="grow":   cover fully visible at departure, fades out during the
 //                latter part of the flight so the proxy ARRIVES as a bare
 //                gray container skin (border + shadow, no image), then the
-//                whole proxy crossfades with the real container beneath it.
+//                whole proxy fades off the real container beneath it.
 // role="shrink": the mirror — departs container-gray, cover fades in as it
 //                travels, lands as a full cover card on the peek slot.
-function NavMorphProxy({ role, from, to, fromRadius, toRadius, coverUrl, config }) {
+function NavMorphProxy({
+  role,
+  from,
+  to,
+  fromRadius,
+  toRadius,
+  coverUrl,
+  config,
+  timeline,
+}) {
   const nm = config.navMorph
   const geo = { duration: nm.growDuration, ease: nm.ease }
 
@@ -32,11 +46,8 @@ function NavMorphProxy({ role, from, to, fromRadius, toRadius, coverUrl, config 
         }
       : { duration: nm.growDuration * (1 - nm.coverFadeStart), ease: nm.ease }
 
-  // Shrinking proxy waits for growing proxy's crossfade to complete before fading
-  const opacityFadeDelay =
-    role === 'shrink'
-      ? nm.growDuration + nm.proxyFadeDuration // Wait for grow proxy to finish
-      : nm.growDuration // Start when arriving
+  const fadeDelay =
+    role === 'shrink' ? timeline.shrinkFadeStartS : timeline.growFadeStartS
 
   return (
     <motion.div
@@ -62,17 +73,20 @@ function NavMorphProxy({ role, from, to, fromRadius, toRadius, coverUrl, config 
         width: geo,
         height: geo,
         borderRadius: geo,
-        opacity: { delay: opacityFadeDelay, duration: nm.proxyFadeDuration, ease: 'linear' },
+        opacity: {
+          delay: fadeDelay,
+          duration: nm.proxyFadeDuration,
+          ease: 'linear',
+        },
       }}
       style={{
         position: 'absolute',
         overflow: 'hidden',
         // Solid fill, deliberately NOT the translucent container color and
         // NOT backdrop-filtered — two extra backdrop roots in flight is a
-        // compositing bill with wrong sampling mid-travel anyway. Behind
-        // the container it lands on sits the plain background page, so the
-        // solid morph proxy color with the container's border + shadow reads
-        // as the same surface at the crossfade.
+        // compositing bill with wrong sampling mid-travel anyway. The real
+        // container skin now stays visible beneath, so the solid proxy color
+        // with the container's border + shadow reads as the same surface.
         backgroundColor: 'var(--color-bg-morph-proxy)',
         border: `${config.containerBorderWidth} solid ${config.containerBorderColor}`,
         boxShadow: config.containerBoxShadow,
@@ -97,6 +111,7 @@ function NavMorphProxy({ role, from, to, fromRadius, toRadius, coverUrl, config 
 export default function NavMorphOverlay({ navMorph, config }) {
   const containerRadius = parseFloat(config.containerBorderRadius)
   const peekRadius = containerRadius * config.peek.scale
+  const timeline = buildNavMorphTimeline(config.navMorph)
 
   return (
     <div className="fixed inset-0" style={{ zIndex: 8, pointerEvents: 'none' }}>
@@ -109,6 +124,7 @@ export default function NavMorphOverlay({ navMorph, config }) {
         toRadius={peekRadius}
         coverUrl={getCoverUrl(navMorph.leavingStudy)}
         config={config}
+        timeline={timeline}
       />
       {/* Incoming study's cover: its peek rect -> container rect. */}
       <NavMorphProxy
@@ -119,6 +135,7 @@ export default function NavMorphOverlay({ navMorph, config }) {
         toRadius={containerRadius}
         coverUrl={getCoverUrl(navMorph.enteringStudy)}
         config={config}
+        timeline={timeline}
       />
     </div>
   )

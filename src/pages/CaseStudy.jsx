@@ -5,6 +5,7 @@ import { Maximize2 } from 'lucide-react'
 import { useCaseStudies, useNeighborPrefetch } from '../hooks/useCaseStudies'
 import { CASE_STUDY_LAYOUT } from '../config/caseStudyLayout'
 import { EXPAND, EXPAND_PHASE } from '../config/expandTransition'
+import { NAV_PHASE } from '../config/navMorphTimeline'
 import { useExpandMorph } from '../hooks/useExpandMorph.js'
 import { useNavMorph } from '../hooks/useNavMorph'
 import Shell from '../components/Shell'
@@ -106,7 +107,7 @@ export default function CaseStudy() {
   const nextSlug = nextStudy?.slug.current ?? null
   const currentStudy = caseStudies[currentIndex]
 
-  const { navMorph, blocksSuppressed, beginNavMorph } = useNavMorph({
+  const { navMorph, navPhase, blocksSuppressed, beginNavMorph } = useNavMorph({
     containerRef,
     prevPeekCardRef,
     nextPeekCardRef,
@@ -205,7 +206,7 @@ export default function CaseStudy() {
     }
   }
 
-  // ---- SHUFFLE LAYER (unchanged) ------------------------------------------
+  // ---- SHUFFLE LAYER ------------------------------------------------------
 
   // Peek slot offset for entry animation: just the reveal width since peeks
   // are at screen edges.
@@ -217,6 +218,8 @@ export default function CaseStudy() {
   // render's variants and slide when they should fade.
   const morphCustom = { dir: direction, morphing: Boolean(navMorph) }
 
+  // Both content swaps happen while an opaque proxy covers the container rect,
+  // so they are hard cuts. No delay arithmetic, nothing to keep in sync.
   const variants = {
     enter: (c) =>
       c.morphing
@@ -225,14 +228,7 @@ export default function CaseStudy() {
     center: { x: 0, opacity: 1 },
     exit: (c) =>
       c.morphing
-        ? {
-            x: 0,
-            opacity: 0,
-            transition: {
-              duration: COMPACT.navMorph.contentExitDuration,
-              ease: 'linear',
-            },
-          }
+        ? { x: 0, opacity: 0, transition: { duration: 0 } }
         : { x: c.dir > 0 ? -slotOffset : slotOffset, opacity: 0 },
   }
 
@@ -242,29 +238,33 @@ export default function CaseStudy() {
     damping: 34,
   }
 
-  // Incoming content during a nav morph: fade-in only, timed to be fully
-  // present just before the growing proxy fades out on top of it.
-  const navContentTransition = {
-    delay: COMPACT.navMorph.contentEnterDelay,
-    duration: COMPACT.navMorph.contentEnterDuration,
-    ease: COMPACT.navMorph.ease,
-  }
+  // During a morph, `animate` is driven off the hook's phase rather than a
+  // variant label — the reveal has exactly one owner.
+  const shuffleAnimate = navMorph
+    ? { x: 0, opacity: navPhase === NAV_PHASE.REVEAL ? 1 : 0 }
+    : 'center'
 
-  const shuffleTransition = navMorph ? navContentTransition : springTransition
+  const shuffleTransition = navMorph ? { duration: 0 } : springTransition
 
   // ---- SKIN (no block descendants, so it may freely fade and scale) --------
 
-  const skinAnimate =
-    isAnimating || navMorph
-      ? { scale: isAnimating ? EXPAND.skinExitScale : 1, opacity: 0 }
-      : { scale: 1, opacity: 1 }
+  // Container chrome is hidden for the flight: during it the proxies ARE the
+  // container, and a second empty frame behind them reads as a third card.
+  // Both cuts are covered by an opaque proxy — the shrink proxy departs from
+  // the container rect at t=0, and the grow proxy has arrived on it by the
+  // reveal — so neither is ever visible.
+  const chromeHidden = Boolean(navMorph) && navPhase !== NAV_PHASE.REVEAL
+
+  const skinAnimate = isAnimating
+    ? { scale: EXPAND.skinExitScale, opacity: 0 }
+    : { scale: 1, opacity: chromeHidden ? 0 : 1 }
 
   const skinTransition = isAnimating
     ? {
         scale: { duration: EXPAND.skinExitDuration, ease: EXPAND.ease },
         opacity: { duration: EXPAND.skinExitDuration, ease: EXPAND.ease },
       }
-    : { opacity: { duration: 0.12, ease: 'linear' } }
+    : { duration: 0 }
 
   return (
     <Shell
@@ -404,7 +404,7 @@ export default function CaseStudy() {
                         custom={morphCustom}
                         variants={variants}
                         initial="enter"
-                        animate="center"
+                        animate={shuffleAnimate}
                         exit="exit"
                         transition={shuffleTransition}
                         drag={isAnimating || navMorph ? false : 'x'}
@@ -473,10 +473,10 @@ export default function CaseStudy() {
                   height: COMPACT.containerHeight,
                   maxHeight: COMPACT.containerMaxHeight,
                   borderRadius: COMPACT.containerBorderRadius,
+                  zIndex: 7,
                   borderWidth: COMPACT.containerBorderWidth,
                   borderStyle: 'solid',
                   borderColor: COMPACT.containerBorderColor,
-                  zIndex: 7,
                   x: '-50%',
                   transformOrigin: 'top center',
                 }}

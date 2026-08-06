@@ -52,17 +52,12 @@ export const CASE_STUDY_LAYOUT = {
       // fading out, so the proxy arrives wearing the gray container skin
       // (border + shadow, no image) before the final crossfade.
       coverFadeStart: 0.05,
-      // Real container content: outgoing disappears instantly (the shrinking
-      // proxy carries the eye), incoming fades in AFTER the growing proxy
-      // arrives, so it crossfades with the proxy at the final position.
-      contentExitDuration: 0,
-      contentEnterDelay: 0.5,
-      contentEnterDuration: 0.25,
       // Uninvolved peek cards sliding to their new slots.
       peekSpring: { type: 'spring', stiffness: 320, damping: 26 },
       // State cleanup. Must cover the shrink proxy's delayed fade:
       // (growDuration + proxyFadeDuration + proxyFadeDuration) * 1000
       totalMs: 1000,
+      revealLeadMs: 40,
     },
   },
 
