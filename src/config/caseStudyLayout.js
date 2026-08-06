@@ -26,7 +26,7 @@ export const CASE_STUDY_LAYOUT = {
       scale: 0.6,
       fadeOutDuration: 0.3,
       magnetism: {
-        radius: 300,              // px — cursor distance before falloff starts
+        radius: 200,              // px — cursor distance before falloff starts
         peekGain: 60,             // ← EDIT THIS: px additional translateX at full strength
         leanGain: 8,              // degrees — rotation at full strength
         leanCap: 8,               // degrees — hard cap (prevent over-rotation)

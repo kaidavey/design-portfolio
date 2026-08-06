@@ -82,12 +82,10 @@ function NavMorphProxy({
       style={{
         position: 'absolute',
         overflow: 'hidden',
-        // Solid fill, deliberately NOT the translucent container color and
+        // Match the real container's background exactly (including gradient in dark mode).
         // NOT backdrop-filtered — two extra backdrop roots in flight is a
-        // compositing bill with wrong sampling mid-travel anyway. The real
-        // container skin now stays visible beneath, so the solid proxy color
-        // with the container's border + shadow reads as the same surface.
-        backgroundColor: 'var(--color-bg-morph-proxy)',
+        // compositing bill with wrong sampling mid-travel anyway.
+        background: config.containerBackgroundColor,
         border: `${config.containerBorderWidth} solid ${config.containerBorderColor}`,
         boxShadow: config.containerBoxShadow,
         willChange: 'top, left, width, height',
