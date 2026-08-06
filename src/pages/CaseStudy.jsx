@@ -30,7 +30,7 @@ const EXPANDED = CASE_STUDY_LAYOUT.expanded
 //
 //   ExpandMorphLayer          width / x / y / opacity   (expand only)
 //     AnimatePresence
-//       motion.div key={slug} variants + drag           (shuffle only)
+//       motion.div key={slug} variants                  (shuffle only)
 //         CaseStudyBody
 //
 // Merging any two of these reintroduces the transform-ownership conflict that
@@ -184,26 +184,6 @@ export default function CaseStudy() {
     if (useMorph && showCompact) beginNavMorph(1)
     setDirection(1)
     navigate(`/work/${nextSlug}`, { replace: true })
-  }
-
-  function handleDragEnd(_e, info) {
-    if (isAnimating || navMorph) return
-
-    const threshold = 80
-    const velocity = info.velocity.x
-
-    if (info.offset.x > threshold || velocity > 300) {
-      if (hasNeighbors) {
-        // Drag keeps the classic slide: the content is already displaced under
-        // the pointer, and a proxy departing from an undisplaced rect would
-        // visibly disagree with it.
-        navigateToPrev({ useMorph: false })
-      }
-    } else if (info.offset.x < -threshold || velocity < -300) {
-      if (hasNeighbors) {
-        navigateToNext({ useMorph: false })
-      }
-    }
   }
 
   // ---- SHUFFLE LAYER ------------------------------------------------------
@@ -407,13 +387,6 @@ export default function CaseStudy() {
                         animate={shuffleAnimate}
                         exit="exit"
                         transition={shuffleTransition}
-                        drag={isAnimating || navMorph ? false : 'x'}
-                        dragConstraints={{ left: 0, right: 0 }}
-                        dragElastic={0.2}
-                        onDragEnd={handleDragEnd}
-                        style={{ cursor: 'grab' }}
-                        onMouseDown={(e) => (e.currentTarget.style.cursor = 'grabbing')}
-                        onMouseUp={(e) => (e.currentTarget.style.cursor = 'grab')}
                       >
                         <BlockEntranceProvider suppress={blocksSuppressed}>
                           <CaseStudyBody
