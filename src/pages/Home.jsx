@@ -66,7 +66,7 @@ export default function Home() {
           <div className="text-lg text-gray-400">Hold tight...</div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 @md:grid-cols-2 gap-9 py-[48px]">
+        <div className="grid grid-cols-1 @md:grid-cols-2 gap-9 py-[36px]">
           {caseStudies.map((caseStudy) => (
             <Link
               key={caseStudy._id}
