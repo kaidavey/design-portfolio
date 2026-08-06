@@ -1,7 +1,8 @@
 import { forwardRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useTransform } from 'framer-motion'
 import imageUrlBuilder from '@sanity/image-url'
 import { client } from '../lib/sanity'
+import { useCursorMagnetism } from '../hooks/useCursorMagnetism'
 
 const builder = imageUrlBuilder(client)
  
@@ -82,6 +83,28 @@ const CaseStudyPeek = forwardRef(function CaseStudyPeek(
   const coverUrl = getCoverUrl(study)
   const slugKey = study?.slug?.current ?? 'empty'
   const interactive = Boolean(study) && !navMorph && !isAnimating
+
+  // Cursor magnetism: peek further + lean toward cursor + vertical tracking
+  const { peekX, peekY, leanRotate } = useCursorMagnetism(cardRef, side, config, {
+    isAnimating,
+    navMorph,
+    slug: slugKey,
+  })
+
+  // Combine magnetism peek with expand-exit slide
+  const slotX = useTransform(() => {
+    if (isAnimating) {
+      return side === 'prev' ? -200 : 200
+    }
+    return peekX.get()
+  })
+
+  const slotY = useTransform(() => {
+    if (isAnimating) {
+      return 0
+    }
+    return peekY.get()
+  })
  
   // ATTACH-ONLY REF — the fix for the morph dying after the first
   // navigation. AnimatePresence keeps the exiting card mounted after the
@@ -106,17 +129,15 @@ const CaseStudyPeek = forwardRef(function CaseStudyPeek(
         width: peek.revealWidth,
         height: peek.height,
         maxHeight: peek.maxHeight,
-        overflow: 'hidden',
+        overflow: 'visible',
         flexShrink: 0,
         pointerEvents: interactive ? 'auto' : 'none',
         cursor: interactive ? 'pointer' : 'default',
+        x: slotX,
+        y: slotY,
       }}
-      // Expand handoff: slide away and fade. Not the skin treatment — peeks do
-      // not scale to 1.02 and take no part in the expand morph.
-      animate={{
-        x: isAnimating ? (side === 'prev' ? -200 : 200) : 0,
-        opacity: isAnimating ? 0 : 1,
-      }}
+      // Expand handoff: fade out (x handled in style with magnetism)
+      animate={{ opacity: isAnimating ? 0 : 1 }}
       transition={{ duration: peek.fadeOutDuration, ease: nm.ease }}
       onClick={interactive ? onClick : undefined}
       role={study ? 'button' : undefined}
@@ -148,6 +169,7 @@ const CaseStudyPeek = forwardRef(function CaseStudyPeek(
               backgroundColor: '#F2F2F2',
               border: `${config.containerBorderWidth} solid ${config.containerBorderColor}`,
               boxShadow: config.containerBoxShadow,
+              rotateY: leanRotate,
             }}
           >
             {coverUrl && (

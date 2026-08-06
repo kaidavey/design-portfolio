@@ -25,6 +25,16 @@ export const CASE_STUDY_LAYOUT = {
       opacity: 1,
       scale: 0.6,
       fadeOutDuration: 0.3,
+      magnetism: {
+        radius: 300,              // px — cursor distance before falloff starts
+        peekGain: 60,             // ← EDIT THIS: px additional translateX at full strength
+        leanGain: 8,              // degrees — rotation at full strength
+        leanCap: 8,               // degrees — hard cap (prevent over-rotation)
+        distanceWeightY: 0.4,     // y-axis weight in distance calc (vs 1.0 for x)
+        verticalGain: 0.2,        // ← EDIT THIS: multiplier for cursor Y displacement (0.0–1.0)
+        springEnter: { stiffness: 120, damping: 28 },  // fast approach (sped up)
+        springExit: { stiffness: 120, damping: 28 },   // slow retreat (sped up)
+      },
     },
 
     // Navigation morph: peek cover grows into the container slot while the
