@@ -17,7 +17,7 @@ export const CASE_STUDY_LAYOUT = {
     contentPaddingLeft: '85px',
     contentGap: '40px',
     peek: {
-      revealWidth: '4vw',
+      revealWidth: '2vw',
       gap: '40px',
       height: '70vh',
       maxHeight: '700px',
