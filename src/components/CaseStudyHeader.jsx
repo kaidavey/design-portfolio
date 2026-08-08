@@ -26,25 +26,25 @@ export default function CaseStudyHeader({
       <nav className="flex items-center gap-2" aria-label="Breadcrumb">
         <Link
           to="/"
-          className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-[18px] hover:text-[#2F2F2F] transition-colors"
+          className="tracking-tight font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-muted)] text-[18px] hover:[color:var(--color-text-secondary)] transition-colors"
         >
           Home
         </Link>
-        <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-[18px]">
+        <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-muted)] text-[18px]">
           /
         </span>
         <Link
           to="/"
-          className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-[18px] hover:text-[#2F2F2F] transition-colors"
+          className="tracking-tight font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-muted)] text-[18px] hover:[color:var(--color-text-secondary)] transition-colors"
         >
           Work
         </Link>
         {title && (
           <>
-            <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-[#0000004D] text-[18px]">
+            <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-muted)] text-[18px]">
               /
             </span>
-            <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] text-black text-[18px] font-medium">
+            <span className="tracking-tight font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-primary)] text-[18px] font-medium">
               {title}
             </span>
           </>
