@@ -1,9 +1,6 @@
 import { skeletonRegistry } from './skeletons/blockSkeletons'
-import { CASE_STUDY_LAYOUT } from '../config/caseStudyLayout'
 
 export default function CaseStudySkeleton({ blockTypes }) {
-  const { pulseStaggerMs } = CASE_STUDY_LAYOUT.skeleton
-
   if (!blockTypes || !Array.isArray(blockTypes)) {
     return null
   }
@@ -22,10 +19,7 @@ export default function CaseStudySkeleton({ blockTypes }) {
           }
 
           return (
-            <div
-              key={block._key || index}
-              style={{ '--skeleton-delay': `${-index * pulseStaggerMs}ms` }}
-            >
+            <div key={block._key || index}>
               <SkeletonComponent block={block} />
             </div>
           )

@@ -9,7 +9,6 @@ export function SkeletonShape({ w = '100%', h = '1em', radius: customRadius, cla
       style={{
         width: w,
         height: h,
-        backgroundColor: 'var(--color-skeleton)',
         borderRadius: customRadius ?? radius,
         ...style,
       }}
