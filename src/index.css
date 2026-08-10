@@ -25,7 +25,7 @@
   --text-section-label--line-height: 1.286;
 
   /* Skeleton animation - slow sweep with long pause */
-  --animate-skeleton: skeleton-shimmer 5000ms ease-in-out infinite;
+  --animate-skeleton: skeleton-shimmer 8000ms ease-in-out infinite;
 }
 
 @keyframes skeleton-shimmer {
@@ -88,7 +88,7 @@
 
   /* Skeleton shimmer - light mode */
   --color-skeleton-base: rgba(0, 0, 0, 0.08);
-  --color-skeleton-highlight: rgba(0, 0, 0, 0.14);
+  --color-skeleton-highlight: rgba(0, 0, 0, 0.10);
 }
 
 /* Dark theme colors */

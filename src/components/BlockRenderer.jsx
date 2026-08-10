@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-  import { useSuppressBlockEntrance } from '../context/BlockEntranceContext'
+import { useSuppressBlockEntrance, useInstantBlockEntrance } from '../context/BlockEntranceContext'
 import { motion } from 'framer-motion'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import ProjectDetails from './blocks/ProjectDetails'
@@ -17,6 +17,7 @@ import Spacer from './blocks/Spacer'
 
 function AnimatedBlock({ children, isFirst = false }) {
   const suppress = useSuppressBlockEntrance()
+  const instant = useInstantBlockEntrance()
   const nodeRef = useRef(null)
   const { ref: observerRef, isVisible } = useScrollAnimation()
   const [hasBeenUnsuppressed, setHasBeenUnsuppressed] = useState(!suppress)
@@ -24,12 +25,13 @@ function AnimatedBlock({ children, isFirst = false }) {
   // Captured once at mount — later context changes must not retroactively
   // re-animate a block the user is already looking at.
   //
-  // 'instant'  render at final state, no entrance (on-screen at mount)
+  // 'instant'  render at final state, no entrance (on-screen at mount, or instant flag set)
   // 'immediate' animate in right away (existing isFirst behaviour)
   // 'scroll'   wait for the intersection observer
   // 'suppressed' waiting for suppress to become false
   const [mode, setMode] = useState(() => {
     if (suppress) return 'suppressed'
+    if (instant) return 'instant'
     return isFirst ? 'immediate' : 'scroll'
   })
 
@@ -41,9 +43,10 @@ function AnimatedBlock({ children, isFirst = false }) {
       if (isFirst) {
         setMode('immediate')
       } else if (nodeRef.current) {
-        const { top } = nodeRef.current.getBoundingClientRect()
-        // If on-screen, animate immediately; otherwise wait for scroll
-        setMode(top < window.innerHeight ? 'immediate' : 'scroll')
+        const rect = nodeRef.current.getBoundingClientRect()
+        const elementMiddle = rect.top + rect.height / 2
+        // Only animate immediately if element is 50% visible (middle point is on screen)
+        setMode(elementMiddle < window.innerHeight && elementMiddle > 0 ? 'immediate' : 'scroll')
       } else {
         setMode('scroll')
       }
@@ -88,7 +91,7 @@ function AnimatedBlock({ children, isFirst = false }) {
         ref={setRefs}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
+        transition={{ duration: 0.5, ease: 'easeOut', delay: 0.15 }}
       >
         {children}
       </motion.div>
@@ -100,7 +103,7 @@ function AnimatedBlock({ children, isFirst = false }) {
       ref={setRefs}
       initial={{ opacity: 0, y: 20 }}
       animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={{ duration: 0.5, ease: 'easeOut', delay: 0.15 }}
     >
       {children}
     </motion.div>

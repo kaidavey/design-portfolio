@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { useCaseStudy } from '../hooks/useCaseStudies'
 import { useDelayedLoading } from '../hooks/useDelayedLoading'
+import { BlockEntranceProvider } from '../context/BlockEntranceContext'
 import { urlFor } from '../lib/sanity'
 import BlockRenderer from './BlockRenderer'
 import CaseStudySkeleton from './CaseStudySkeleton'
@@ -54,10 +55,13 @@ export default function CaseStudyBody({ slug, expandButton }) {
 
   return (
     <div className="space-y-8">
-      <BlockRenderer
-        blocks={caseStudy.body}
-        expandButton={showSkeleton ? null : expandButton}
-      />
+      {/* Use instant mode - blocks appear immediately without fade-in after skeleton */}
+      <BlockEntranceProvider instant={true}>
+        <BlockRenderer
+          blocks={caseStudy.body}
+          expandButton={showSkeleton ? null : expandButton}
+        />
+      </BlockEntranceProvider>
     </div>
   )
 }
