@@ -101,7 +101,27 @@ export async function getCaseStudyBySlug(slug) {
         _type == "imageFull" => {
           image,
           caption
+        },
+
+        // spacer
+        _type == "spacer" => {
+          height
         }
+      }
+    }
+  `
+
+  return await client.fetch(query, { slug })
+}
+
+// Fetch case study shape (block types only, for skeleton rendering)
+export async function getCaseStudyShape(slug) {
+  const query = `
+    *[_type == "caseStudy" && slug.current == $slug][0]{
+      "blockTypes": body[]{
+        _type,
+        _key,
+        _type == "spacer" => { height }
       }
     }
   `
@@ -129,6 +149,7 @@ export async function getAllCaseStudies() {
 
 // Simple cache for prefetching
 const caseStudyCache = new Map()
+const shapeCache = new Map()
 
 export function getCachedCaseStudy(slug) {
   return caseStudyCache.get(slug)
@@ -136,6 +157,37 @@ export function getCachedCaseStudy(slug) {
 
 export function setCachedCaseStudy(slug, data) {
   caseStudyCache.set(slug, data)
+}
+
+export function getCachedShape(slug) {
+  return shapeCache.get(slug)
+}
+
+export function setCachedShape(slug, data) {
+  shapeCache.set(slug, data)
+}
+
+// Debug utilities - expose cache clearing on window
+export function clearAllCaches() {
+  console.log('[Cache] Clearing all caches')
+  caseStudyCache.clear()
+  shapeCache.clear()
+}
+
+export function clearCacheForSlug(slug) {
+  console.log('[Cache] Clearing cache for', slug)
+  caseStudyCache.delete(slug)
+  shapeCache.delete(slug)
+}
+
+// Expose to window for debugging
+if (typeof window !== 'undefined') {
+  window.__clearCaseStudyCache = clearAllCaches
+  window.__clearCacheForSlug = clearCacheForSlug
+  window.__inspectCache = () => ({
+    bodyCache: Array.from(caseStudyCache.keys()),
+    shapeCache: Array.from(shapeCache.keys()),
+  })
 }
 
 export async function prefetchCaseStudy(slug) {

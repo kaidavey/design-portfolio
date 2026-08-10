@@ -23,6 +23,28 @@
 
   --text-section-label: clamp(0.8125rem, 0.625rem + 0.2083vw, 0.875rem);  /* 13→14px — Section labels (uppercase) */
   --text-section-label--line-height: 1.286;
+
+  /* Skeleton animation */
+  --animate-skeleton: skeleton-pulse 2400ms cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+/* Negative delay is set per-block as a CSS custom property so every shape
+   inside one block shares a phase, and blocks drift out of phase with each
+   other. Inherited, so it only needs to be set once on the block wrapper. */
+.skeleton-shape {
+  animation-delay: var(--skeleton-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shape {
+    animation: none;
+    opacity: 0.6;
+  }
 }
 
 :root {
@@ -50,6 +72,9 @@
   --shadow-container-inset: rgba(255, 255, 255, 0.9) -2px 2px 0px inset, rgba(0, 0, 0, 0.04) 0px 10px 20px;
   --shadow-block-inset: #ffffff -1px 2px 0px inset;
   --shadow-button-inset: #ffffff 0px 1px 0px inset;
+
+  /* Skeleton shimmer - light mode */
+  --color-skeleton: rgba(0, 0, 0, 0.12);
 }
 
 /* Dark theme colors */
@@ -72,6 +97,9 @@
   --shadow-container-inset: #ffffff38 -2px 2px 0px inset, #00000080 2px -2px 0px inset;
   --shadow-block-inset: #ffffff4d -1px 2px 0px inset, #00000080 1px -1px 0px inset;
   --shadow-button-inset: #ffffff4d -1px 1px 0px inset;
+
+  /* Skeleton shimmer - dark mode */
+  --color-skeleton: rgba(255, 255, 255, 0.15);
 }
 
 *,

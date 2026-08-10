@@ -65,4 +65,25 @@ export const CASE_STUDY_LAYOUT = {
     contentWidth: '60%',
     contentMaxWidth: '907px',
   },
+
+  skeleton: {
+    // Pulse — MIRRORED in @keyframes skeleton-pulse in src/index.css
+    // Do not try to drive the keyframe from JS; it defeats compositing.
+    // If you change pulseDuration or pulseFloor, update the CSS keyframe to match.
+    pulseDuration: '2400ms',
+    pulseFloor: 0.35,        // bottom of the pulse; below ~0.3 reads as broken, not loading
+    pulseStaggerMs: 180,     // applied as a NEGATIVE animation-delay per block index
+
+    // Appearance
+    // fill color now lives in CSS as --color-skeleton (theme-aware)
+    radius: '6px',
+    imageRadius: '12px',
+
+    // Timing guards
+    delayInMs: 0,            // TEMP: set to 0 to always show skeleton (normally 200)
+    minVisibleMs: 2000,      // TEMP: hold for 2s to see it clearly (normally 400)
+
+    // Accessibility
+    reducedMotionOpacity: 0.6,
+  },
 }
