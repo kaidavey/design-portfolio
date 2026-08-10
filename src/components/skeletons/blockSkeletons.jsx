@@ -9,8 +9,8 @@ function ProjectDetailsSkeleton() {
     <div className="flex flex-col @md:flex-row items-start gap-5 justify-between w-full">
       {Array.from({ length: 4 }).map((_, index) => (
         <div key={index} className="flex flex-col items-start gap-2">
-          <SkeletonShape w="60px" h="0.8125rem" />
-          <SkeletonShape w="100px" h="0.9375rem" />
+          <SkeletonShape w="60px" h="1.0446rem" />
+          <SkeletonShape w="100px" h="1.25rem" />
         </div>
       ))}
     </div>
@@ -22,7 +22,7 @@ function HeroSkeleton() {
   return (
     <div className="flex items-center gap-4 w-full">
       <SkeletonShape w="50px" h="50px" className="shrink-0" />
-      <SkeletonShape w="280px" h="1.1875rem" />
+      <SkeletonShape w="280px" h="1.745rem" />
     </div>
   )
 }
@@ -32,7 +32,7 @@ function TextImageRowSkeleton() {
   return (
     <div className="flex flex-col @lg:flex-row items-start @lg:items-center gap-8 @lg:justify-between w-full">
       <div className="flex flex-col items-start gap-4 flex-1 w-full">
-        <SkeletonShape w="200px" h="1.1875rem" />
+        <SkeletonShape w="200px" h="1.484rem" />
         <SkeletonLines count={3} />
       </div>
       <div className="flex-1 w-full @lg:w-auto @lg:max-w-md">
@@ -50,7 +50,7 @@ function ImageRowSkeleton() {
       {Array.from({ length: count }).map((_, index) => (
         <div key={index} className="flex flex-col items-start gap-4 flex-1 w-full">
           <SkeletonShape w="100%" h="auto" radius={imageRadius} style={{ aspectRatio: '4 / 3' }} />
-          <SkeletonShape w="120px" h="0.8125rem" />
+          <SkeletonShape w="120px" h="1.0446rem" />
         </div>
       ))}
     </div>
@@ -67,7 +67,7 @@ function ImageTextGridSkeleton() {
           <SkeletonShape w="100%" h="auto" radius={imageRadius} style={{ aspectRatio: '4 / 3' }} />
           <div className="flex overflow-clip rounded-[20px] flex-col items-start gap-9 p-6 self-stretch [background:var(--color-bg-block)] border border-solid [border-color:var(--color-border-block)]">
             <div className="flex flex-col items-start gap-2 self-stretch">
-              <SkeletonShape w="140px" h="0.9375rem" />
+              <SkeletonShape w="140px" h="1.25rem" />
               <SkeletonLines count={2} />
             </div>
           </div>
@@ -82,8 +82,8 @@ function CallToActionSkeleton() {
   return (
     <div className="flex flex-col @md:flex-row overflow-clip rounded-[20px] items-start @md:items-center gap-4 px-6 py-5 justify-between w-full [background:var(--color-bg-block)] border border-solid [border-color:var(--color-border-block)]">
       <div className="flex flex-col items-start gap-2">
-        <SkeletonShape w="180px" h="0.9375rem" />
-        <SkeletonShape w="240px" h="0.9375rem" />
+        <SkeletonShape w="180px" h="1.25rem" />
+        <SkeletonShape w="240px" h="1.25rem" />
       </div>
       <div className="flex items-center gap-6">
         <SkeletonShape w="100px" h="32px" radius="12px" />
@@ -97,13 +97,13 @@ function TextBlockCenteredSkeleton() {
   return (
     <div className="flex overflow-clip rounded-[20px] flex-col items-center gap-4 py-12 px-6 @md:px-25 justify-center [background:var(--color-bg-block)] border border-solid [border-color:var(--color-border-block)] w-full">
       <div className="flex flex-col items-center gap-1 w-full">
-        <SkeletonShape w="80px" h="0.8125rem" />
-        <SkeletonShape w="200px" h="1.1875rem" />
+        <SkeletonShape w="80px" h="1.0446rem" />
+        <SkeletonShape w="200px" h="1.484rem" />
       </div>
       <div className="flex flex-col items-center gap-2 max-w-prose w-full">
-        <SkeletonShape w="90%" h="0.9375rem" />
-        <SkeletonShape w="85%" h="0.9375rem" />
-        <SkeletonShape w="70%" h="0.9375rem" />
+        <SkeletonShape w="90%" h="1.25rem" />
+        <SkeletonShape w="85%" h="1.25rem" />
+        <SkeletonShape w="70%" h="1.25rem" />
       </div>
     </div>
   )
@@ -121,7 +121,7 @@ function TextCardRowSkeleton() {
         >
           <SkeletonShape w="24px" h="24px" className="shrink-0" />
           <div className="flex flex-col items-start gap-2 self-stretch">
-            <SkeletonShape w="140px" h="0.9375rem" />
+            <SkeletonShape w="140px" h="1.25rem" />
             <SkeletonLines count={2} />
           </div>
         </div>
@@ -135,8 +135,8 @@ function TextColumnsSkeleton() {
   return (
     <div className="flex flex-col @md:flex-row items-start justify-between w-full gap-6">
       <div className="flex items-start gap-1 flex-col flex-1 w-full">
-        <SkeletonShape w="80px" h="0.8125rem" />
-        <SkeletonShape w="180px" h="1.1875rem" />
+        <SkeletonShape w="80px" h="1.0446rem" />
+        <SkeletonShape w="180px" h="1.484rem" />
       </div>
       <div className="flex items-start flex-col gap-9 flex-1 w-full">
         <div className="flex flex-col items-start gap-2 w-full">
@@ -152,8 +152,8 @@ function TextRowTwoColumnSkeleton() {
   return (
     <div className="flex flex-col items-start gap-4 w-full">
       <div className="flex flex-col items-start gap-1 w-full">
-        <SkeletonShape w="80px" h="0.8125rem" />
-        <SkeletonShape w="200px" h="1.1875rem" />
+        <SkeletonShape w="80px" h="1.0446rem" />
+        <SkeletonShape w="200px" h="1.484rem" />
       </div>
       <div className="flex flex-col @md:flex-row items-start w-full gap-6">
         <div className="flex flex-col items-start gap-4 flex-1">
@@ -174,7 +174,7 @@ function ImageFullSkeleton() {
       <div className="w-full overflow-hidden rounded-xl">
         <SkeletonShape w="100%" h="auto" radius="12px" style={{ aspectRatio: '16 / 9' }} />
       </div>
-      <SkeletonShape w="180px" h="0.8125rem" />
+      <SkeletonShape w="180px" h="1.0446rem" />
     </div>
   )
 }

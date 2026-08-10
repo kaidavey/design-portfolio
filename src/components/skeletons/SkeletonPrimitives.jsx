@@ -32,7 +32,7 @@ export function SkeletonLines({ count = 3, widths }) {
           <SkeletonShape
             key={index}
             w={width}
-            h="0.9375rem"
+            h="1.25rem"
           />
         )
       })}
