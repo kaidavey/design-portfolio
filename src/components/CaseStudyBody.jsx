@@ -53,8 +53,8 @@ export default function CaseStudyBody({ slug, expandButton }) {
 
   return (
     <div className="space-y-8">
-      {/* Use instant mode - blocks appear immediately without fade-in after skeleton */}
-      <BlockEntranceProvider instant={true}>
+      {/* Blocks animate in with blur effect when replacing skeleton */}
+      <BlockEntranceProvider>
         <BlockRenderer
           blocks={caseStudy.body}
           expandButton={showSkeleton ? null : expandButton}

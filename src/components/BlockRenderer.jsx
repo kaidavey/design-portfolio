@@ -64,6 +64,19 @@ function AnimatedBlock({ children, isFirst = false }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // For blocks that start in 'scroll' mode, check if they're already on screen
+  // and switch to 'immediate' mode to avoid the upward movement (blur only)
+  useLayoutEffect(() => {
+    if (mode !== 'scroll' || !nodeRef.current) return
+    const rect = nodeRef.current.getBoundingClientRect()
+    const elementMiddle = rect.top + rect.height / 2
+    // If element is already 50% visible, use immediate mode (blur only, no y movement)
+    if (elementMiddle < window.innerHeight && elementMiddle > 0) {
+      setMode('immediate')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   function setRefs(node) {
     nodeRef.current = node
     if (observerRef) observerRef.current = node
@@ -71,7 +84,7 @@ function AnimatedBlock({ children, isFirst = false }) {
 
   if (mode === 'suppressed') {
     return (
-      <motion.div ref={setRefs} initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }} animate={{ opacity: 0, y: 20, filter: 'blur(8px)' }}>
+      <motion.div ref={setRefs} initial={{ opacity: 0, filter: 'blur(8px)' }} animate={{ opacity: 0, filter: 'blur(8px)' }}>
         {children}
       </motion.div>
     )
@@ -79,7 +92,7 @@ function AnimatedBlock({ children, isFirst = false }) {
 
   if (mode === 'instant') {
     return (
-      <motion.div ref={setRefs} initial={false} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}>
+      <motion.div ref={setRefs} initial={false} animate={{ opacity: 1, filter: 'blur(0px)' }}>
         {children}
       </motion.div>
     )
@@ -89,9 +102,9 @@ function AnimatedBlock({ children, isFirst = false }) {
     return (
       <motion.div
         ref={setRefs}
-        initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
-        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-        transition={{ duration: 0.5, ease: 'easeOut', delay: 0.15 }}
+        initial={{ opacity: 0, filter: 'blur(8px)' }}
+        animate={{ opacity: 1, filter: 'blur(0px)' }}
+        transition={{ duration: 0.5, ease: 'easeOut', delay: 0.25 }}
       >
         {children}
       </motion.div>
@@ -103,7 +116,7 @@ function AnimatedBlock({ children, isFirst = false }) {
       ref={setRefs}
       initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
       animate={isVisible ? { opacity: 1, y: 0, filter: 'blur(0px)' } : { opacity: 0, y: 20, filter: 'blur(8px)' }}
-      transition={{ duration: 0.5, ease: 'easeOut', delay: 0.15 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
     >
       {children}
     </motion.div>
