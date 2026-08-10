@@ -71,7 +71,7 @@ function AnimatedBlock({ children, isFirst = false }) {
 
   if (mode === 'suppressed') {
     return (
-      <motion.div ref={setRefs} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 0, y: 20 }}>
+      <motion.div ref={setRefs} initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }} animate={{ opacity: 0, y: 20, filter: 'blur(8px)' }}>
         {children}
       </motion.div>
     )
@@ -79,7 +79,7 @@ function AnimatedBlock({ children, isFirst = false }) {
 
   if (mode === 'instant') {
     return (
-      <motion.div ref={setRefs} initial={false} animate={{ opacity: 1, y: 0 }}>
+      <motion.div ref={setRefs} initial={false} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}>
         {children}
       </motion.div>
     )
@@ -89,8 +89,8 @@ function AnimatedBlock({ children, isFirst = false }) {
     return (
       <motion.div
         ref={setRefs}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
         transition={{ duration: 0.5, ease: 'easeOut', delay: 0.15 }}
       >
         {children}
@@ -101,8 +101,8 @@ function AnimatedBlock({ children, isFirst = false }) {
   return (
     <motion.div
       ref={setRefs}
-      initial={{ opacity: 0, y: 20 }}
-      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
+      animate={isVisible ? { opacity: 1, y: 0, filter: 'blur(0px)' } : { opacity: 0, y: 20, filter: 'blur(8px)' }}
       transition={{ duration: 0.5, ease: 'easeOut', delay: 0.15 }}
     >
       {children}
