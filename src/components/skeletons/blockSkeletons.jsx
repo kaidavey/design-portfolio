@@ -77,7 +77,7 @@ function ImageTextGridSkeleton() {
   )
 }
 
-// CallToAction - Card with title, description, and button
+// CallToAction - Card with title, description, and button (no X button in skeleton)
 function CallToActionSkeleton() {
   return (
     <div className="flex flex-col @md:flex-row overflow-clip rounded-[20px] items-start @md:items-center gap-4 px-6 py-5 justify-between w-full [background:var(--color-bg-block)] border border-solid [border-color:var(--color-border-block)]">
@@ -87,7 +87,6 @@ function CallToActionSkeleton() {
       </div>
       <div className="flex items-center gap-6">
         <SkeletonShape w="100px" h="32px" radius="12px" />
-        <SkeletonShape w="14px" h="0.9375rem" />
       </div>
     </div>
   )

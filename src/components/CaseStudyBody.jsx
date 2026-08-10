@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'
-import { X } from 'lucide-react'
+import { useEffect } from 'react'
 import { useCaseStudy } from '../hooks/useCaseStudies'
 import { useDelayedLoading } from '../hooks/useDelayedLoading'
 import { BlockEntranceProvider } from '../context/BlockEntranceContext'
@@ -9,7 +8,6 @@ import CaseStudySkeleton from './CaseStudySkeleton'
 
 export default function CaseStudyBody({ slug, expandButton }) {
   const { caseStudy, shape, loading, error } = useCaseStudy(slug)
-  const [showViewSolution, setShowViewSolution] = useState(true)
 
   const showSkeleton = useDelayedLoading(loading) && shape != null
 
