@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Button from '../core/Button'
 
 export default function CallToAction({ block }) {
   const [isVisible, setIsVisible] = useState(true)
@@ -18,14 +19,9 @@ export default function CallToAction({ block }) {
         </div>
       </div>
       <div className="flex items-center gap-6">
-        <a
-          href={block.buttonLink || '#'}
-          className="flex overflow-clip rounded-xl flex-col items-start gap-1.5 px-3.5 py-1.5 [box-shadow:var(--shadow-button-inset)] bg-origin-border border border-solid [border-color:var(--color-border-button)] [background:var(--color-bg-button)] transition-all duration-300"
-        >
-          <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-button)] text-body leading-[1.25rem]">
-            {block.buttonText}
-          </div>
-        </a>
+        <Button href={block.buttonLink || '#'}>
+          {block.buttonText}
+        </Button>
         <button
           onClick={() => setIsVisible(false)}
           className="flex items-center justify-center [color:var(--color-text-muted)] hover:opacity-70 transition-opacity duration-200 cursor-pointer"
