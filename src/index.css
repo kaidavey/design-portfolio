@@ -73,6 +73,7 @@
   --color-bg-morph-proxy: #f2f2f2;
   --color-bg-block: #f2f2f2;
   --color-bg-button: linear-gradient(in oklab 0deg, oklab(95.5% 0 0) -8.17%, oklab(97.5% 0 0) 77.61%);
+  --color-bg-button-pressed: linear-gradient(in oklab 0deg, oklab(91.9% 0 0) -8.17%, oklab(96.4% 0 0) 77.61%);
   --color-shimmer-button: rgb(255 255 255 / 1);
   --color-border: #d8d8d8;
   --color-border-block: #dedede;
@@ -86,6 +87,7 @@
   --shadow-container-inset: rgba(255, 255, 255, 0.9) -2px 2px 0px inset, rgba(0, 0, 0, 0.04) 0px 10px 20px;
   --shadow-block-inset: #ffffff -1px 2px 0px inset;
   --shadow-button-inset: #ffffff 0px 1px 0px inset;
+  --shadow-button-pressed: #0000001A -1px 1px 0px inset;
 
   /* Skeleton shimmer - light mode */
   --color-skeleton-base: rgba(0, 0, 0, 0.08);
@@ -100,6 +102,7 @@
   --color-bg-morph-proxy: #1e1e1e;
   --color-bg-block: linear-gradient(in oklab 180deg, oklab(32.5% 0 0) 0%, oklab(25.2% 0 0) 100%);
   --color-bg-button: #343434;
+  --color-bg-button-pressed: #2a2a2a;
   --color-shimmer-button: rgb(255 255 255 / 0.10);
   --color-border: #222222;
   --color-border-block: #222222;
@@ -113,6 +116,7 @@
   --shadow-container-inset: #ffffff38 -2px 2px 0px inset, #00000080 2px -2px 0px inset;
   --shadow-block-inset: #ffffff4d -1px 2px 0px inset, #00000080 1px -1px 0px inset;
   --shadow-button-inset: #ffffff4d -1px 1px 0px inset;
+  --shadow-button-pressed: #00000066 -1px 1px 0px inset;
 
   /* Skeleton shimmer - dark mode */
   --color-skeleton-base: rgba(255, 255, 255, 0.08);

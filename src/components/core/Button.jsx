@@ -15,7 +15,7 @@ export default function Button({
   className = '',
   ...props
 }) {
-  const baseClasses = "group relative flex overflow-clip rounded-xl flex-col items-start gap-1.5 px-3.5 py-1.5 [box-shadow:var(--shadow-button-inset)] bg-origin-border border border-solid [border-color:var(--color-border-button)] [background:var(--color-bg-button)] transition-all duration-300"
+  const baseClasses = "group relative flex overflow-clip rounded-xl flex-col items-start gap-1.5 px-3.5 py-1.5 [box-shadow:var(--shadow-button-inset)] bg-origin-border border border-solid [border-color:var(--color-border-button)] [background:var(--color-bg-button)] transition-all duration-300 active:[box-shadow:var(--shadow-button-pressed)] active:[background:var(--color-bg-button-pressed)]"
 
   const textClasses = "relative tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-button)] text-body leading-[1.25rem]"
 
