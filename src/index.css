@@ -73,6 +73,7 @@
   --color-bg-morph-proxy: #f2f2f2;
   --color-bg-block: #f2f2f2;
   --color-bg-button: linear-gradient(in oklab 0deg, oklab(95.5% 0 0) -8.17%, oklab(97.5% 0 0) 77.61%);
+  --color-shimmer-button: rgb(255 255 255 / 1);
   --color-border: #d8d8d8;
   --color-border-block: #dedede;
   --color-border-button: #e0e0e0;
@@ -99,6 +100,7 @@
   --color-bg-morph-proxy: #1e1e1e;
   --color-bg-block: linear-gradient(in oklab 180deg, oklab(32.5% 0 0) 0%, oklab(25.2% 0 0) 100%);
   --color-bg-button: #343434;
+  --color-shimmer-button: rgb(255 255 255 / 0.10);
   --color-border: #222222;
   --color-border-block: #222222;
   --color-border-button: #222222;
