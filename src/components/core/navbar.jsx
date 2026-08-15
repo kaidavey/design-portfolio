@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../../contexts/ThemeContext'
-import Icon from './Icon'
+import AnimatedIcon from './AnimatedIcon'
 
 export default function NavBar() {
   const navigate = useNavigate()
@@ -80,14 +80,13 @@ export function NavButton({ iconId, onClick, isActive = false, label, className 
     <button
       onClick={onClick}
       aria-label={label}
-      className={`w-10 h-10 flex justify-center items-center transition-all ${
-        isActive
-          ? ''
-          : 'hover:opacity-70'
-      } ${className}`}
+      className={`w-10 h-10 flex justify-center items-center ${className}`}
       style={{ overflow: 'visible' }}
     >
-      <Icon id={iconId} size={24} className="shrink-0" style={{ color: iconColor }} />
+      <AnimatedIcon id={iconId} size={24} className="shrink-0" style={{ color: iconColor }} />
     </button>
   )
 }
+
+
+
