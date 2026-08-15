@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useCaseStudies } from '../../hooks/useCaseStudies'
 import AnimatedIcon from './AnimatedIcon'
+import GlassSurface from './liquid-glass/LiquidGlass'
 
 export default function NavBar() {
   const navigate = useNavigate()
@@ -30,7 +31,7 @@ export default function NavBar() {
 
   return (
     <div
-      className={`flex rounded-full items-center justify-center gap-2.5 p-3 border-solid [border-width:1.7px] bg-origin-border antialiased transition-colors duration-300 ${
+      className={`flex rounded-full items-center justify-center gap-2.25 p-3 border-solid [border-width:1.7px] bg-origin-border antialiased transition-colors duration-300 ${
         isDark ? 'border-[#222222]' : 'border-[#EAEAEA]'
       }`}
       style={{
@@ -84,12 +85,12 @@ export function NavButton({ iconId, onClick, isActive = false, label, className 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       aria-label={label}
-      className={`w-11 h-11 flex justify-center items-center ${className}`}
+      className={`w-9.5 h-9.5 flex justify-center items-center ${className}`}
       style={{ overflow: 'visible', position: 'relative', zIndex: 1 }}
     >
       <AnimatedIcon
         id={iconId}
-        size={26}
+        size={21}
         className="shrink-0"
         style={{ color: iconColor }}
         isHovered={isHovered}

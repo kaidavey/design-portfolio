@@ -24,15 +24,41 @@ export default function ThemeToggleAnimation({ isDark, size, isHovered }) {
     },
   }
 
-  // Sun animation: rotation wiggle
-  const sunVariants = {
+  // Sun animation: rotation + center scale + ray opacity
+  const sunSvgVariants = {
     normal: {
       rotate: 0,
     },
     animate: {
-      rotate: [0, 15, -10, 8, -5, 0],
+      rotate: 12,
       transition: {
-        duration: 1.2,
+        duration: 1,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+  }
+
+  const sunCenterVariants = {
+    normal: {
+      scale: 1,
+    },
+    animate: {
+      scale: [1, 1.18, 1],
+      transition: {
+        duration: 1,
+        ease: "easeInOut",
+      },
+    },
+  }
+
+  const sunRayVariants = {
+    normal: {
+      opacity: 1,
+    },
+    animate: {
+      opacity: [1, 0.7, 1],
+      transition: {
+        duration: 1,
         ease: "easeInOut",
       },
     },
@@ -62,7 +88,7 @@ export default function ThemeToggleAnimation({ isDark, size, isHovered }) {
           />
         </motion.svg>
       ) : (
-        /* DARK MODE: Sun icon - white color */
+        /* DARK MODE: Sun icon - white color with multi-layer animation */
         <motion.svg
           width={size}
           height={size}
@@ -73,18 +99,25 @@ export default function ThemeToggleAnimation({ isDark, size, isHovered }) {
           strokeWidth="1.5"
           animate={shouldAnimate ? "animate" : "normal"}
           initial="normal"
-          variants={sunVariants}
+          variants={sunSvgVariants}
           style={{ overflow: 'visible', display: 'block' }}
         >
-          <circle cx="12" cy="12" r="4" stroke="#FFFFFF" fill="none" />
-          <path d="M12 2v2" stroke="#FFFFFF" />
-          <path d="M12 20v2" stroke="#FFFFFF" />
-          <path d="m4.93 4.93 1.41 1.41" stroke="#FFFFFF" />
-          <path d="m17.66 17.66 1.41 1.41" stroke="#FFFFFF" />
-          <path d="M2 12h2" stroke="#FFFFFF" />
-          <path d="M20 12h2" stroke="#FFFFFF" />
-          <path d="m6.34 17.66-1.41 1.41" stroke="#FFFFFF" />
-          <path d="m19.07 4.93-1.41 1.41" stroke="#FFFFFF" />
+          <motion.circle
+            cx="12"
+            cy="12"
+            r="4"
+            stroke="#FFFFFF"
+            fill="none"
+            variants={sunCenterVariants}
+          />
+          <motion.path d="M12 2v2" stroke="#FFFFFF" variants={sunRayVariants} />
+          <motion.path d="M12 20v2" stroke="#FFFFFF" variants={sunRayVariants} />
+          <motion.path d="m4.93 4.93 1.41 1.41" stroke="#FFFFFF" variants={sunRayVariants} />
+          <motion.path d="m17.66 17.66 1.41 1.41" stroke="#FFFFFF" variants={sunRayVariants} />
+          <motion.path d="M2 12h2" stroke="#FFFFFF" variants={sunRayVariants} />
+          <motion.path d="M20 12h2" stroke="#FFFFFF" variants={sunRayVariants} />
+          <motion.path d="m6.34 17.66-1.41 1.41" stroke="#FFFFFF" variants={sunRayVariants} />
+          <motion.path d="m19.07 4.93-1.41 1.41" stroke="#FFFFFF" variants={sunRayVariants} />
         </motion.svg>
       )}
     </div>
