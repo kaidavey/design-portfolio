@@ -87,7 +87,7 @@ export function NavButton({ iconId, onClick, isActive = false, label, className 
       } ${className}`}
       style={{ overflow: 'visible' }}
     >
-      <Icon id={iconId} size={20} className="shrink-0" style={{ color: iconColor }} />
+      <Icon id={iconId} size={24} className="shrink-0" style={{ color: iconColor }} />
     </button>
   )
 }
