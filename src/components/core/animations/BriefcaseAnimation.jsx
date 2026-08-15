@@ -1,10 +1,14 @@
 import { motion } from "motion/react"
 
-export default function AnimatedBriefcase({ id, size, className, style, isHovered }) {
+/**
+ * Animated briefcase icon with opening flap animation
+ * Shows outlined version with flap animation on hover, filled version when active
+ */
+export default function BriefcaseAnimation({ id, size, style, isHovered }) {
   const isFilled = id === 'briefcase-filled'
   const shouldAnimate = !isFilled && isHovered
 
-  const variants = {
+  const flapVariants = {
     normal: {
       scaleY: 1,
       originX: "50%",
@@ -25,7 +29,6 @@ export default function AnimatedBriefcase({ id, size, className, style, isHovere
 
   return (
     <svg
-      className={className}
       width={size}
       height={size}
       viewBox="0 0 24 24"
@@ -46,7 +49,7 @@ export default function AnimatedBriefcase({ id, size, className, style, isHovere
           />
         </>
       ) : (
-        /* Outlined briefcase with animated flap - inline SVG, no wrapper */
+        /* Outlined briefcase with animated flap */
         <>
           <path
             d="M8.48173 6.725V4.832C8.48173 4.234 8.96673 3.75 9.56373 3.75H14.7037C15.3007 3.75 15.7857 4.234 15.7857 4.832V6.725M8.48173 6.725H15.7857M8.48173 6.725H4.71973C3.06273 6.725 1.71973 8.069 1.71973 9.725V17.25C1.71973 18.907 3.06273 20.25 4.71973 20.25H19.2767C20.9337 20.25 22.2767 18.907 22.2767 17.25V9.725C22.2767 8.069 20.9337 6.725 19.2767 6.725H15.7857"
@@ -65,7 +68,7 @@ export default function AnimatedBriefcase({ id, size, className, style, isHovere
             strokeWidth="1.5"
             animate={shouldAnimate ? "animate" : "normal"}
             initial="normal"
-            variants={variants}
+            variants={flapVariants}
           />
         </>
       )}

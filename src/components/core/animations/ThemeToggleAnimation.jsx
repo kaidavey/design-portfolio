@@ -1,10 +1,14 @@
 import { motion } from "motion/react"
 
-export default function AnimatedThemeIcon({ isDark, size, className, style, isHovered }) {
+/**
+ * Animated theme toggle icon
+ * Shows moon (dark #282828) in light mode with float/scale animation
+ * Shows sun (white #FFFFFF) in dark mode with rotation animation
+ */
+export default function ThemeToggleAnimation({ isDark, size, isHovered }) {
   const shouldAnimate = isHovered
 
-  // Moon animation (shown in LIGHT mode)
-  // SVG level: subtle float + scale only
+  // Moon animation: subtle float + scale
   const moonSvgVariants = {
     normal: {
       y: 0,
@@ -20,7 +24,7 @@ export default function AnimatedThemeIcon({ isDark, size, className, style, isHo
     },
   }
 
-  // Sun animation (shown in DARK mode)
+  // Sun animation: rotation wiggle
   const sunVariants = {
     normal: {
       rotate: 0,
@@ -37,7 +41,7 @@ export default function AnimatedThemeIcon({ isDark, size, className, style, isHo
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
       {!isDark ? (
-        /* LIGHT MODE: Show Moon icon - dark color */
+        /* LIGHT MODE: Moon icon - dark color */
         <motion.svg
           width={size}
           height={size}
@@ -58,7 +62,7 @@ export default function AnimatedThemeIcon({ isDark, size, className, style, isHo
           />
         </motion.svg>
       ) : (
-        /* DARK MODE: Show Sun icon - white color */
+        /* DARK MODE: Sun icon - white color */
         <motion.svg
           width={size}
           height={size}
