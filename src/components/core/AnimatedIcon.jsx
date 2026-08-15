@@ -1,6 +1,7 @@
 import { motion, useAnimation } from "motion/react"
 import { useCallback } from "react"
 import Icon from './Icon'
+import AnimatedBriefcase from './AnimatedBriefcase'
 
 const iconAnimations = {
   'hand-wave': {
@@ -21,6 +22,11 @@ const iconAnimations = {
 }
 
 export default function AnimatedIcon({ id, size, className, style, ...props }) {
+  // Route briefcase to specialized component with path animations
+  if (id === 'briefcase-outlined') {
+    return <AnimatedBriefcase size={size} className={className} style={style} />
+  }
+
   const controls = useAnimation()
   const animation = iconAnimations[id]
 

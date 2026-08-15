@@ -30,7 +30,7 @@ export default function NavBar() {
 
   return (
     <div
-      className={`flex rounded-full items-center justify-center gap-3 p-3 border-solid [border-width:1.7px] bg-origin-border antialiased transition-colors duration-300 ${
+      className={`flex rounded-full items-center justify-center gap-2.5 p-3 border-solid [border-width:1.7px] bg-origin-border antialiased transition-colors duration-300 ${
         isDark ? 'border-[#222222]' : 'border-[#EAEAEA]'
       }`}
       style={{
@@ -80,10 +80,10 @@ export function NavButton({ iconId, onClick, isActive = false, label, className 
     <button
       onClick={onClick}
       aria-label={label}
-      className={`w-10 h-10 flex justify-center items-center ${className}`}
+      className={`w-11 h-11 flex justify-center items-center ${className}`}
       style={{ overflow: 'visible' }}
     >
-      <AnimatedIcon id={iconId} size={24} className="shrink-0" style={{ color: iconColor }} />
+      <AnimatedIcon id={iconId} size={26} className="shrink-0" style={{ color: iconColor }} />
     </button>
   )
 }
