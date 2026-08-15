@@ -1,4 +1,4 @@
-import NavBar from './core/navbar'
+import NavBar from './core/NavBar'
 
 /**
  * Shell - Shared layout wrapper for Home and CaseStudy routes

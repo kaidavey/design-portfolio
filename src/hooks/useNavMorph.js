@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { NAV_PHASE, buildNavMorphTimeline } from '../config/navMorphTimeline'
 
 // Owns the side-to-side navigation morph. Measures peek card and container
 // rects before navigation, freezes them in state, and drives the proxy overlay.
+//
+// Also owns the reveal moment. Content beneath a proxy is swapped at
+// `phase === REVEAL`, never on a delay of its own — an opaque proxy is
+// covering that rect, so the swap is invisible regardless of frame timing.
 export function useNavMorph({
   containerRef,
   prevPeekCardRef,
@@ -12,9 +17,10 @@ export function useNavMorph({
   config,
 }) {
   const [navMorph, setNavMorph] = useState(null)
+  const [navPhase, setNavPhase] = useState(null)
   const [blocksSuppressed, setBlocksSuppressed] = useState(false)
-  const navMorphTimerRef = useRef(null)
-  const blocksTimerRef = useRef(null)
+  const revealTimerRef = useRef(null)
+  const endTimerRef = useRef(null)
 
   const prefersReducedMotion = useRef(
     typeof window !== 'undefined' &&
@@ -23,8 +29,8 @@ export function useNavMorph({
 
   useEffect(
     () => () => {
-      clearTimeout(navMorphTimerRef.current)
-      clearTimeout(blocksTimerRef.current)
+      clearTimeout(revealTimerRef.current)
+      clearTimeout(endTimerRef.current)
     },
     []
   )
@@ -44,18 +50,23 @@ export function useNavMorph({
   const beginNavMorph = useCallback(
     (dir) => {
       if (prefersReducedMotion) return false
+
       const container = rectOf(containerRef)
       const growFrom = rectOf(dir > 0 ? nextPeekCardRef : prevPeekCardRef)
       const shrinkTo = rectOf(dir > 0 ? prevPeekCardRef : nextPeekCardRef)
       const enteringStudy = dir > 0 ? nextStudy : prevStudy
+
       if (!container || !growFrom || !shrinkTo || !enteringStudy || !currentStudy) {
         return false
       }
-      clearTimeout(navMorphTimerRef.current)
-      clearTimeout(blocksTimerRef.current)
+
+      clearTimeout(revealTimerRef.current)
+      clearTimeout(endTimerRef.current)
+
+      const t = buildNavMorphTimeline(config.navMorph)
 
       setBlocksSuppressed(true)
-
+      setNavPhase(NAV_PHASE.FLIGHT)
       setNavMorph({
         dir,
         container,
@@ -65,15 +76,19 @@ export function useNavMorph({
         leavingStudy: currentStudy,
       })
 
-      // Unsuppress blocks once content is mostly visible: contentEnterDelay
-      // plus most of contentEnterDuration.
-      const blocksDelay = (config.navMorph.contentEnterDelay + 0.2) * 1000
-      blocksTimerRef.current = setTimeout(() => setBlocksSuppressed(false), blocksDelay)
+      revealTimerRef.current = setTimeout(
+        () => setNavPhase(NAV_PHASE.REVEAL),
+        t.revealAtMs
+      )
 
-      navMorphTimerRef.current = setTimeout(() => {
+      // Blocks stay suppressed for the whole morph: they are already on screen
+      // by the reveal, so a late unsuppress would animate visible content in.
+      endTimerRef.current = setTimeout(() => {
         setNavMorph(null)
+        setNavPhase(null)
         setBlocksSuppressed(false)
-      }, config.navMorph.totalMs)
+      }, t.totalMs)
+
       return true
     },
     [
@@ -88,5 +103,5 @@ export function useNavMorph({
     ]
   )
 
-  return { navMorph, blocksSuppressed, beginNavMorph }
+  return { navMorph, navPhase, blocksSuppressed, beginNavMorph }
 }

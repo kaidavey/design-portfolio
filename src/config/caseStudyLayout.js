@@ -17,7 +17,7 @@ export const CASE_STUDY_LAYOUT = {
     contentPaddingLeft: '85px',
     contentGap: '40px',
     peek: {
-      revealWidth: '4vw',
+      revealWidth: '2vw',
       gap: '40px',
       height: '70vh',
       maxHeight: '700px',
@@ -25,6 +25,16 @@ export const CASE_STUDY_LAYOUT = {
       opacity: 1,
       scale: 0.6,
       fadeOutDuration: 0.3,
+      magnetism: {
+        radius: 200,              // px — cursor distance before falloff starts
+        peekGain: 50,             // ← EDIT THIS: px additional translateX at full strength
+        leanGain: 8,              // degrees — rotation at full strength
+        leanCap: 8,               // degrees — hard cap (prevent over-rotation)
+        distanceWeightY: 0.4,     // y-axis weight in distance calc (vs 1.0 for x)
+        verticalGain: 0.2,        // ← EDIT THIS: multiplier for cursor Y displacement (0.0–1.0)
+        springEnter: { stiffness: 120, damping: 28 },  // fast approach (sped up)
+        springExit: { stiffness: 120, damping: 28 },   // slow retreat (sped up)
+      },
     },
 
     // Navigation morph: peek cover grows into the container slot while the
@@ -42,22 +52,36 @@ export const CASE_STUDY_LAYOUT = {
       // fading out, so the proxy arrives wearing the gray container skin
       // (border + shadow, no image) before the final crossfade.
       coverFadeStart: 0.05,
-      // Real container content: outgoing disappears instantly (the shrinking
-      // proxy carries the eye), incoming fades in AFTER the growing proxy
-      // arrives, so it crossfades with the proxy at the final position.
-      contentExitDuration: 0,
-      contentEnterDelay: 0.5,
-      contentEnterDuration: 0.25,
       // Uninvolved peek cards sliding to their new slots.
       peekSpring: { type: 'spring', stiffness: 320, damping: 26 },
       // State cleanup. Must cover the shrink proxy's delayed fade:
       // (growDuration + proxyFadeDuration + proxyFadeDuration) * 1000
       totalMs: 1000,
+      revealLeadMs: 40,
     },
   },
 
   expanded: {
     contentWidth: '60%',
     contentMaxWidth: '907px',
+  },
+
+  skeleton: {
+    // Shimmer — MIRRORED in @keyframes skeleton-shimmer in src/index.css
+    // Horizontal gradient wave (90deg) that sweeps left-to-right across all shapes in sync
+    // Animation: 5000ms total (2000ms sweep + 3000ms pause)
+    shimmerDuration: '8000ms',
+
+    // Appearance
+    // Base and highlight colors live in CSS as theme-aware custom properties
+    radius: '4px',
+    imageRadius: '8px',
+
+    // Timing guards
+    delayInMs: 0,            // TEMP: set to 0 to always show skeleton (normally 200)
+    minVisibleMs: 2000,      // TEMP: hold for 2s to see it clearly (normally 400)
+
+    // Accessibility (reduced motion shows static base color)
+    reducedMotionOpacity: 0.6,
   },
 }

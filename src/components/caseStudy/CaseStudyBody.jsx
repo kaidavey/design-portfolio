@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
-import { useCaseStudy } from '../hooks/useCaseStudies'
-import { useDelayedLoading } from '../hooks/useDelayedLoading'
-import { BlockEntranceProvider } from '../context/BlockEntranceContext'
-import { urlFor } from '../lib/sanity'
+import { useCaseStudy } from '../../hooks/useCaseStudies'
+import { useDelayedLoading } from '../../hooks/useDelayedLoading'
+import { BlockEntranceProvider } from '../../context/BlockEntranceContext'
+import { urlFor } from '../../lib/sanity'
 import BlockRenderer from './BlockRenderer'
 import CaseStudySkeleton from './CaseStudySkeleton'
 

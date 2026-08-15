@@ -1,11 +1,14 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Home, Briefcase, Mail, Moon, Sun } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
+import Icon from './Icon'
 
 export default function NavBar() {
   const navigate = useNavigate()
   const location = useLocation()
   const { isDark, toggleTheme } = useTheme()
+
+  const isHome = location.pathname === '/'
+  const isWorkPage = location.pathname.startsWith('/work/')
 
   const handleHomeClick = () => {
     navigate('/')
@@ -26,57 +29,65 @@ export default function NavBar() {
   }
 
   return (
-    <div className="[font-synthesis:none] flex overflow-clip rounded-full items-center gap-2 p-1.5 justify-center [box-shadow:#00000005_0px_4px_8px] [background-color:var(--color-bg-container-solid)] border border-solid [border-color:var(--color-border)] antialiased transition-colors duration-300">
+    <div
+      className={`flex rounded-full items-center justify-center gap-3 p-3 border-solid [border-width:1.7px] bg-origin-border antialiased transition-colors duration-300 ${
+        isDark ? 'border-[#222222]' : 'border-[#EAEAEA]'
+      }`}
+      style={{
+        boxShadow: isDark
+          ? '#FFFFFF4D -1px 1.2px 0px inset'
+          : '#FFFFFF -1px 1.2px 0px inset, #00000008 0px 8px 10px',
+        backgroundImage: isDark
+          ? 'linear-gradient(in oklab 180deg, oklab(37.5% 0 0) 0%, 62.55%, oklab(25.2% 0 0) 99.99%)'
+          : 'linear-gradient(in oklab 180deg, oklab(97.5% 0 0) 0%, 79.83%, oklab(93.1% 0 0) 99.99%)',
+        overflow: 'visible',
+      }}
+    >
       <NavButton
-        icon={<Home className="w-5 h-5" strokeWidth={1.5} />}
+        iconId={isHome ? 'home-filled' : 'home-outlined'}
         onClick={handleHomeClick}
-        isActive={location.pathname === '/'}
+        isActive={isHome}
         label="Home"
+        isDark={isDark}
       />
       <NavButton
-        icon={<Briefcase className="w-5 h-5" strokeWidth={1.5} />}
+        iconId={isWorkPage ? 'briefcase-filled' : 'briefcase-outlined'}
         onClick={handleWorkClick}
+        isActive={isWorkPage}
         label="Work"
+        isDark={isDark}
       />
       <NavButton
-        icon={<Mail className="w-5 h-5" strokeWidth={1.5} />}
+        iconId="hand-wave"
         onClick={handleMailClick}
-        label="Mail"
+        label="Say hi"
+        isDark={isDark}
       />
       <NavButton
-        icon={isDark ? <Sun className="w-5 h-5" strokeWidth={1.5} /> : <Moon className="w-5 h-5" strokeWidth={1.5} />}
+        iconId={isDark ? 'moon-filled' : 'moon-outlined'}
         onClick={toggleTheme}
         label={isDark ? "Light mode" : "Dark mode"}
-      />
-      <div className="w-[0.8px] h-6.5 rounded-full shrink-0 bg-[#DDDDDD]" />
-      <div
-        className="flex overflow-clip rounded-full flex-col items-center py-2.5 justify-center shrink-0 bg-origin-border bg-cover bg-position-[50%] [border-width:1.2px] border-solid border-[#EAEAEA] size-10"
-        style={{
-          backgroundImage:
-            'url(https://app.paper.design/file-assets/01KWM3MAWXZNV08ENZMGME6W21/01KWMF0B5A2669H2Z3AZ8S9F8R.jpg)',
-        }}
+        isDark={isDark}
       />
     </div>
   )
 }
 
-export function NavButton({ icon, onClick, isActive = false, label }) {
+export function NavButton({ iconId, onClick, isActive = false, label, className = '', isDark = false }) {
+  const iconColor = isDark ? '#FFFFFF' : '#282828'
+
   return (
     <button
       onClick={onClick}
       aria-label={label}
-      style={{
-        backgroundImage: isActive
-          ? 'linear-gradient(in oklab 90deg, oklab(95.5% 0 0) -24.56%, oklab(97.5% 0 0) 113.82%)'
-          : '',
-      }}
-      className={`w-10 h-10 flex justify-center items-center transition-all [color:var(--color-text-primary)] ${
+      className={`w-10 h-10 flex justify-center items-center transition-all ${
         isActive
-          ? '[background-color:var(--color-bg-primary)] rounded-full [box-shadow:var(--shadow-container-inset)] bg-origin-border [border-width:1.2px] border-solid [border-color:var(--color-border)]'
+          ? ''
           : 'hover:opacity-70'
-      }`}
+      } ${className}`}
+      style={{ overflow: 'visible' }}
     >
-      {icon}
+      <Icon id={iconId} size={24} className="shrink-0" style={{ color: iconColor }} />
     </button>
   )
 }

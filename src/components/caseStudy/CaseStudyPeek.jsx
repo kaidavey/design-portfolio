@@ -1,8 +1,8 @@
 import { forwardRef } from 'react'
 import { motion, AnimatePresence, useTransform } from 'framer-motion'
 import imageUrlBuilder from '@sanity/image-url'
-import { client } from '../lib/sanity'
-import { useCursorMagnetism } from '../hooks/useCursorMagnetism'
+import { client } from '../../lib/sanity'
+import { useCursorMagnetism } from '../../hooks/useCursorMagnetism'
 
 const builder = imageUrlBuilder(client)
  

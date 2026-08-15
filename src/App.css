@@ -63,11 +63,12 @@
   width: 100%;
 }
 
-.shell__content {
-  /* Content inherits container context from parent */
+/* Home page specific styles */
+.shell__container--compact:has(.shell__content--home) {
+  /* Override top padding to clear progressive blur (80px + small gap) */
+  padding-top: clamp(50px, 6vw, 72px);
 }
 
-/* Home page header and content max-width */
 .shell__container--compact .shell__header {
   max-width: 900px;
   margin: 0 auto;
