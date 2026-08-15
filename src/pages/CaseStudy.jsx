@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Maximize2 } from 'lucide-react'
 import { useCaseStudies, useNeighborPrefetch } from '../hooks/useCaseStudies'
 import { CASE_STUDY_LAYOUT } from '../config/caseStudyLayout'
 import { EXPAND, EXPAND_PHASE } from '../config/expandTransition'
@@ -77,7 +76,12 @@ function ExpandButton({ onToggleExpand }) {
       className="flex items-center justify-center hover:opacity-70 transition-opacity cursor-pointer"
       style={{ transform: 'rotate(90deg)' }}
     >
-      <Maximize2 className="w-[17.5px] h-[17.5px] [color:var(--color-text-secondary)]" strokeWidth={2} />
+      <svg className="w-[17.5px] h-[17.5px] [color:var(--color-text-secondary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="15 3 21 3 21 9" />
+        <polyline points="9 21 3 21 3 15" />
+        <line x1="21" y1="3" x2="14" y2="10" />
+        <line x1="3" y1="21" x2="10" y2="14" />
+      </svg>
     </button>
   )
 }

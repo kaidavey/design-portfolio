@@ -1,4 +1,3 @@
-import { Music } from 'lucide-react'
 import useNowPlaying from '../hooks/useNowPlaying'
 
 const TEXT_CLASSES =
@@ -35,10 +34,19 @@ export default function NowPlaying({ data }) {
           className="w-[18px] h-[18px] rounded-[3px] object-cover shrink-0"
         />
       ) : (
-        <Music
+        <svg
           className="w-[18px] h-[18px] shrink-0 [color:var(--color-text-muted)]"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
           strokeWidth={1.5}
-        />
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M9 18V5l12-2v13" />
+          <circle cx="6" cy="18" r="3" />
+          <circle cx="18" cy="16" r="3" />
+        </svg>
       )}
       <span className={`${TEXT_CLASSES} truncate`}>
         {track} · {artist}

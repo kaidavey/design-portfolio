@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { Clock } from 'lucide-react'
 import { useCaseStudies } from '../hooks/useCaseStudies'
 import Shell from '../components/Shell'
 import NowPlaying from '../components/NowPlaying'
@@ -32,7 +31,10 @@ function HomeHeader() {
       <div className="flex flex-col items-end gap-2">
         {/* Location status */}
         <div className="flex items-center gap-1.5">
-          <Clock className="w-[18px] h-[18px] [color:var(--color-text-muted)]" strokeWidth={1.5} />
+          <svg className="w-[18px] h-[18px] [color:var(--color-text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
           <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-muted)] text-meta-value leading-[1.375rem]">
             Seattle · {seattleTime}
           </span>
