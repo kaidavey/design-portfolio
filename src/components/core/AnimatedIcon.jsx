@@ -1,7 +1,7 @@
-import { motion, useAnimation } from "motion/react"
-import { useCallback } from "react"
+import { motion } from "motion/react"
 import Icon from './Icon'
 import AnimatedBriefcase from './AnimatedBriefcase'
+import AnimatedThemeIcon from './AnimatedThemeIcon'
 
 const iconAnimations = {
   'hand-wave': {
@@ -21,26 +21,18 @@ const iconAnimations = {
   // More animations will be added for other outlined icons
 }
 
-export default function AnimatedIcon({ id, size, className, style, ...props }) {
-  // Route briefcase to specialized component with path animations
-  if (id === 'briefcase-outlined') {
-    return <AnimatedBriefcase size={size} className={className} style={style} />
+export default function AnimatedIcon({ id, size, className, style, isHovered, isDark, ...props }) {
+  // Route briefcase (both outlined and filled) to specialized component
+  if (id === 'briefcase-outlined' || id === 'briefcase-filled') {
+    return <AnimatedBriefcase id={id} size={size} className={className} style={style} isHovered={isHovered} />
   }
 
-  const controls = useAnimation()
+  // Route theme toggle to specialized component
+  if (id === 'theme-toggle') {
+    return <AnimatedThemeIcon isDark={isDark} size={size} className={className} style={style} isHovered={isHovered} />
+  }
+
   const animation = iconAnimations[id]
-
-  const handleMouseEnter = useCallback(() => {
-    if (animation) {
-      controls.start("animate")
-    }
-  }, [controls, animation])
-
-  const handleMouseLeave = useCallback(() => {
-    if (animation) {
-      controls.start("normal")
-    }
-  }, [controls, animation])
 
   // If no animation for this icon, return regular Icon
   if (!animation) {
@@ -49,12 +41,10 @@ export default function AnimatedIcon({ id, size, className, style, ...props }) {
 
   return (
     <motion.div
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      animate={controls}
+      animate={isHovered ? "animate" : "normal"}
       initial="normal"
       variants={animation}
-      style={{ display: 'inline-flex' }}
+      style={{ display: 'inline-flex', pointerEvents: 'none' }}
     >
       <Icon id={id} size={size} className={className} style={style} {...props} />
     </motion.div>

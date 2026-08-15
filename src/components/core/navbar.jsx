@@ -1,11 +1,14 @@
+import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useCaseStudies } from '../../hooks/useCaseStudies'
 import AnimatedIcon from './AnimatedIcon'
 
 export default function NavBar() {
   const navigate = useNavigate()
   const location = useLocation()
   const { isDark, toggleTheme } = useTheme()
+  const { caseStudies } = useCaseStudies()
 
   const isHome = location.pathname === '/'
   const isWorkPage = location.pathname.startsWith('/work/')
@@ -15,12 +18,9 @@ export default function NavBar() {
   }
 
   const handleWorkClick = () => {
-    if (location.pathname === '/') {
-      // Already on home, scroll to projects
-      document.querySelector('main')?.scrollIntoView({ behavior: 'smooth' })
-    } else {
-      // Navigate to home
-      navigate('/')
+    // Navigate to first case study if available
+    if (caseStudies.length > 0) {
+      navigate(`/work/${caseStudies[0].slug.current}`)
     }
   }
 
@@ -64,26 +64,37 @@ export default function NavBar() {
         isDark={isDark}
       />
       <NavButton
-        iconId={isDark ? 'moon-filled' : 'moon-outlined'}
+        iconId="theme-toggle"
         onClick={toggleTheme}
         label={isDark ? "Light mode" : "Dark mode"}
         isDark={isDark}
+        isThemeToggle={true}
       />
     </div>
   )
 }
 
-export function NavButton({ iconId, onClick, isActive = false, label, className = '', isDark = false }) {
+export function NavButton({ iconId, onClick, isActive = false, label, className = '', isDark = false, isThemeToggle = false }) {
   const iconColor = isDark ? '#FFFFFF' : '#282828'
+  const [isHovered, setIsHovered] = React.useState(false)
 
   return (
     <button
       onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       aria-label={label}
       className={`w-11 h-11 flex justify-center items-center ${className}`}
-      style={{ overflow: 'visible' }}
+      style={{ overflow: 'visible', position: 'relative', zIndex: 1 }}
     >
-      <AnimatedIcon id={iconId} size={26} className="shrink-0" style={{ color: iconColor }} />
+      <AnimatedIcon
+        id={iconId}
+        size={26}
+        className="shrink-0"
+        style={{ color: iconColor }}
+        isHovered={isHovered}
+        isDark={isThemeToggle ? isDark : undefined}
+      />
     </button>
   )
 }
