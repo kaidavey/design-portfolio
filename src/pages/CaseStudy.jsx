@@ -71,7 +71,7 @@ function CaseStudyNavigation({ title }) {
 
 function ExpandButton({ onToggleExpand }) {
   return (
-    <Tooltip label="Expand">
+    <Tooltip label="Expand" offset={12}>
       <button
         onClick={onToggleExpand}
         aria-label="Expand"

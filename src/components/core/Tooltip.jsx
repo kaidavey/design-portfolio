@@ -19,7 +19,7 @@ const TOOLTIP_STYLES = {
   zIndex: 1000,
 }
 
-const TOOLTIP_DELAY = 2000 // 2 seconds
+const TOOLTIP_DELAY = 1000 // 2 seconds
 const TOOLTIP_OFFSET = 8 // Distance from element in pixels
 
 /**
@@ -28,8 +28,9 @@ const TOOLTIP_OFFSET = 8 // Distance from element in pixels
  * @param {Object} props
  * @param {React.ReactNode} props.children - The content to wrap (usually a button)
  * @param {string} props.label - The tooltip text to display
+ * @param {number} props.offset - Optional custom offset distance (defaults to TOOLTIP_OFFSET)
  */
-export default function Tooltip({ children, label }) {
+export default function Tooltip({ children, label, offset }) {
   const [showTooltip, setShowTooltip] = React.useState(false)
   const timeoutRef = React.useRef(null)
 
@@ -55,6 +56,8 @@ export default function Tooltip({ children, label }) {
     }
   }, [])
 
+  const effectiveOffset = offset !== undefined ? offset : TOOLTIP_OFFSET
+
   return (
     <div
       onMouseEnter={handleMouseEnter}
@@ -70,7 +73,7 @@ export default function Tooltip({ children, label }) {
             top: '15%',
             left: '50%',
             transform: 'translate(-50%, -100%)',
-            marginTop: `-${TOOLTIP_OFFSET}px`,
+            marginTop: `-${effectiveOffset}px`,
           }}
         >
           {label}
