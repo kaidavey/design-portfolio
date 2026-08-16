@@ -24,6 +24,11 @@ export const EXPAND = {
   // well before the handoff.
   skinExitScale: 1.05,
   skinExitDuration: 0.3,
+
+  // How far past the viewport edge the container's clip opens. The clip travels
+  // on the same curve as the geometry, so it must overshoot rather than merely
+  // reach the edge — a clip that lags the column shaves its edges mid-flight.
+  clipMargin: 40,
 }
 
 export const HANDOFF_AT = EXPAND.growDuration + EXPAND.holdDuration

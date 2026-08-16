@@ -1,5 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { useSuppressBlockEntrance, useInstantBlockEntrance } from '../context/BlockEntranceContext'
+import { useMorphCutIndex } from '../context/MorphCutContext'
+import { useScrollRoot, scrollViewportBounds } from '../context/ScrollContainerContext'
 import { motion } from 'framer-motion'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
 import ProjectDetails from './blocks/ProjectDetails'
@@ -15,11 +17,13 @@ import TextRowTwoColumn from './blocks/TextRowTwoColumn'
 import ImageFull from './blocks/ImageFull'
 import Spacer from './blocks/Spacer'
 
-function AnimatedBlock({ children, isFirst = false }) {
+function AnimatedBlock({ children, index, isFirst = false }) {
   const suppress = useSuppressBlockEntrance()
   const instant = useInstantBlockEntrance()
+  const cutIndex = useMorphCutIndex()
+  const scrollRootRef = useScrollRoot()
   const nodeRef = useRef(null)
-  const { ref: observerRef, isVisible } = useScrollAnimation()
+  const { ref: observerRef, isVisible } = useScrollAnimation(scrollRootRef)
   const [hasBeenUnsuppressed, setHasBeenUnsuppressed] = useState(!suppress)
 
   // Captured once at mount — later context changes must not retroactively
@@ -45,22 +49,27 @@ function AnimatedBlock({ children, isFirst = false }) {
       } else if (nodeRef.current) {
         const rect = nodeRef.current.getBoundingClientRect()
         const elementMiddle = rect.top + rect.height / 2
+        const bounds = scrollViewportBounds(scrollRootRef)
         // Only animate immediately if element is 50% visible (middle point is on screen)
-        setMode(elementMiddle < window.innerHeight && elementMiddle > 0 ? 'immediate' : 'scroll')
+        setMode(elementMiddle < bounds.bottom && elementMiddle > bounds.top ? 'immediate' : 'scroll')
       } else {
         setMode('scroll')
       }
     }
-  }, [suppress, hasBeenUnsuppressed, mode, isFirst])
+  }, [suppress, hasBeenUnsuppressed, mode, isFirst, scrollRootRef])
 
   // Blocks default to 'instant' so nothing on screen ever flashes at opacity 0.
   // Anything that measures out below the fold gets handed back to the observer.
   // This runs before paint, and those blocks are off-screen anyway, so the
   // correction is invisible.
+  //
+  // This predicate defines which blocks a column paints, so useExpandMorph's
+  // cut measurement mirrors it exactly. If the two drift apart, the compact and
+  // expanded columns stop agreeing and content flickers at the handoff.
   useLayoutEffect(() => {
     if (mode !== 'instant' || !nodeRef.current) return
     const { top } = nodeRef.current.getBoundingClientRect()
-    if (top >= window.innerHeight) setMode('scroll')
+    if (top >= scrollViewportBounds(scrollRootRef).bottom) setMode('scroll')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -70,8 +79,9 @@ function AnimatedBlock({ children, isFirst = false }) {
     if (mode !== 'scroll' || !nodeRef.current) return
     const rect = nodeRef.current.getBoundingClientRect()
     const elementMiddle = rect.top + rect.height / 2
+    const bounds = scrollViewportBounds(scrollRootRef)
     // If element is already 50% visible, use immediate mode (blur only, no y movement)
-    if (elementMiddle < window.innerHeight && elementMiddle > 0) {
+    if (elementMiddle < bounds.bottom && elementMiddle > bounds.top) {
       setMode('immediate')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -82,9 +92,44 @@ function AnimatedBlock({ children, isFirst = false }) {
     if (observerRef) observerRef.current = node
   }
 
+  // A cut index only exists while an expand morph is in flight, and it splits
+  // this column in two: blocks past it are hidden, blocks up to it are pinned
+  // at their final state.
+  const morphing = cutIndex != null && index != null
+
+  // Cut blocks are always a contiguous suffix — a flex column stacks
+  // vertically, so visibility is monotonic in index — which is what makes
+  // display:none safe here: dropping them cannot shift anything retained. It
+  // also takes them out of the per-frame layout while the column's width
+  // animates, which is worth real time on a long case study.
+  const isCut = morphing && index > cutIndex
+
+  // The data attribute is the contract useExpandMorph measures against. Every
+  // branch carries it, cut or not.
+  const wrapperProps = {
+    ref: setRefs,
+    'data-block-index': index,
+    ...(isCut ? { style: { display: 'none' } } : null),
+  }
+
+  // Retained blocks skip whatever entrance they were mid-way through and pin to
+  // their final state, so this column paints exactly what the expanded column
+  // paints and the handoff has nothing to reconcile. A retained block the user
+  // never scrolled to is still at opacity 0 at this point; snapping it visible
+  // is invisible because it sits below the box's fold, where the container's
+  // clip still covers it. The clip then unveils it over the grow instead of
+  // popping it in.
+  if (morphing && !isCut) {
+    return (
+      <motion.div {...wrapperProps} initial={false} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} transition={{ duration: 0 }}>
+        {children}
+      </motion.div>
+    )
+  }
+
   if (mode === 'suppressed') {
     return (
-      <motion.div ref={setRefs} initial={{ opacity: 0, filter: 'blur(8px)' }} animate={{ opacity: 0, filter: 'blur(8px)' }}>
+      <motion.div {...wrapperProps} initial={{ opacity: 0, filter: 'blur(8px)' }} animate={{ opacity: 0, filter: 'blur(8px)' }}>
         {children}
       </motion.div>
     )
@@ -92,7 +137,7 @@ function AnimatedBlock({ children, isFirst = false }) {
 
   if (mode === 'instant') {
     return (
-      <motion.div ref={setRefs} initial={false} animate={{ opacity: 1, filter: 'blur(0px)' }}>
+      <motion.div {...wrapperProps} initial={false} animate={{ opacity: 1, filter: 'blur(0px)' }}>
         {children}
       </motion.div>
     )
@@ -101,7 +146,7 @@ function AnimatedBlock({ children, isFirst = false }) {
   if (mode === 'immediate') {
     return (
       <motion.div
-        ref={setRefs}
+        {...wrapperProps}
         initial={{ opacity: 0, filter: 'blur(8px)' }}
         animate={{ opacity: 1, filter: 'blur(0px)' }}
         transition={{ duration: 0.5, ease: 'easeOut', delay: 0.25 }}
@@ -113,7 +158,7 @@ function AnimatedBlock({ children, isFirst = false }) {
 
   return (
     <motion.div
-      ref={setRefs}
+      {...wrapperProps}
       initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
       animate={isVisible ? { opacity: 1, y: 0, filter: 'blur(0px)' } : { opacity: 0, y: 20, filter: 'blur(8px)' }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -158,7 +203,7 @@ export default function BlockRenderer({ blocks, expandButton }) {
 
         if (index === 0 && expandButton) {
           return (
-            <AnimatedBlock key={block._key || index} isFirst={true}>
+            <AnimatedBlock key={block._key || index} index={index} isFirst={true}>
               <div className="flex items-center justify-between w-full">
                 <Component block={block} />
                 <div className="shrink-0 pb-4">{expandButton}</div>
@@ -168,7 +213,7 @@ export default function BlockRenderer({ blocks, expandButton }) {
         }
 
         return (
-          <AnimatedBlock key={block._key || index} isFirst={index === 0}>
+          <AnimatedBlock key={block._key || index} index={index} isFirst={index === 0}>
             <Component block={block} />
           </AnimatedBlock>
         )

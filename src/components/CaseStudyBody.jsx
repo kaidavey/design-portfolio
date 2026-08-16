@@ -6,7 +6,7 @@ import { urlFor } from '../lib/sanity'
 import BlockRenderer from './BlockRenderer'
 import CaseStudySkeleton from './CaseStudySkeleton'
 
-export default function CaseStudyBody({ slug, expandButton }) {
+export default function CaseStudyBody({ slug, expandButton, instant = false }) {
   const { caseStudy, shape, loading, error } = useCaseStudy(slug)
 
   const showSkeleton = useDelayedLoading(loading) && shape != null
@@ -53,8 +53,12 @@ export default function CaseStudyBody({ slug, expandButton }) {
 
   return (
     <div className="space-y-8">
-      {/* Blocks animate in with blur effect when replacing skeleton */}
-      <BlockEntranceProvider>
+      {/* Blocks animate in with blur effect when replacing skeleton.
+          NOTE: this provider shadows whatever the caller supplied — anything a
+          parent puts on BlockEntranceContext is reset here unless it is threaded
+          through as a prop, which is why `instant` is one. `suppress` is not,
+          so useNavMorph's blocksSuppressed still never reaches a block. */}
+      <BlockEntranceProvider instant={instant}>
         <BlockRenderer
           blocks={caseStudy.body}
           expandButton={showSkeleton ? null : expandButton}
