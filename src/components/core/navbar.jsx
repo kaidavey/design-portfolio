@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useCaseStudies } from '../../hooks/useCaseStudies'
 import AnimatedIcon from './AnimatedIcon'
+import Tooltip from './Tooltip'
 
 export default function NavBar() {
   const navigate = useNavigate()
@@ -30,7 +31,7 @@ export default function NavBar() {
 
   return (
     <div
-      className={`flex rounded-full items-center justify-center gap-2.25 p-3 border-solid [border-width:1.7px] bg-origin-border antialiased transition-colors duration-300 ${
+      className={`flex rounded-full items-center justify-center gap-3 p-3 border-solid [border-width:1.7px] bg-origin-border antialiased transition-colors duration-300 ${
         isDark ? 'border-[#222222]' : 'border-[#EAEAEA]'
       }`}
       style={{
@@ -77,82 +78,27 @@ export default function NavBar() {
 export function NavButton({ iconId, onClick, isActive = false, label, className = '', isDark = false, isThemeToggle = false }) {
   const iconColor = isDark ? '#FFFFFF' : '#282828'
   const [isHovered, setIsHovered] = React.useState(false)
-  const [showTooltip, setShowTooltip] = React.useState(false)
-  const timeoutRef = React.useRef(null)
-
-  const handleMouseEnter = () => {
-    setIsHovered(true)
-    // Start 2-second timer for tooltip
-    timeoutRef.current = setTimeout(() => {
-      setShowTooltip(true)
-    }, 1800)
-  }
-
-  const handleMouseLeave = () => {
-    setIsHovered(false)
-    setShowTooltip(false)
-    // Clear timeout if user moves away before 2 seconds
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = null
-    }
-  }
-
-  React.useEffect(() => {
-    // Cleanup timeout on unmount
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
-    }
-  }, [])
 
   return (
-    <button
-      onClick={onClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      aria-label={label}
-      className={`w-9.5 h-9.5 flex justify-center items-center ${className}`}
-      style={{ overflow: 'visible', position: 'relative', zIndex: 1 }}
-    >
-      <AnimatedIcon
-        id={iconId}
-        size={21}
-        className="shrink-0"
-        style={{ color: iconColor }}
-        isHovered={isHovered}
-        isDark={isThemeToggle ? isDark : undefined}
-      />
-      {showTooltip && (
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            top: '15%',
-            left: '50%',
-            transform: 'translate(-50%, -100%)',
-            marginTop: '-8px',
-            paddingInline: '10px',
-            paddingBlock: '4px',
-            borderRadius: '4px',
-            backgroundColor: '#1E1E1E',
-            borderWidth: '0.3px',
-            borderStyle: 'solid',
-            borderColor: '#3F3F3F',
-            whiteSpace: 'nowrap',
-            fontSize: '13px',
-            letterSpacing: '-0.26249px',
-            lineHeight: '128.6%',
-            fontFamily: '"DM Sans", system-ui, sans-serif',
-            fontWeight: 500,
-            color: '#FFFFFF',
-            zIndex: 1000,
-          }}
-        >
-          {label}
-        </div>
-      )}
-    </button>
+    <Tooltip label={label}>
+      <button
+        onClick={onClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        aria-label={label}
+        className={`w-9 h-9 flex justify-center items-center ${className}`}
+        style={{ overflow: 'visible', position: 'relative', zIndex: 1, cursor: 'pointer' }}
+      >
+        <AnimatedIcon
+          id={iconId}
+          size={22}
+          className="shrink-0"
+          style={{ color: iconColor }}
+          isHovered={isHovered}
+          isDark={isThemeToggle ? isDark : undefined}
+        />
+      </button>
+    </Tooltip>
   )
 }
 

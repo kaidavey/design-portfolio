@@ -61,7 +61,7 @@ export default function BriefcaseAnimation({ id, size, style, isHovered }) {
             x="1.71973"
             y="6.81"
             width="20.557"
-            height="13"
+            height="13.39"
             rx="2.2"
             fill="none"
             stroke="currentColor"
