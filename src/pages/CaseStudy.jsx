@@ -14,6 +14,8 @@ import CaseStudyPeek from '../components/CaseStudyPeek'
 import NavMorphOverlay from '../components/caseStudy/NavMorphOverlay'
 import { ExpandMorphLayer, ExpandedLayer } from '../components/caseStudy/ExpandLayers'
 import { BlockEntranceProvider } from '../context/BlockEntranceContext'
+import { MorphCutProvider } from '../context/MorphCutContext'
+import { ScrollContainerProvider } from '../context/ScrollContainerContext'
 
 const COMPACT = CASE_STUDY_LAYOUT.compact
 const EXPANDED = CASE_STUDY_LAYOUT.expanded
@@ -123,10 +125,21 @@ export default function CaseStudy() {
 
   const expand = useExpandMorph({
     scrollContainerRef,
+    containerRef,
     blocked: Boolean(navMorph),
   })
 
-  const { phase, morph, morphRef, expandedRef, isAnimating, showExpanded, showCompact } = expand
+  const {
+    phase,
+    morph,
+    cutIndex,
+    clipTo,
+    morphRef,
+    expandedRef,
+    isAnimating,
+    showExpanded,
+    showCompact,
+  } = expand
 
   useNeighborPrefetch(prevSlug, nextSlug)
 
@@ -250,6 +263,30 @@ export default function CaseStudy() {
       }
     : { duration: 0 }
 
+  // ---- CONTAINER CLIP -----------------------------------------------------
+
+  // The block column has to escape the box during the grow, but only as fast as
+  // the box opens. Dropping overflow:hidden in a single frame reveals whatever
+  // sits below the fold instantly; this opens the window on the geometry's own
+  // curve and, by the time the column arrives, is clear of the viewport.
+  //
+  // It lives on the container because the container is the only stationary
+  // thing here: position:fixed with inline width/height, so inset values stay
+  // meaningful for the whole animation. The morph layer is resizing.
+  const clipClosed = `inset(0px 0px 0px 0px round ${COMPACT.containerBorderRadius})`
+  const clipOpen = clipTo
+    ? `inset(${clipTo.top}px ${clipTo.right}px ${clipTo.bottom}px ${clipTo.left}px round 0px)`
+    : null
+  const clipping = isAnimating && Boolean(clipOpen)
+
+  // Two keyframes rather than one: the array pins the start at the box's own
+  // edges, so the frame that stops using overflow:hidden is clipped to exactly
+  // the rect overflow:hidden was clipping to.
+  const clipAnimate = clipping ? { clipPath: [clipClosed, clipOpen] } : { clipPath: 'none' }
+  const clipTransition = clipping
+    ? { duration: EXPAND.growDuration, ease: EXPAND.ease }
+    : { duration: 0 }
+
   return (
     <Shell
       header={
@@ -293,7 +330,12 @@ export default function CaseStudy() {
                     exit="exit"
                     transition={springTransition}
                   >
-                    <CaseStudyBody slug={slug} />
+                    {/* `instant` puts these blocks at their final state from
+                        frame one. Their 0.5s blur entrance would otherwise still
+                        be running at the handoff (it lands at 0.75s, the swap is
+                        at 0.7s), so the columns would not match when they trade
+                        places — and it plays behind an opacity-0 layer anyway. */}
+                    <CaseStudyBody slug={slug} instant={isAnimating} />
                   </motion.div>
                 </AnimatePresence>
               </BlockEntranceProvider>
@@ -335,7 +377,7 @@ export default function CaseStudy() {
                 onClick={() => navigateToPrev()}
               />
 
-              <div
+              <motion.div
                 ref={containerRef}
                 className="relative"
                 style={{
@@ -345,10 +387,15 @@ export default function CaseStudy() {
                   maxHeight: COMPACT.containerMaxHeight,
                   borderRadius: COMPACT.containerBorderRadius,
                   // Un-clip during the grow: the block column expands past the
-                  // container's edges while the skin fades out beneath it.
+                  // container's edges while the skin fades out beneath it. The
+                  // animated clip-path takes over the containment from here —
+                  // see clipAnimate above.
                   overflow: isAnimating ? 'visible' : 'hidden',
                   pointerEvents: isAnimating ? 'none' : 'auto',
                 }}
+                initial={false}
+                animate={clipAnimate}
+                transition={clipTransition}
               >
                 {/* Skin: all of the container's paint lives here, behind the
                     blocks, so it can fade without taking the blocks with it. */}
@@ -381,28 +428,36 @@ export default function CaseStudy() {
                     overflowX: isAnimating ? 'visible' : 'hidden',
                   }}
                 >
-                  <ExpandMorphLayer phase={phase} morph={morph} layerRef={morphRef}>
-                    <AnimatePresence initial={false} custom={morphCustom} mode="wait">
-                      <motion.div
-                        key={slug}
-                        custom={morphCustom}
-                        variants={variants}
-                        initial="enter"
-                        animate={shuffleAnimate}
-                        exit="exit"
-                        transition={shuffleTransition}
-                      >
-                        <BlockEntranceProvider suppress={blocksSuppressed}>
-                          <CaseStudyBody
-                            slug={slug}
-                            expandButton={<ExpandButton onToggleExpand={expand.beginExpand} />}
-                          />
-                        </BlockEntranceProvider>
-                      </motion.div>
-                    </AnimatePresence>
-                  </ExpandMorphLayer>
+                  {/* Compact blocks scroll inside the box, not the viewport, and
+                      during a morph they are cut to what the expanded column will
+                      paint. Both are compact-only: the expanded tree gets neither
+                      provider, so it keeps the viewport and stays uncut. */}
+                  <ScrollContainerProvider rootRef={scrollContainerRef}>
+                    <MorphCutProvider cutIndex={cutIndex}>
+                      <ExpandMorphLayer phase={phase} morph={morph} layerRef={morphRef}>
+                        <AnimatePresence initial={false} custom={morphCustom} mode="wait">
+                          <motion.div
+                            key={slug}
+                            custom={morphCustom}
+                            variants={variants}
+                            initial="enter"
+                            animate={shuffleAnimate}
+                            exit="exit"
+                            transition={shuffleTransition}
+                          >
+                            <BlockEntranceProvider suppress={blocksSuppressed}>
+                              <CaseStudyBody
+                                slug={slug}
+                                expandButton={<ExpandButton onToggleExpand={expand.beginExpand} />}
+                              />
+                            </BlockEntranceProvider>
+                          </motion.div>
+                        </AnimatePresence>
+                      </ExpandMorphLayer>
+                    </MorphCutProvider>
+                  </ScrollContainerProvider>
                 </div>
-              </div>
+              </motion.div>
 
               <CaseStudyPeek
                 ref={nextPeekCardRef}

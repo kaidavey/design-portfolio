@@ -1,5 +1,60 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { EXPAND, EXPAND_PHASE, EXPAND_TOTAL_MS, HANDOFF_AT } from '../config/expandTransition'
+import { EXPAND, EXPAND_PHASE, HANDOFF_AT } from '../config/expandTransition'
+
+/**
+ * Index of the last block the expanded column is actually going to paint.
+ *
+ * The compact column gets cut to the same set for the duration of the morph, so
+ * both columns carry identical content when they swap at the handoff. Without
+ * it, every block the user scrolled past is still mounted at opacity 1 and
+ * paints the moment the box stops clipping — then disappears at the handoff,
+ * because the expanded column never had it.
+ *
+ * The predicate below MUST stay identical to the one in BlockRenderer that
+ * demotes an 'instant' block back to 'scroll'. That is the whole mechanism: the
+ * same rule applied to both columns is what keeps them in agreement.
+ *
+ * Returns null when nothing can be measured. Every failure path here degrades
+ * to "no cut", never to "hide everything".
+ */
+export function measureVisibleCut(expandedRoot) {
+  const nodes = expandedRoot?.querySelectorAll('[data-block-index]')
+  if (!nodes?.length) return null
+
+  const viewportBottom = window.innerHeight
+  let cut = null
+
+  for (const node of nodes) {
+    if (node.getBoundingClientRect().top >= viewportBottom) break
+    cut = Number(node.dataset.blockIndex)
+  }
+
+  return Number.isFinite(cut) ? Math.max(cut, 0) : null
+}
+
+/**
+ * Where the container's clip has to land: past every viewport edge, expressed
+ * as insets on the container's own border box. Negative insets grow the clip
+ * outward.
+ *
+ * Measured while the container is at rest. It is position:fixed with inline
+ * width/height that do not change during the morph, so these stay valid for the
+ * whole grow — which is exactly why the clip lives on the container and not on
+ * the morph layer, which is simultaneously translating and resizing.
+ */
+function measureClipTarget(container) {
+  const rect = container?.getBoundingClientRect()
+  if (!rect) return null
+
+  const m = EXPAND.clipMargin
+
+  return {
+    top: -(rect.top + m),
+    right: -(window.innerWidth - rect.right + m),
+    bottom: -(window.innerHeight - rect.bottom + m),
+    left: -(rect.left + m),
+  }
+}
 
 /**
  * Manages the expand animation state and FLIP measurement.
@@ -9,9 +64,11 @@ import { EXPAND, EXPAND_PHASE, EXPAND_TOTAL_MS, HANDOFF_AT } from '../config/exp
  * compact content's initial Y position (it's visually scrolled down inside
  * its container, but getBoundingClientRect reports the container's top edge).
  */
-export function useExpandMorph({ scrollContainerRef, blocked }) {
+export function useExpandMorph({ scrollContainerRef, containerRef, blocked }) {
   const [phase, setPhase] = useState(EXPAND_PHASE.IDLE)
   const [morph, setMorph] = useState(null)
+  const [cutIndex, setCutIndex] = useState(null)
+  const [clipTo, setClipTo] = useState(null)
   const morphRef = useRef(null)
   const expandedRef = useRef(null)
   const phaseTimerRef = useRef(null)
@@ -53,6 +110,13 @@ export function useExpandMorph({ scrollContainerRef, blocked }) {
       fromY: -scrollOffset,
       toY: x.top - c.top,
     })
+
+    // The expanded layer is mounted at its final geometry by now, so this is
+    // the first moment it can be asked what it is going to paint. Lands one
+    // commit after GROW, same as `morph` — React flushes layout-effect state
+    // before paint, so no frame is painted uncut, and the clip has not opened
+    // past the box's own edges in that time either.
+    setCutIndex(measureVisibleCut(expandedRef.current))
   }, [phase])
 
   // Phase sequencing
@@ -75,13 +139,21 @@ export function useExpandMorph({ scrollContainerRef, blocked }) {
     // Capture scroll position before any state changes
     scrollAtExpandRef.current = scrollContainerRef.current?.scrollTop ?? 0
 
+    // Batched with setPhase, so the clip's destination is available on the very
+    // first GROW render. It opens from the box's own edges, so the frame that
+    // stops using overflow:hidden is still clipped to exactly the same rect.
+    setClipTo(measureClipTarget(containerRef?.current))
+
     setMorph(null) // Clear previous measurement
+    setCutIndex(null)
     setPhase(EXPAND_PHASE.GROW)
-  }, [blocked, phase, scrollContainerRef])
+  }, [blocked, phase, scrollContainerRef, containerRef])
 
   return {
     phase,
     morph,
+    cutIndex,
+    clipTo,
     morphRef,
     expandedRef,
     isAnimating,
