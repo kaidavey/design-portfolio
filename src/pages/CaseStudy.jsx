@@ -14,6 +14,7 @@ import CaseStudyPeek from '../components/CaseStudyPeek'
 import NavMorphOverlay from '../components/caseStudy/NavMorphOverlay'
 import { ExpandMorphLayer, ExpandedLayer } from '../components/caseStudy/ExpandLayers'
 import { BlockEntranceProvider } from '../context/BlockEntranceContext'
+import Tooltip from '../components/core/Tooltip'
 import { MorphCutProvider } from '../context/MorphCutContext'
 import { ScrollContainerProvider } from '../context/ScrollContainerContext'
 
@@ -72,19 +73,21 @@ function CaseStudyNavigation({ title }) {
 
 function ExpandButton({ onToggleExpand }) {
   return (
-    <button
-      onClick={onToggleExpand}
-      aria-label="Expand"
-      className="flex items-center justify-center hover:opacity-70 transition-opacity cursor-pointer"
-      style={{ transform: 'rotate(90deg)' }}
-    >
-      <svg className="w-[17.5px] h-[17.5px] [color:var(--color-text-secondary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="15 3 21 3 21 9" />
-        <polyline points="9 21 3 21 3 15" />
-        <line x1="21" y1="3" x2="14" y2="10" />
-        <line x1="3" y1="21" x2="10" y2="14" />
-      </svg>
-    </button>
+    <Tooltip label="Expand" offset={12}>
+      <button
+        onClick={onToggleExpand}
+        aria-label="Expand"
+        className="flex items-center justify-center hover:opacity-70 transition-opacity cursor-pointer"
+        style={{ transform: 'rotate(90deg)', position: 'relative', overflow: 'visible' }}
+      >
+        <svg className="w-[17.5px] h-[17.5px] [color:var(--color-text-secondary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="15 3 21 3 21 9" />
+          <polyline points="9 21 3 21 3 15" />
+          <line x1="21" y1="3" x2="14" y2="10" />
+          <line x1="3" y1="21" x2="10" y2="14" />
+        </svg>
+      </button>
+    </Tooltip>
   )
 }
 
