@@ -62,8 +62,8 @@ export const CASE_STUDY_LAYOUT = {
   },
 
   expanded: {
-    contentWidth: '60%',
-    contentMaxWidth: '907px',
+    contentWidth: '90%',
+    contentMaxWidth: '60vw',
   },
 
   skeleton: {

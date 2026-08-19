@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useCaseStudies } from '../hooks/useCaseStudies'
 import Shell from '../components/Shell'
 import NowPlaying from '../components/NowPlaying'
-import CaseStudyImage from '../components/CaseStudyImage'
+import CaseStudyCover from '../components/CaseStudyCover'
 import ProgressiveBlur from '../components/core/ProgressiveBlur'
 
 // Home header slot: Bio + Status
@@ -68,24 +68,22 @@ export default function Home() {
           <div className="text-lg text-gray-400">Hold tight...</div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 @md:grid-cols-2 gap-9 py-[36px]">
+        <div className="grid grid-cols-1 @md:grid-cols-2 gap-9 pt-[36px] pb-[128px]">
           {caseStudies.map((caseStudy) => (
             <Link
               key={caseStudy._id}
               to={`/work/${caseStudy.slug.current}`}
               className="group flex flex-col items-start gap-4"
             >
-              {/* Cover Image - separate white card */}
+              {/* Cover - supports both image and video */}
               {caseStudy.coverImage && (
-                <div className="w-full aspect-[455/328] rounded-[30px] overflow-hidden [background-color:var(--color-bg-container-solid)] shadow-md hover:shadow-xl transition-all duration-300">
-                  <CaseStudyImage
-                    source={caseStudy.coverImage}
-                    alt={caseStudy.title}
-                    sizes="(max-width: 640px) 92vw, (max-width: 900px) 45vw, 440px"
-                    maxWidth={880}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
+                <CaseStudyCover
+                  coverImage={caseStudy.coverImage}
+                  coverVideo={caseStudy.coverVideoAsset}
+                  alt={caseStudy.title}
+                  sizes="(max-width: 640px) 92vw, (max-width: 900px) 45vw, 440px"
+                  maxWidth={880}
+                />
               )}
 
               {/* Title below - not in a card */}

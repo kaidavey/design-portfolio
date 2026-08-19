@@ -70,13 +70,15 @@
 }
 
 .shell__container--compact .shell__header {
-  max-width: 900px;
+  width: var(--home-content-width, 100%);
+  max-width: var(--home-content-max-width, 900px);
   margin: 0 auto;
 }
 
 /* Only constrain content width on home page (has the home class) */
 .shell__container--compact .shell__content.shell__content--home {
-  max-width: 900px;
+  width: var(--home-content-width, 100%);
+  max-width: var(--home-content-max-width, 900px);
   margin: 0 auto;
 }
 

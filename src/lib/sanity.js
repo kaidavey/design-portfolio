@@ -5,8 +5,8 @@ import { createImageUrlBuilder } from '@sanity/image-url'
 export const client = createClient({
   projectId: '6vslo6fw',
   dataset: 'production',
-  useCdn: true,
-  apiVersion: '2024-01-01',
+  useCdn: false, // Temporarily disabled to bypass cache during development
+  apiVersion: '2025-08-15', // Use current API version
 })
 
 // Image URL builder

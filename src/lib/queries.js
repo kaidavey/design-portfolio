@@ -13,6 +13,14 @@ export async function getCaseStudyBySlug(slug) {
       team,
       tools,
       coverImage,
+      coverVideo {
+        asset-> {
+          _id,
+          playbackId,
+          status,
+          duration
+        }
+      },
       body[] {
         _type,
         _key,
@@ -140,11 +148,25 @@ export async function getAllCaseStudies() {
       year,
       role,
       order,
-      coverImage
+      coverImage,
+      "coverVideoAsset": coverVideo.asset->
     }
   `
 
-  return await client.fetch(query)
+  console.log('[getAllCaseStudies] Executing query')
+  const result = await client.fetch(query)
+  console.log('[getAllCaseStudies] Result:', result)
+
+  // Debug: Log each case study's video data
+  result.forEach((study, index) => {
+    console.log(`[getAllCaseStudies] Case Study ${index} (${study.title}):`, {
+      hasCoverImage: !!study.coverImage,
+      hasCoverVideoAsset: !!study.coverVideoAsset,
+      coverVideoAsset: study.coverVideoAsset,
+    })
+  })
+
+  return result
 }
 
 // Simple cache for prefetching

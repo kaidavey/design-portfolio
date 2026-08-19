@@ -72,7 +72,14 @@ export default defineType({
       options: {
         hotspot: true,
       },
+      description: 'Required fallback image. Also used as poster frame for video.',
       validation: (Rule) => Rule.required(),
+    },
+    {
+      name: 'coverVideo',
+      title: 'Cover Video (Optional)',
+      type: 'mux.video',
+      description: 'Optional video enhancement. Recommended: 5-10 seconds, looping content at 720p.',
     },
     {
       name: 'body',
