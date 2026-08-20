@@ -79,7 +79,7 @@ export default function Home() {
               {caseStudy.coverImage && (
                 <CaseStudyCover
                   coverImage={caseStudy.coverImage}
-                  coverVideo={caseStudy.coverVideoAsset}
+                  coverVideo={caseStudy.coverVideo}
                   alt={caseStudy.title}
                   sizes="(max-width: 640px) 92vw, (max-width: 900px) 45vw, 440px"
                   maxWidth={880}

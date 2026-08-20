@@ -1,21 +1,28 @@
-import { useState, useEffect, useRef } from 'react'
-import Hls from 'hls.js'
+import { useEffect, useRef, useState } from 'react'
 import CaseStudyImage from './CaseStudyImage'
 import { getMuxPlaybackUrl } from '../utils/mux'
+import { useVideoCapability } from '../hooks/useVideoCapability'
+import { useInView } from '../hooks/useInView'
 
 /**
- * CaseStudyCover - Displays case study cover with progressive enhancement
+ * CaseStudyCover - Cover image, with video layered over it when that works out.
  *
- * Architecture:
- * - Image-first approach: Always loads image (required, fast)
- * - Video as enhancement: If video exists, loads it lazily
- * - Performance: IntersectionObserver for lazy loading
- * - Accessibility: Respects prefers-reduced-motion
- * - Graceful degradation: Falls back to image if video fails
+ * The image is always rendered and never unmounted: it's the poster, the
+ * fallback, and the thing that paints first. The video sits on top at zero
+ * opacity and fades in only once it's actually playing.
+ *
+ * That ordering is what makes the failure modes free. A missing playback ID, a
+ * still-encoding asset, a fatal HLS error, a refused autoplay — none of them
+ * need to be predicted or handled, because the image underneath is already
+ * showing and simply stays.
+ *
+ * Video bytes are spent only when the device, connection and viewport all say
+ * it's worthwhile; hls.js itself is loaded on demand and never ships on the
+ * critical path.
  *
  * @param {Object} coverImage - Sanity image object (required)
- * @param {Object} coverVideo - Sanity Mux video object (optional)
- * @param {string} alt - Alt text for image
+ * @param {Object} coverVideo - Sanity Mux asset (optional)
+ * @param {string} alt - Alt text for the image
  * @param {string} sizes - Responsive sizes attribute
  * @param {number} maxWidth - Max width for image optimization
  * @param {string} className - Additional CSS classes
@@ -30,189 +37,121 @@ export default function CaseStudyCover({
   className = '',
   style = {},
 }) {
-  const [videoError, setVideoError] = useState(false)
   const containerRef = useRef(null)
   const videoRef = useRef(null)
-  const hlsRef = useRef(null)
 
-  // Check if user prefers reduced motion
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const [failed, setFailed] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
 
-  // Debug logging
+  const isCapable = useVideoCapability()
+  const inView = useInView(containerRef)
+
+  const videoUrl = getMuxPlaybackUrl(coverVideo)
+  const shouldLoad = Boolean(videoUrl) && isCapable && inView && !failed
+
   useEffect(() => {
-    console.log('[CaseStudyCover] Props:', {
-      hasCoverImage: !!coverImage,
-      hasCoverVideo: !!coverVideo,
-      coverVideo,
-      coverVideoType: typeof coverVideo,
-      coverVideoKeys: coverVideo ? Object.keys(coverVideo) : null,
-      prefersReducedMotion,
-    })
-
-    // Log the full coverVideo object as JSON for inspection
-    if (coverVideo) {
-      console.log('[CaseStudyCover] coverVideo JSON:', JSON.stringify(coverVideo, null, 2))
-    } else {
-      console.warn('[CaseStudyCover] coverVideo is null/undefined!')
-    }
-  }, [coverImage, coverVideo, prefersReducedMotion])
-
-  // Determine if we should show video (simplified - no lazy loading for now)
-  const showVideo = coverVideo && !videoError && !prefersReducedMotion
-  const videoUrl = showVideo ? getMuxPlaybackUrl(coverVideo) : null
-
-  console.log('[CaseStudyCover] Video decision:', {
-    showVideo,
-    videoUrl,
-    videoError,
-    prefersReducedMotion,
-  })
-
-  // Setup HLS.js for browsers that don't support HLS natively
-  useEffect(() => {
-    console.log('[CaseStudyCover] HLS setup effect running', {
-      hasVideoUrl: !!videoUrl,
-      hasVideoRef: !!videoRef.current,
-      videoUrl,
-    })
-
-    if (!videoUrl || !videoRef.current) {
-      console.log('[CaseStudyCover] Skipping HLS setup - missing requirements')
-      return
-    }
+    if (!shouldLoad) return
 
     const video = videoRef.current
-    console.log('[CaseStudyCover] Video element ready:', {
-      readyState: video.readyState,
-      networkState: video.networkState,
-      src: video.src,
-    })
+    if (!video) return
 
-    // Check if browser supports HLS natively (Safari, iOS)
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      console.log('[CaseStudyCover] Browser supports HLS natively')
+    let cancelled = false
+    let hls = null
 
-      // Wait for metadata to load before playing
-      const onLoadedMetadata = () => {
-        console.log('[CaseStudyCover] Native HLS metadata loaded', {
-          duration: video.duration,
-          videoWidth: video.videoWidth,
-          videoHeight: video.videoHeight,
-        })
-        video.play().catch(err => {
-          console.warn('[CaseStudyCover] Native HLS autoplay prevented:', err)
-        })
+    const onPlaying = () => setIsPlaying(true)
+    const onError = () => setFailed(true)
+    video.addEventListener('playing', onPlaying)
+    video.addEventListener('error', onError)
+
+    // Belt and braces for autoplay policy: an unmuted video is never allowed to
+    // start on its own, and React has historically been inconsistent about
+    // reflecting the attribute onto the property.
+    video.muted = true
+
+    // Autoplay can still be refused — battery saver, an unusual policy. The
+    // image is already on screen, so there's nothing to recover from.
+    const play = () => video.play().catch(() => {})
+
+    async function attach() {
+      // Safari and iOS play HLS natively: no library, nothing downloaded.
+      if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = videoUrl
+        play()
+        return
       }
 
-      const onCanPlay = () => {
-        console.log('[CaseStudyCover] Native HLS can play')
+      const { default: Hls } = await import('hls.js/light')
+
+      // Scrolled past, or a StrictMode remount, while the chunk was in flight.
+      if (cancelled) return
+
+      if (!Hls.isSupported()) {
+        setFailed(true)
+        return
       }
 
-      const onError = (e) => {
-        console.error('[CaseStudyCover] Native HLS error event:', {
-          error: video.error,
-          errorCode: video.error?.code,
-          errorMessage: video.error?.message,
-          src: video.src,
-        })
-      }
-
-      video.addEventListener('loadedmetadata', onLoadedMetadata)
-      video.addEventListener('canplay', onCanPlay)
-      video.addEventListener('error', onError)
-
-      console.log('[CaseStudyCover] Setting video src:', videoUrl)
-      video.src = videoUrl
-      video.load()
-
-      return () => {
-        video.removeEventListener('loadedmetadata', onLoadedMetadata)
-        video.removeEventListener('canplay', onCanPlay)
-        video.removeEventListener('error', onError)
-      }
-    }
-    // Use HLS.js for browsers that don't support HLS (Chrome, Firefox)
-    else if (Hls.isSupported()) {
-      console.log('[CaseStudyCover] Using HLS.js')
-      const hls = new Hls({
+      hls = new Hls({
         enableWorker: true,
-        lowLatencyMode: true,
-        debug: false,
+        capLevelToPlayerSize: true,
+        maxBufferLength: 10, // a short looping cover never needs more
       })
-
-      hlsRef.current = hls
-
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.fatal) setFailed(true)
+      })
+      hls.on(Hls.Events.MANIFEST_PARSED, play)
       hls.loadSource(videoUrl)
       hls.attachMedia(video)
-
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log('[CaseStudyCover] HLS manifest parsed, playing video')
-        video.play().catch(err => {
-          console.warn('[CaseStudyCover] Autoplay prevented:', err)
-        })
-      })
-
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        console.error('[CaseStudyCover] HLS error:', data)
-        if (data.fatal) {
-          console.error('[CaseStudyCover] Fatal HLS error, type:', data.type, 'details:', data.details)
-          setVideoError(true)
-        }
-      })
-    } else {
-      console.error('[CaseStudyCover] HLS not supported in this browser')
-      setVideoError(true)
     }
 
-    // Cleanup
+    attach()
+
     return () => {
-      if (hlsRef.current) {
-        console.log('[CaseStudyCover] Cleaning up HLS.js')
-        hlsRef.current.destroy()
-        hlsRef.current = null
+      cancelled = true
+      // Detach before tearing down the source: clearing `src` fires its own
+      // error event, and that must not be mistaken for a playback failure.
+      video.removeEventListener('playing', onPlaying)
+      video.removeEventListener('error', onError)
+      setIsPlaying(false)
+
+      if (hls) {
+        hls.destroy()
+      } else {
+        // Abort an in-flight native fetch.
+        video.removeAttribute('src')
+        video.load()
       }
     }
-  }, [videoUrl])
+  }, [shouldLoad, videoUrl])
 
   return (
     <div
       ref={containerRef}
-      className={`w-full overflow-hidden [background-color:var(--color-bg-container-solid)] shadow-md hover:shadow-xl transition-all duration-300 ${className}`}
+      className={`relative w-full overflow-hidden [background-color:var(--color-bg-container-solid)] shadow-md hover:shadow-xl transition-all duration-300 ${className}`}
       style={{
         aspectRatio: 'var(--home-cover-aspect-ratio, 4 / 2.75)',
         borderRadius: 'var(--home-cover-border-radius, 30px)',
         ...style,
       }}
     >
-      {showVideo && videoUrl ? (
+      <CaseStudyImage
+        source={coverImage}
+        alt={alt}
+        sizes={sizes}
+        maxWidth={maxWidth}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+      />
+
+      {shouldLoad && (
         <video
           ref={videoRef}
+          autoPlay
           loop
           muted
           playsInline
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          onError={(e) => {
-            console.error('[CaseStudyCover] Video error:', e, e.target.error)
-            if (e.target.error) {
-              console.error('[CaseStudyCover] Error code:', e.target.error.code)
-              console.error('[CaseStudyCover] Error message:', e.target.error.message)
-            }
-            setVideoError(true)
-          }}
-          onLoadedData={() => console.log('[CaseStudyCover] Video loaded successfully')}
-          onCanPlay={() => console.log('[CaseStudyCover] Video can play')}
-          onLoadedMetadata={() => console.log('[CaseStudyCover] Video metadata loaded')}
-        >
-          {/* Fallback to image if video fails */}
-          Your browser does not support HLS video.
-        </video>
-      ) : (
-        <CaseStudyImage
-          source={coverImage}
-          alt={alt}
-          sizes={sizes}
-          maxWidth={maxWidth}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          aria-hidden="true"
+          tabIndex={-1}
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-[transform,opacity] duration-300"
+          style={{ opacity: isPlaying ? 1 : 0 }}
         />
       )}
     </div>

@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:integration": "SANITY_INTEGRATION=1 vitest run src/test/sanity.integration.test.js",
     "test:watch": "vitest",
     "test:ui": "vitest --ui"
   },

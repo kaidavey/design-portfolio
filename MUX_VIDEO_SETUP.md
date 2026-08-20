@@ -11,15 +11,26 @@ The implementation follows **progressive enhancement** principles:
 
 ## Key Design Decisions
 
-### 1. Progressive Enhancement
-- `coverImage`: **Required** - Fast-loading fallback, also used as video poster
-- `coverVideo`: **Optional** - Enhances the experience when present
+### 1. The image is layered under the video, never replaced by it
+
+The `<img>` is always rendered and never unmounted. The `<video>` sits on top of
+it at `opacity: 0` and fades in **only once it fires a `playing` event**.
+
+This is the load-bearing decision. Because the image is already on screen, the
+component never has to predict whether video will work — it just tries, and
+success reveals itself. A missing playback ID, a still-encoding asset, a fatal
+HLS error, a refused autoplay, a 404 from Mux: every one of them just leaves the
+image showing. Failure is free, silent and identical.
+
+- `coverImage`: **Required** — the poster, the fallback, and the LCP element
+- `coverVideo`: **Optional** — enhances the experience when it works out
 
 ### 2. Performance Optimizations
-- **Lazy loading**: Videos only load when in viewport (IntersectionObserver)
-- **Reduced motion**: Respects `prefers-reduced-motion` preference (shows image instead)
-- **Error handling**: Falls back to image if video fails to load
-- **Native video element**: Uses lightweight `<video>` instead of full Mux Player
+- **Lazy loading**: Videos load only when the card nears the viewport (`useInView`, 200px margin)
+- **Capability gating**: `useVideoCapability` blocks loading on `prefers-reduced-motion`, Data Saver, `slow-2g`/`2g`/`3g`, or `deviceMemory < 4`. Both live signals are *subscribed*, so toggling the OS motion setting or dropping to cellular takes effect without a reload. A browser that doesn't report a signal counts as capable — never block on something you can't read.
+- **On-demand player**: hls.js is `import()`ed only when a video actually loads, and uses the `hls.js/light` build (no alt-audio, subtitles or DRM — none of which a silent loop needs). This keeps **~183 kB gzipped off the critical path**; the main bundle is 172 kB gz instead of 355 kB gz.
+- **Native HLS on Apple platforms**: Safari and iOS play the `.m3u8` directly, so they download no player library at all.
+- **Capped delivery**: playback URLs request `?max_resolution=720p`. Cards render around 440 CSS px wide.
 
 ### 3. User Experience
 - Videos autoplay, loop, and are muted (required for autoplay)
@@ -41,10 +52,12 @@ Smart component that handles both images and videos:
 ```
 
 ### Mux Utilities (`/src/utils/mux.js`)
-Helper functions for working with Mux videos:
-- `getMuxPlaybackUrl(muxVideo, options)` - Generates playback URL
-- `getMuxThumbnailUrl(muxVideo, options)` - Generates thumbnail URL
-- `isMuxVideoReady(muxVideo)` - Checks if video is ready
+- `normalizeMuxAsset(input)` - Flattens either GROQ shape (`{ asset: {...} }` or the bare asset document) into `{ playbackId, status }`, or `null` if there's nothing playable
+- `getMuxPlaybackUrl(input, options)` - Builds the HLS URL, capped at 720p by default
+
+### Hooks
+- `useVideoCapability()` (`/src/hooks/useVideoCapability.js`) - Should this device/connection spend bytes on decorative video?
+- `useInView(ref, options)` (`/src/hooks/useInView.js`) - IntersectionObserver against a ref the caller already owns
 
 ## Sanity Studio Setup
 
@@ -99,34 +112,67 @@ You'll likely never need to pay for a portfolio site.
 
 ## Frontend Query
 
-GROQ queries fetch the video data structure:
+`getAllCaseStudies` projects only the two fields playback needs — dereferencing
+the whole Mux asset drags its full encoding metadata into every card on the page:
+
 ```groq
-coverVideo {
-  asset-> {
-    _id,
-    playbackId,
-    status,
-    duration
-  }
+"coverVideo": coverVideo.asset-> {
+  "playbackId": coalesce(playbackId, data.playback_ids[0].id),
+  status
 }
 ```
 
+`status` is fetched for debugging only. **Nothing gates on it** — see below.
+
 ## Testing Checklist
 
-- [ ] Upload a test video in Sanity Studio
-- [ ] Wait for Mux to finish encoding (status: "ready")
-- [ ] Verify video plays on homepage
-- [ ] Test on slow connection (video should lazy load)
-- [ ] Test with browser DevTools > Rendering > "Emulate CSS prefers-reduced-motion" (should show image)
+- [ ] Upload a test video in Sanity Studio and **publish** the case study
+- [ ] `npm test` — `src/test/mux.test.js` covers URL building and both GROQ shapes offline
+- [ ] Verify the image paints immediately, then the video cross-fades in
+- [ ] DevTools > Network: no `hls.light` chunk is requested until a card scrolls into view
+- [ ] DevTools > Rendering > "Emulate prefers-reduced-motion: reduce" — video stops loading; toggle it back off and the video should start **without a reload**
+- [ ] DevTools > Network > throttle to "Slow 3G" — no video requested at all
 - [ ] Test with video field empty (should show image)
-- [ ] Test video error handling (invalid playback ID should fall back to image)
+- [ ] Test video error handling (invalid playback ID should fall back to image, silently)
 
 ## Troubleshooting
 
+### ⚠️ Never gate playback on the Sanity `status` field
+
+This one cost a day. The `status` on a `mux.videoAsset` document is **a snapshot
+taken moments after Mux ingests the file, while it is still encoding** — and
+nothing routinely writes it back.
+
+In `sanity-plugin-mux-input@5`, `updateAssetDocumentFromUpload` calls `pollUpload`,
+which resolves as soon as `upload.data.asset_id` exists. It then does a
+`createOrReplace` with `status: asset.data.status`, which at that instant is
+`"preparing"`. The only code paths that ever update it afterwards are the
+mezzanine/master-download poller, the "add captions" dialog, and the Studio
+tool's manual *resync from Mux* button. There is no general poller, so the field
+reads `"preparing"` more or less forever, long after the video plays fine.
+
+`data.status` is captured in the same instant and is just as stale.
+
+**The playback ID is the durable signal.** It is written correctly on first save
+and never changes. If a playback ID exists, try to play it and let failure fall
+back to the image.
+
+To check what your dataset actually holds:
+
+```bash
+curl -sG 'https://6vslo6fw.api.sanity.io/v2025-08-15/data/query/production' \
+  --data-urlencode 'query=*[_type=="caseStudy"]{title,"pid":coverVideo.asset->playbackId,"status":coverVideo.asset->status}'
+```
+
+A valid `pid` next to a non-`ready` `status` is the expected, healthy state.
+
 ### Video not showing
-1. Check Sanity Studio - is the video status "ready"?
-2. Check browser console for errors
-3. Verify `coverImage` exists (required fallback)
+1. Confirm a `playbackId` exists (see the curl above). Ignore `status`.
+2. Is the case study **published**? The frontend client is unauthenticated, so it only sees published documents — a video added to a draft is invisible.
+3. Do you have **Reduce Motion** on at the OS level? That intentionally disables cover videos.
+4. Are you on a throttled connection, or is Data Saver on? Both intentionally disable them.
+5. Check that `https://stream.mux.com/<playbackId>.m3u8` returns 200 in the browser.
+6. Verify `coverImage` exists — it is the required fallback and the video is layered over it.
 
 ### Video loads slowly
 - This is expected on first load

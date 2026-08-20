@@ -212,18 +212,17 @@ export function useCursorMagnetism(cardRef, side, config, gates = {}) {
   const smoothStrength = useSpring(rawStrength, springConfigRef.current)
   const smoothDisplacementY = useSpring(rawDisplacementY, springConfigRef.current)
 
-  // Peek: base offset + gain
-  const basePeek = parseFloat(config.peek?.revealWidth) || 0
+  // Peek: gain applied on top of the CSS reveal width
   const peekGain = magnetism?.peekGain ?? 60
 
-  const peekX = useTransform(
-    smoothStrength,
-    [0, 1],
-    [0, peekGain * (side === 'prev' ? 1 : -1)]
-  )
+  const peekX = useTransform(smoothStrength, (strength) => {
+    if (!magnetism) return 0
+    return strength * peekGain * (side === 'prev' ? 1 : -1)
+  })
 
   // Vertical tracking: cursor displacement scaled by strength
   const peekY = useTransform([smoothStrength, smoothDisplacementY], ([strength, disY]) => {
+    if (!magnetism) return 0
     return strength * disY
   })
 
@@ -244,14 +243,9 @@ export function useCursorMagnetism(cardRef, side, config, gates = {}) {
     return Math.max(-leanCap, Math.min(leanCap, angle))
   })
 
-  // Under reduced motion, return only base peek (no magnetism)
-  if (!magnetism) {
-    return {
-      peekX: useMotionValue(0),
-      peekY: useMotionValue(0),
-      leanRotate: useMotionValue(0),
-    }
-  }
-
+  // Under reduced motion there is no magnetism, and each transform above
+  // already resolves to 0. Returning fresh motion values from a branch here
+  // would call hooks conditionally — and would hand back new objects on every
+  // render, detaching whatever was bound to the previous ones.
   return { peekX, peekY, leanRotate }
 }
