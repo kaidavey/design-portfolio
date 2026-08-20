@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll, beforeEach, vi } from 'vitest'
+import { describe, test, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest'
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import CaseStudyCover from '../components/CaseStudyCover'
 
@@ -101,6 +101,10 @@ beforeEach(() => {
   observers = []
   hlsInstances.length = 0
   prefersReducedMotion = false
+
+  // jsdom ships no MediaSource, which would make every test look like iOS.
+  // Default to a Chromium-shaped environment; the native suite clears it.
+  vi.stubGlobal('MediaSource', class MockMediaSource {})
 
   vi.stubGlobal(
     'matchMedia',
@@ -246,11 +250,52 @@ describe('when playback fails', () => {
   })
 })
 
-describe('on browsers with native HLS', () => {
-  test('sets src directly and never downloads the player', async () => {
-    const canPlayType = vi
-      .spyOn(HTMLMediaElement.prototype, 'canPlayType')
-      .mockReturnValue('probably')
+describe('choosing a playback path', () => {
+  let canPlayType
+
+  beforeEach(() => {
+    canPlayType = vi.spyOn(HTMLMediaElement.prototype, 'canPlayType')
+  })
+
+  afterEach(() => {
+    canPlayType.mockRestore()
+  })
+
+  test('iOS plays natively and never downloads the player', async () => {
+    // No MediaSource, but real HLS in the platform.
+    vi.stubGlobal('MediaSource', undefined)
+    canPlayType.mockReturnValue('probably')
+
+    const { container } = renderCover()
+    scrollIntoView()
+    await settle()
+
+    expect(hlsInstances).toHaveLength(0)
+    expect(container.querySelector('video').src).toBe(
+      'https://stream.mux.com/pb-123.m3u8?max_resolution=720p'
+    )
+  })
+
+  test('ignores a "maybe" from a browser that has MediaSource', async () => {
+    // Chrome answers "maybe" for the HLS MIME type on some builds while having
+    // no demuxer for it. Trusting that sets a src which can never decode, and
+    // the resulting error event retires the video permanently — the exact bug
+    // that made every cover fall back to its still image.
+    canPlayType.mockReturnValue('maybe')
+
+    const { container } = renderCover()
+    scrollIntoView()
+    await settle()
+
+    expect(hlsInstances).toHaveLength(1)
+    expect(hlsInstances[0].media).toBe(container.querySelector('video'))
+    expect(container.querySelector('video').src).toBe('')
+  })
+
+  test('falls back to native when MediaSource exists but hls.js declines it', async () => {
+    const { default: MockHls } = await import('hls.js/light')
+    const isSupported = vi.spyOn(MockHls, 'isSupported').mockReturnValue(false)
+    canPlayType.mockReturnValue('probably')
 
     const { container } = renderCover()
     scrollIntoView()
@@ -261,6 +306,19 @@ describe('on browsers with native HLS', () => {
       'https://stream.mux.com/pb-123.m3u8?max_resolution=720p'
     )
 
-    canPlayType.mockRestore()
+    isSupported.mockRestore()
+  })
+
+  test('gives up and keeps the image when nothing can play HLS', async () => {
+    vi.stubGlobal('MediaSource', undefined)
+    canPlayType.mockReturnValue('')
+
+    const { container } = renderCover()
+    scrollIntoView()
+    await settle()
+
+    expect(hlsInstances).toHaveLength(0)
+    expect(container.querySelector('video')).toBeNull()
+    expect(screen.getByAltText('Project cover')).toBeInTheDocument()
   })
 })

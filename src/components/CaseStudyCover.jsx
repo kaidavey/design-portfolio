@@ -58,8 +58,19 @@ export default function CaseStudyCover({
     let cancelled = false
     let hls = null
 
+    // Visitors always just get the image back. But swallowing the reason makes a
+    // real playback failure indistinguishable from "no video configured", which
+    // is exactly how this bug stayed hidden — so say what happened in dev.
+    const fail = (reason, detail) => {
+      if (import.meta.env.DEV) {
+        console.warn('[CaseStudyCover] video disabled —', reason, detail ?? '')
+      }
+      setFailed(true)
+    }
+
     const onPlaying = () => setIsPlaying(true)
-    const onError = () => setFailed(true)
+    const onError = () =>
+      fail('media element error', video.error && `code ${video.error.code}: ${video.error.message}`)
     video.addEventListener('playing', onPlaying)
     video.addEventListener('error', onError)
 
@@ -72,11 +83,26 @@ export default function CaseStudyCover({
     // image is already on screen, so there's nothing to recover from.
     const play = () => video.play().catch(() => {})
 
+    const canPlayNatively = () => Boolean(video.canPlayType('application/vnd.apple.mpegurl'))
+
     async function attach() {
-      // Safari and iOS play HLS natively: no library, nothing downloaded.
-      if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = videoUrl
-        play()
+      // `canPlayType` cannot be trusted to choose the path. Chrome answers
+      // "maybe" for the HLS MIME type on some builds while having no demuxer
+      // for it at all, so asking it first sets a src that can never decode —
+      // one manifest request, an error event, and the video is retired for
+      // good. Media Source Extensions is the capability that actually decides,
+      // and hls.js documents testing it first for this reason.
+      //
+      // iOS is the one place native is unambiguously right: no MediaSource, but
+      // real HLS in the platform. Catching it here keeps iPhones on zero-JS
+      // playback instead of downloading a library they cannot use.
+      if (typeof MediaSource === 'undefined') {
+        if (canPlayNatively()) {
+          video.src = videoUrl
+          play()
+        } else {
+          fail('no playback path: neither MediaSource nor native HLS')
+        }
         return
       }
 
@@ -86,7 +112,13 @@ export default function CaseStudyCover({
       if (cancelled) return
 
       if (!Hls.isSupported()) {
-        setFailed(true)
+        // MSE exists but hls.js still declined it. Native is the last resort.
+        if (canPlayNatively()) {
+          video.src = videoUrl
+          play()
+        } else {
+          fail('MediaSource present but hls.js reports no support')
+        }
         return
       }
 
@@ -96,7 +128,7 @@ export default function CaseStudyCover({
         maxBufferLength: 10, // a short looping cover never needs more
       })
       hls.on(Hls.Events.ERROR, (_event, data) => {
-        if (data.fatal) setFailed(true)
+        if (data.fatal) fail(`fatal hls error (${data.type})`, data.details)
       })
       hls.on(Hls.Events.MANIFEST_PARSED, play)
       hls.loadSource(videoUrl)
@@ -115,8 +147,10 @@ export default function CaseStudyCover({
 
       if (hls) {
         hls.destroy()
-      } else {
-        // Abort an in-flight native fetch.
+      } else if (video.src) {
+        // Abort an in-flight native fetch. Guarded, because the effect may be
+        // tearing down while the hls.js import is still in flight, and calling
+        // load() on a source-less element is its own error.
         video.removeAttribute('src')
         video.load()
       }
