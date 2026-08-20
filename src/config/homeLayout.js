@@ -1,8 +1,8 @@
 export const HOME_LAYOUT = {
   containerWidth: '100%',
   containerMaxWidth: '900px',
-  contentWidth: '90%',
-  contentMaxWidth: '60vw',
+  contentWidth: '95%',
+  contentMaxWidth: '1000px',
 
   // Case study cover settings
   cover: {
