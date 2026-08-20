@@ -39,11 +39,6 @@ export function useCaseStudy(slug) {
     const cachedBody = getCachedCaseStudy(slug)
     const cachedShape = getCachedShape(slug)
 
-    console.log('[useCaseStudy]', slug, {
-      hasCachedBody: !!cachedBody,
-      hasCachedShape: !!cachedShape,
-    })
-
     if (cachedBody) {
       setCaseStudy(cachedBody)
       setShape(cachedShape)
@@ -55,24 +50,12 @@ export function useCaseStudy(slug) {
     async function loadCaseStudyData() {
       try {
         setLoading(true)
-        console.log('[useCaseStudy] Cache miss, fetching shape + body for', slug)
 
         // Fire both requests without await between them
         const bodyPromise = getCaseStudyBySlug(slug)
         const shapePromise = getCaseStudyShape(slug)
 
-        // Track which resolves first
-        shapePromise.then(() => console.log('[useCaseStudy] Shape resolved first'))
-        bodyPromise.then(() => console.log('[useCaseStudy] Body resolved'))
-
-        // Wait for both
         const [bodyData, shapeData] = await Promise.all([bodyPromise, shapePromise])
-
-        console.log('[useCaseStudy] Both resolved', {
-          hasBody: !!bodyData,
-          hasShape: !!shapeData,
-          blockCount: shapeData?.blockTypes?.length,
-        })
 
         // Guard against stale responses after navigation
         if (slug !== bodyData?.slug?.current) return

@@ -1,8 +1,6 @@
-import { useEffect } from 'react'
 import { useCaseStudy } from '../../hooks/useCaseStudies'
 import { useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { BlockEntranceProvider } from '../../context/BlockEntranceContext'
-import { urlFor } from '../../lib/sanity'
 import BlockRenderer from './BlockRenderer'
 import CaseStudySkeleton from './CaseStudySkeleton'
 
@@ -10,17 +8,6 @@ export default function CaseStudyBody({ slug, expandButton }) {
   const { caseStudy, shape, loading, error } = useCaseStudy(slug)
 
   const showSkeleton = useDelayedLoading(loading) && shape != null
-
-  // Debug logging
-  useEffect(() => {
-    console.log('[CaseStudyBody]', {
-      slug,
-      loading,
-      hasShape: !!shape,
-      hasCaseStudy: !!caseStudy,
-      showSkeleton,
-    })
-  }, [slug, loading, shape, caseStudy, showSkeleton])
 
   if (error) {
     return (
@@ -32,7 +19,6 @@ export default function CaseStudyBody({ slug, expandButton }) {
 
   // Show skeleton if delayed loading is active and shape data is available
   if (showSkeleton) {
-    console.log('[CaseStudyBody] Rendering skeleton with', shape.blockTypes?.length, 'blocks')
     return (
       <div className="space-y-8">
         <CaseStudySkeleton blockTypes={shape.blockTypes} />
@@ -48,8 +34,6 @@ export default function CaseStudyBody({ slug, expandButton }) {
   if (!caseStudy) {
     return null
   }
-
-  const hasMetadata = caseStudy.role || caseStudy.timeline || caseStudy.team || caseStudy.tools
 
   return (
     <div className="space-y-8">
