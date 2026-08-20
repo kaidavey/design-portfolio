@@ -13,14 +13,6 @@ export async function getCaseStudyBySlug(slug) {
       team,
       tools,
       coverImage,
-      coverVideo {
-        asset-> {
-          _id,
-          playbackId,
-          status,
-          duration
-        }
-      },
       body[] {
         _type,
         _key,
@@ -138,6 +130,11 @@ export async function getCaseStudyShape(slug) {
 }
 
 // Fetch all case studies (for listing page)
+//
+// The cover video projection keeps only the two fields playback needs —
+// dereferencing the whole Mux asset drags its full encoding metadata into every
+// card on the page. The coalesce covers assets written before the Mux plugin
+// lifted playbackId out of `data`.
 export async function getAllCaseStudies() {
   const query = `
     *[_type == "caseStudy"] | order(order asc) {
@@ -149,24 +146,14 @@ export async function getAllCaseStudies() {
       role,
       order,
       coverImage,
-      "coverVideoAsset": coverVideo.asset->
+      "coverVideo": coverVideo.asset-> {
+        "playbackId": coalesce(playbackId, data.playback_ids[0].id),
+        status
+      }
     }
   `
 
-  console.log('[getAllCaseStudies] Executing query')
-  const result = await client.fetch(query)
-  console.log('[getAllCaseStudies] Result:', result)
-
-  // Debug: Log each case study's video data
-  result.forEach((study, index) => {
-    console.log(`[getAllCaseStudies] Case Study ${index} (${study.title}):`, {
-      hasCoverImage: !!study.coverImage,
-      hasCoverVideoAsset: !!study.coverVideoAsset,
-      coverVideoAsset: study.coverVideoAsset,
-    })
-  })
-
-  return result
+  return client.fetch(query)
 }
 
 // Simple cache for prefetching
