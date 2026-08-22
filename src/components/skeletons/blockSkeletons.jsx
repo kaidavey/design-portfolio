@@ -200,6 +200,23 @@ function SpacerSkeleton({ block }) {
   return <div style={{ height: `${block.height}px` }} aria-hidden="true" />
 }
 
+// Group - Its children at the group's own gap, so the placeholder column is the
+// same height as the real one. Groups do not nest, so neither does this.
+function BlockGroupSkeleton({ block }) {
+  return (
+    <div
+      className="flex flex-col w-full"
+      style={{ gap: `${block?.gap ?? CASE_STUDY_LAYOUT.blockGap}px` }}
+    >
+      {(block?.blocks || []).map((child, index) => {
+        const ChildSkeleton = skeletonRegistry[child._type]
+        if (!ChildSkeleton) return null
+        return <ChildSkeleton key={child._key || index} block={child} />
+      })}
+    </div>
+  )
+}
+
 export const skeletonRegistry = {
   projectDetails: ProjectDetailsSkeleton,
   hero: HeroSkeleton,
@@ -214,4 +231,5 @@ export const skeletonRegistry = {
   imageFull: ImageFullSkeleton,
   framedImage: FramedImageSkeleton,
   spacer: SpacerSkeleton,
+  blockGroup: BlockGroupSkeleton,
 }

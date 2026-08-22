@@ -18,7 +18,8 @@ Your portfolio now has a complete block-based content system! Each case study is
 10. **Image Row** - 2-3 images in a row with captions
 11. **Image + Text Grid** - 2-3 columns with images and text cards
 12. **Call to Action** - CTA card with button
-13. **Spacer** - Fixed vertical gap
+13. **Group** - A run of blocks sharing one spacing value
+14. **Spacer** - Fixed vertical gap
 
 ### Image vs Framed Image
 
@@ -48,6 +49,29 @@ Frame options:
 
 Portrait frames are capped by height and sized from the ratio, so a 9:16 frame
 stays on screen instead of turning into a long column of gray.
+
+### Spacing: Group vs Spacer
+
+Blocks in the body sit **32px apart** by default. You only need to do something
+when you want a different rhythm.
+
+**Group** is the one to reach for. Add a Group, set its **Spacing**, and put
+blocks inside it — every block in that group is spaced by that value. It is the
+only way to bring blocks *closer* than the 32px default, which is what makes a
+heading sit tight above its paragraph.
+
+**Spacer** adds a fixed gap at one point in the body. It stacks on top of the
+32px that is already there, so a 16px Spacer produces a 48px gap. Use it for a
+one-off breath between sections, not for rhythm.
+
+Groups do not nest, and Spacers are not offered inside them — a group exists to
+make its spacing uniform, and a Spacer in the middle would quietly undo that.
+
+One trade-off worth knowing before you start: blocks inside a Group are edited
+one level down in the Studio, and Sanity does not let you drag a block between
+the body and a Group. Moving an existing block into one means copy, paste
+inside the Group, delete the original. Decide on a group while you are laying a
+section out and this never comes up; retrofitting one later costs a few clicks.
 
 ## Getting Started
 
@@ -109,7 +133,7 @@ Replace `your-slug-here` with the slug you created.
 Here's a typical case study flow:
 
 1. **Hero** - Introduction with project title
-2. **Project Details** - Metadata overview
+2. **Project Details** - Metadata overview (often grouped tight under the Hero)
 3. **Text Block (Centered)** - Problem statement
 4. **Text + Image Row** - Research findings
 5. **Image Row** - Design explorations

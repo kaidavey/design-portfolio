@@ -15,6 +15,7 @@ import textColumns from './blocks/textColumns'
 import textRowTwoColumn from './blocks/textRowTwoColumn'
 import imageFull from './blocks/imageFull'
 import framedImage from './blocks/framedImage'
+import blockGroup from './blocks/blockGroup'
 import spacer from './blocks/spacer'
 
 // Document types
@@ -37,6 +38,7 @@ export const schemaTypes = [
   textRowTwoColumn,
   imageFull,
   framedImage,
+  blockGroup,
   spacer,
   // Documents
   caseStudy,

@@ -55,6 +55,7 @@ export default defineType({
         { type: 'imageRow' },
         { type: 'imageTextGrid' },
         { type: 'callToAction' },
+        { type: 'blockGroup' },
         { type: 'spacer' },
       ],
       validation: (Rule) => Rule.required().min(1),

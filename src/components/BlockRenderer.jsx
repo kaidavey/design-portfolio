@@ -4,6 +4,7 @@ import { useMorphCutIndex } from '../context/MorphCutContext'
 import { useScrollRoot, scrollViewportBounds } from '../context/ScrollContainerContext'
 import { motion } from 'framer-motion'
 import { useScrollAnimation } from '../hooks/useScrollAnimation'
+import { CASE_STUDY_LAYOUT } from '../config/caseStudyLayout'
 import ProjectDetails from './blocks/ProjectDetails'
 import Hero from './blocks/Hero'
 import TextImageRow from './blocks/TextImageRow'
@@ -185,41 +186,100 @@ const blockRegistry = {
   spacer: Spacer,
 }
 
+/**
+ * Number every block that gets an AnimatedBlock wrapper, in document order.
+ *
+ * `data-block-index` is what useExpandMorph measures against, and both halves
+ * of that mechanism assume one thing: the sequence only ever increases down the
+ * page. measureVisibleCut walks the wrappers flat and stops at the first one
+ * past the fold; AnimatedBlock then hides every block whose index is past the
+ * cut, which is only safe while "past the cut" and "further down" mean the same
+ * thing.
+ *
+ * So a group contributes its children to the sequence and never itself. A group
+ * is a flex column inside a flex column, so its children still run top to
+ * bottom in document order and the invariant survives the nesting. Blocks that
+ * get no wrapper — spacers, groups, unknown types — claim no index; gaps in the
+ * numbering are fine, only the ordering matters.
+ *
+ * Indices are keyed by block identity rather than position, so the caller can
+ * look one up without re-deriving the walk.
+ */
+function assignBlockIndices(blocks, indices = new Map(), counter = { next: 0 }) {
+  for (const block of blocks || []) {
+    if (!block) continue
+
+    if (block._type === 'blockGroup') {
+      assignBlockIndices(block.blocks, indices, counter)
+      continue
+    }
+
+    if (block._type === 'spacer' || !blockRegistry[block._type]) continue
+
+    indices.set(block, counter.next++)
+  }
+
+  return indices
+}
+
+function renderBlock(block, fallbackKey, indices, expandButton) {
+  const key = block._key || fallbackKey
+
+  // A group paints no content of its own — it is the column its children sit
+  // in, holding the gap they share.
+  if (block._type === 'blockGroup') {
+    return (
+      <div
+        key={key}
+        className="flex flex-col w-full"
+        style={{ gap: `${block.gap ?? CASE_STUDY_LAYOUT.blockGap}px` }}
+      >
+        {(block.blocks || []).map((child, childIndex) =>
+          renderBlock(child, `${key}-${childIndex}`, indices, expandButton)
+        )}
+      </div>
+    )
+  }
+
+  const Component = blockRegistry[block._type]
+  if (!Component) return null
+
+  if (block._type === 'spacer') {
+    return <Component key={key} block={block} />
+  }
+
+  const index = indices.get(block)
+
+  // The expand button rides on the very first block that paints, wherever it
+  // sits — inside a group as readily as at the top level.
+  if (index === 0 && expandButton) {
+    return (
+      <AnimatedBlock key={key} index={index} isFirst={true}>
+        <div className="flex items-center justify-between w-full">
+          <Component block={block} />
+          <div className="shrink-0 pb-4">{expandButton}</div>
+        </div>
+      </AnimatedBlock>
+    )
+  }
+
+  return (
+    <AnimatedBlock key={key} index={index} isFirst={index === 0}>
+      <Component block={block} />
+    </AnimatedBlock>
+  )
+}
+
 export default function BlockRenderer({ blocks, expandButton }) {
   if (!blocks || !Array.isArray(blocks)) {
     return null
   }
 
+  const indices = assignBlockIndices(blocks)
+
   return (
     <div className="flex flex-col gap-8">
-      {blocks.map((block, index) => {
-        const Component = blockRegistry[block._type]
-
-        if (!Component) {
-          return null
-        }
-
-        if (block._type === 'spacer') {
-          return <Component key={block._key || index} block={block} />
-        }
-
-        if (index === 0 && expandButton) {
-          return (
-            <AnimatedBlock key={block._key || index} index={index} isFirst={true}>
-              <div className="flex items-center justify-between w-full">
-                <Component block={block} />
-                <div className="shrink-0 pb-4">{expandButton}</div>
-              </div>
-            </AnimatedBlock>
-          )
-        }
-
-        return (
-          <AnimatedBlock key={block._key || index} index={index} isFirst={index === 0}>
-            <Component block={block} />
-          </AnimatedBlock>
-        )
-      })}
+      {blocks.map((block, index) => renderBlock(block, index, indices, expandButton))}
     </div>
   )
 }

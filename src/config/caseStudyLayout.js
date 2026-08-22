@@ -1,4 +1,8 @@
 export const CASE_STUDY_LAYOUT = {
+  // Gap between body blocks, in px. MIRRORED as `gap-8` on BlockRenderer's
+  // outer column; a Group overrides it for the blocks it holds.
+  blockGap: 32,
+
   compact: {
     containerWidth: '60vw',
     containerMaxWidth: '1048px',

@@ -149,3 +149,102 @@ describe('BlockRenderer cut', () => {
     expect(blocks[1].style.display).toBe('none')
   })
 })
+
+/**
+ * Groups and the index contract.
+ *
+ * A Group nests blocks one level deep, which is exactly the shape that could
+ * break the cut: measureVisibleCut walks [data-block-index] flat and stops at
+ * the first block past the fold, and AnimatedBlock hides everything past that
+ * index. Both only work while "past the cut" and "further down the page" mean
+ * the same thing.
+ *
+ * So the numbering has to run in document order across the whole tree, and the
+ * group itself must not take a number — it paints nothing.
+ */
+describe('BlockRenderer groups', () => {
+  function group(gap, children) {
+    return { _key: `group-${gap}`, _type: 'blockGroup', gap, blocks: children }
+  }
+
+  function text(key) {
+    return { _key: key, _type: 'textBlockCentered', body: key }
+  }
+
+  function indicesOf(container) {
+    return [...container.querySelectorAll('[data-block-index]')].map(
+      (node) => node.dataset.blockIndex
+    )
+  }
+
+  test('numbers grouped blocks in document order, and the group itself not at all', () => {
+    const { container } = render(
+      <BlockRenderer
+        blocks={[text('a'), group(16, [text('b'), text('c')]), text('d')]}
+      />
+    )
+
+    // Four blocks paint, so four indices — the group contributed its children
+    // and took no number of its own.
+    expect(indicesOf(container)).toEqual(['0', '1', '2', '3'])
+  })
+
+  test('keeps numbering monotonic across several groups', () => {
+    const { container } = render(
+      <BlockRenderer
+        blocks={[
+          group(8, [text('a'), text('b')]),
+          text('c'),
+          group(48, [text('d'), text('e'), text('f')]),
+        ]}
+      />
+    )
+
+    const indices = indicesOf(container).map(Number)
+    expect(indices).toEqual([0, 1, 2, 3, 4, 5])
+    // Document order is what measureVisibleCut walks; if this ever stops
+    // increasing, the cut hides the wrong half of the column.
+    expect([...indices].sort((a, b) => a - b)).toEqual(indices)
+  })
+
+  test('cuts through a group boundary without hiding anything retained', () => {
+    const { container } = render(
+      <MorphCutProvider cutIndex={1}>
+        <BlockRenderer blocks={[text('a'), group(16, [text('b'), text('c')]), text('d')]} />
+      </MorphCutProvider>
+    )
+
+    const hidden = [...container.querySelectorAll('[data-block-index]')].map(
+      (node) => node.style.display === 'none'
+    )
+    // Indices 0 and 1 are retained, 2 and 3 are cut — a contiguous suffix even
+    // though the cut lands inside the group.
+    expect(hidden).toEqual([false, false, true, true])
+  })
+
+  test('applies the group gap, and falls back to the body default', () => {
+    const { container } = render(
+      <BlockRenderer
+        blocks={[group(8, [text('a'), text('b')]), { _key: 'g2', _type: 'blockGroup', blocks: [text('c'), text('d')] }]}
+      />
+    )
+
+    const columns = [...container.querySelectorAll('[style*="gap"]')]
+    expect(columns[0].style.gap).toBe('8px')
+    // No gap set on the block at all — the body default stands in.
+    expect(columns[1].style.gap).toBe('32px')
+  })
+
+  test('hands the expand button to the first block even when it sits in a group', () => {
+    render(
+      <BlockRenderer
+        blocks={[group(16, [text('a'), text('b')]), text('c')]}
+        expandButton={<button type="button">Expand</button>}
+      />
+    )
+
+    // The button belongs to whatever paints first, group or not.
+    const first = document.querySelector('[data-block-index="0"]')
+    expect(first.querySelector('button')).not.toBeNull()
+  })
+})

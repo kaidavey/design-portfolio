@@ -336,6 +336,22 @@ frame and its skeleton both read it, so they agree on the height.
 
 ---
 
+## Structural Blocks
+
+One block type is layout, not content, and Paper does not generate a
+presentation for it:
+
+**`blockGroup`** — a run of blocks sharing one gap, so a section can be spaced
+tighter or looser than the body's 32px default. `BlockRenderer` renders it as a
+nested flex column with an inline `gap`.
+
+The rule it imposes on everything else: **`data-block-index` runs in document
+order across the whole tree, and a group claims no index of its own.**
+`measureVisibleCut` walks those indices flat and stops at the first block past
+the fold; `AnimatedBlock` then hides every block past the cut. Both hold only
+while the numbering increases down the page. Any future block that nests other
+blocks must contribute its children to that sequence and never itself.
+
 ## Theme Tokens
 
 Paper must use semantic token classes, **not** raw values.

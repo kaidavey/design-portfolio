@@ -26,6 +26,118 @@ const MEDIA_FIELDS = `
   image { ${IMAGE_FIELDS} }
 `
 
+// The per-type projections, shared by the body and by the blocks inside a
+// Group. Without this a grouped block would arrive carrying `_type` and nothing
+// else, because GROQ applies a projection only at the level it is written.
+//
+// Deliberately does not mention `blockGroup` — groups do not nest, and this is
+// what enforces it on the read side.
+const BLOCK_FIELDS = `
+  _type,
+  _key,
+
+  // projectDetails
+  _type == "projectDetails" => {
+    role,
+    timeline,
+    team,
+    tools
+  },
+
+  // hero
+  _type == "hero" => {
+    icon,
+    title
+  },
+
+  // textImageRow
+  _type == "textImageRow" => {
+    title,
+    paragraphs,
+    subtitle,
+    media { ${MEDIA_FIELDS} }
+  },
+
+  // imageRow
+  _type == "imageRow" => {
+    images[] {
+      _key,
+      ${MEDIA_FIELDS}
+    }
+  },
+
+  // imageTextGrid
+  _type == "imageTextGrid" => {
+    columns[] {
+      _key,
+      subtitle,
+      description,
+      media { ${MEDIA_FIELDS} }
+    }
+  },
+
+  // callToAction
+  _type == "callToAction" => {
+    title,
+    description,
+    buttonText,
+    buttonLink
+  },
+
+  // textBlockCentered
+  _type == "textBlockCentered" => {
+    section,
+    title,
+    body
+  },
+
+  // textCardRow
+  _type == "textCardRow" => {
+    cards[] {
+      _key,
+      icon,
+      subtitle,
+      description
+    }
+  },
+
+  // textColumns
+  _type == "textColumns" => {
+    section,
+    title,
+    paragraphs,
+    subtitle
+  },
+
+  // textRowTwoColumn
+  _type == "textRowTwoColumn" => {
+    section,
+    title,
+    leftParagraphs,
+    rightParagraphs
+  },
+
+  // imageFull
+  _type == "imageFull" => {
+    alt,
+    caption,
+    image { ${IMAGE_FIELDS} }
+  },
+
+  // framedImage
+  _type == "framedImage" => {
+    alt,
+    caption,
+    frame,
+    image { ${IMAGE_FIELDS} }
+  },
+
+  // spacer
+  _type == "spacer" => {
+    height
+  }
+`
+
 // Fetch a single case study by slug
 export async function getCaseStudyBySlug(slug) {
   const query = `
@@ -34,108 +146,14 @@ export async function getCaseStudyBySlug(slug) {
       title,
       slug,
       body[] {
-        _type,
-        _key,
+        ${BLOCK_FIELDS},
 
-        // projectDetails
-        _type == "projectDetails" => {
-          role,
-          timeline,
-          team,
-          tools
-        },
-
-        // hero
-        _type == "hero" => {
-          icon,
-          title
-        },
-
-        // textImageRow
-        _type == "textImageRow" => {
-          title,
-          paragraphs,
-          subtitle,
-          media { ${MEDIA_FIELDS} }
-        },
-
-        // imageRow
-        _type == "imageRow" => {
-          images[] {
-            _key,
-            ${MEDIA_FIELDS}
+        // blockGroup — a run of blocks sharing one gap
+        _type == "blockGroup" => {
+          gap,
+          blocks[] {
+            ${BLOCK_FIELDS}
           }
-        },
-
-        // imageTextGrid
-        _type == "imageTextGrid" => {
-          columns[] {
-            _key,
-            subtitle,
-            description,
-            media { ${MEDIA_FIELDS} }
-          }
-        },
-
-        // callToAction
-        _type == "callToAction" => {
-          title,
-          description,
-          buttonText,
-          buttonLink
-        },
-
-        // textBlockCentered
-        _type == "textBlockCentered" => {
-          section,
-          title,
-          body
-        },
-
-        // textCardRow
-        _type == "textCardRow" => {
-          cards[] {
-            _key,
-            icon,
-            subtitle,
-            description
-          }
-        },
-
-        // textColumns
-        _type == "textColumns" => {
-          section,
-          title,
-          paragraphs,
-          subtitle
-        },
-
-        // textRowTwoColumn
-        _type == "textRowTwoColumn" => {
-          section,
-          title,
-          leftParagraphs,
-          rightParagraphs
-        },
-
-        // imageFull
-        _type == "imageFull" => {
-          alt,
-          caption,
-          image { ${IMAGE_FIELDS} }
-        },
-
-        // framedImage
-        _type == "framedImage" => {
-          alt,
-          caption,
-          frame,
-          image { ${IMAGE_FIELDS} }
-        },
-
-        // spacer
-        _type == "spacer" => {
-          height
         }
       }
     }
@@ -152,7 +170,15 @@ export async function getCaseStudyShape(slug) {
         _type,
         _key,
         _type == "spacer" => { height },
-        _type == "framedImage" => { frame }
+        _type == "framedImage" => { frame },
+        _type == "blockGroup" => {
+          gap,
+          blocks[]{
+            _type,
+            _key,
+            _type == "framedImage" => { frame }
+          }
+        }
       }
     }
   `

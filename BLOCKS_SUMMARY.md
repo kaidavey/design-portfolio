@@ -10,7 +10,7 @@
   which is what lets a framed device shot go anywhere a plain image goes.
 - **imageFrame.ts** — frame settings: shape, inset, backdrop.
 
-### 2. Sanity block schemas (13 types)
+### 2. Sanity block schemas (14 types)
 `portfolio-cms/schemaTypes/blocks/`
 
 | Schema | What it is |
@@ -27,6 +27,7 @@
 | `imageRow.ts` | 2-3 images with captions |
 | `imageTextGrid.ts` | 2-3 columns of image + text card |
 | `callToAction.ts` | Title, description, button text/link |
+| `blockGroup.ts` | A run of blocks sharing one gap |
 | `spacer.ts` | Fixed vertical gap |
 
 Every one of them is listed in the `body` array of `caseStudy.ts`. Registering
@@ -90,6 +91,19 @@ standalone Framed Image block — puts that image on a rounded surface. The
 surface is the responsive part; the image inside is centred and only ever
 scaled down to fit. It is never cropped.
 
+### Grouped spacing
+Body blocks sit 32px apart (`gap-8`, mirrored as `CASE_STUDY_LAYOUT.blockGap`).
+A **Group** wraps a run of blocks in its own gap — the only way to space blocks
+*closer* than the default, since a Spacer can only add to it.
+
+Groups paint no content: `BlockRenderer` renders one as a nested flex column
+and the group claims no `data-block-index`. That matters, because
+`measureVisibleCut` walks those indices flat and stops at the first block past
+the fold, and `AnimatedBlock` hides everything past the cut — both only hold
+while the numbering increases down the page. `assignBlockIndices` numbers the
+whole tree in document order to keep it that way, and
+`src/test/expandMorph.test.jsx` pins the behaviour.
+
 ### Images that don't shift the page
 The case study query dereferences `asset->metadata.dimensions`, so every block
 knows an image's shape before its bytes land and reserves the height up front.
@@ -122,6 +136,8 @@ If any documents already exist in the dataset, they need a one-off migration:
 | `imageRow.images[].image` | `imageRow.images[].image` (now inside a `caseStudyImage`, so `caption` sits beside it as before) |
 | `imageTextGrid.columns[].image` | `imageTextGrid.columns[].media.image` |
 | `imageFull` | unchanged, plus an optional `alt` |
+
+`blockGroup` is additive — nothing existing has to move to adopt it.
 
 An `imageRow` item and a `caseStudyImage` happen to have the same field names
 for `image` and `caption`, so that one migrates by adding `_type` alone. The
