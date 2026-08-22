@@ -30,4 +30,13 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     },
   ],
+  preview: {
+    select: { role: 'role', timeline: 'timeline' },
+    prepare({ role, timeline }) {
+      return {
+        title: 'Project Details',
+        subtitle: [role, timeline].filter(Boolean).join(' · '),
+      }
+    },
+  },
 })

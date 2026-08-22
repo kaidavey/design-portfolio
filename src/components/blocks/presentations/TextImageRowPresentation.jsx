@@ -1,21 +1,21 @@
-import CaseStudyImage from '../../CaseStudyImage'
+import CaseStudyMedia from '../../CaseStudyMedia'
 
 /**
  * TextImageRowPresentation - Pure presentation component
  *
- * This is the shape Paper will generate. It:
- * - Has no Sanity coupling
- * - Receives plain, well-named props
- * - Uses theme tokens
+ * Text on one side, one image on the other. The image slot takes a
+ * `caseStudyImage`, so it holds either a plain image or a framed device shot.
+ *
+ * - No Sanity coupling
+ * - Plain, well-named props
  * - Sizes via container queries
- * - Has no mount/entrance animations
+ * - No mount/entrance animations
  */
 export default function TextImageRowPresentation({
   title,
   paragraphs = [],
   subtitle,
-  imageSource,
-  imageAlt,
+  media,
 }) {
   return (
     <div className="flex flex-col @lg:flex-row items-start @lg:items-center gap-8 @lg:justify-between w-full">
@@ -42,15 +42,19 @@ export default function TextImageRowPresentation({
       </div>
 
       {/* Image column */}
-      <div className="flex-1 w-full @lg:w-auto @lg:max-w-md">
-        <CaseStudyImage
-          source={imageSource}
-          alt={imageAlt}
+      <figure className="flex flex-col items-start gap-3 flex-1 w-full @lg:w-auto @lg:max-w-md m-0">
+        <CaseStudyMedia
+          media={media}
           sizes="(max-width: 640px) 92vw, 448px"
           maxWidth={900}
-          className="w-full rounded-[20px] object-cover"
+          fillClassName="w-full rounded-[20px] object-cover"
         />
-      </div>
+        {media?.caption && (
+          <figcaption className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] [color:var(--color-text-muted)] text-caption">
+            {media.caption}
+          </figcaption>
+        )}
+      </figure>
     </div>
   )
 }

@@ -9,17 +9,17 @@ export default defineType({
       name: 'columns',
       title: 'Columns',
       type: 'array',
+      description:
+        'Two or three columns, each an image above a text card. Any column image can be framed.',
       of: [
         {
           type: 'object',
+          name: 'imageTextColumn',
           fields: [
             {
-              name: 'image',
+              name: 'media',
               title: 'Image',
-              type: 'image',
-              options: {
-                hotspot: true,
-              },
+              type: 'caseStudyImage',
               validation: (Rule) => Rule.required(),
             },
             {
@@ -35,9 +35,30 @@ export default defineType({
               validation: (Rule) => Rule.required(),
             },
           ],
+          preview: {
+            select: {
+              title: 'subtitle',
+              subtitle: 'description',
+              media: 'media.image',
+            },
+          },
         },
       ],
       validation: (Rule) => Rule.required().min(2).max(3),
     },
   ],
+  preview: {
+    select: {
+      columns: 'columns',
+      media: 'columns.0.media.image',
+    },
+    prepare({ columns, media }) {
+      const count = columns?.length ?? 0
+      return {
+        title: 'Image + Text Grid',
+        subtitle: `${count} column${count === 1 ? '' : 's'}`,
+        media,
+      }
+    },
+  },
 })

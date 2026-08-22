@@ -39,4 +39,11 @@ export default defineType({
       validation: (Rule) => Rule.required().length(3),
     },
   ],
+  preview: {
+    select: { cards: 'cards' },
+    prepare({ cards }) {
+      const count = cards?.length ?? 0
+      return { title: 'Text Card Row', subtitle: `${count} card${count === 1 ? '' : 's'}` }
+    },
+  },
 })

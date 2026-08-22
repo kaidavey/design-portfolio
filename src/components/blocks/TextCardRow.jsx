@@ -3,9 +3,9 @@ import { urlFor } from '../../lib/sanity'
 export default function TextCardRow({ block }) {
   return (
     <div className="flex flex-col @md:flex-row items-stretch gap-4 w-full antialiased">
-      {block.cards.map((card, index) => (
+      {(block.cards || []).map((card, index) => (
         <div
-          key={index}
+          key={card._key || index}
           className="flex overflow-clip rounded-[20px] flex-col items-start gap-9 p-6 flex-1 w-full [box-shadow:var(--shadow-block-inset)] [background:var(--color-bg-block)] border border-solid [border-color:var(--color-border-block)] transition-all duration-300"
         >
           {card.icon && (

@@ -9,6 +9,7 @@ export default defineType({
       name: 'icon',
       title: 'Icon',
       type: 'image',
+      description: 'Optional square mark shown beside the title. Decorative — it is not read out.',
       options: {
         hotspot: true,
       },
@@ -19,11 +20,14 @@ export default defineType({
       type: 'string',
       validation: (Rule) => Rule.required(),
     },
-    {
-      name: 'timeframe',
-      title: 'Timeframe',
-      type: 'string',
-      validation: (Rule) => Rule.required(),
-    },
   ],
+  preview: {
+    select: {
+      title: 'title',
+      media: 'icon',
+    },
+    prepare({ title, media }) {
+      return { title: title || 'Hero', subtitle: 'Hero', media }
+    },
+  },
 })

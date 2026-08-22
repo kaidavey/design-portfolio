@@ -12,8 +12,7 @@ export default function TextImageRow({ block }) {
       title={block.title}
       paragraphs={block.paragraphs || []}
       subtitle={block.subtitle}
-      imageSource={block.image}
-      imageAlt={block.title}
+      media={block.media}
     />
   )
 }

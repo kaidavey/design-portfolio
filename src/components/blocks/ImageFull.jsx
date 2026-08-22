@@ -8,7 +8,7 @@ export default function ImageFull({ block }) {
   return (
     <ImageFullPresentation
       imageSource={block.image}
-      imageAlt={block.caption || 'Case study image'}
+      imageAlt={block.alt || ''}
       caption={block.caption}
     />
   )

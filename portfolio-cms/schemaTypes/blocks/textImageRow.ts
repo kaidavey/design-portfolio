@@ -25,13 +25,20 @@ export default defineType({
       description: 'Optional muted text below paragraphs',
     },
     {
-      name: 'image',
+      name: 'media',
       title: 'Image',
-      type: 'image',
-      options: {
-        hotspot: true,
-      },
+      type: 'caseStudyImage',
+      description: 'Toggle "Show in a frame" to sit a device shot inside a surface instead.',
       validation: (Rule) => Rule.required(),
     },
   ],
+  preview: {
+    select: {
+      title: 'title',
+      media: 'media.image',
+    },
+    prepare({ title, media }) {
+      return { title: title || 'Text + Image Row', subtitle: 'Text + Image Row', media }
+    },
+  },
 })

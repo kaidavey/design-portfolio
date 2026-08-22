@@ -1,164 +1,171 @@
 # Block System Implementation Summary
 
-## ✅ What Was Built
+## What's In The System
 
-### 1. Sanity Schemas (9 block types)
-All located in `portfolio-cms/schemaTypes/blocks/`:
+### 1. Shared Sanity objects
+`portfolio-cms/schemaTypes/objects/`
 
-- **projectDetails.ts** - Role, Timeline, Team, Tools metadata
-- **hero.ts** - Icon, title, and timeframe header
-- **textImageRow.ts** - Title, paragraphs, optional subtitle, image
-- **imageRow.ts** - 2-3 images with captions
-- **imageTextGrid.ts** - 2-3 columns with image + text card
-- **callToAction.ts** - Title, description, button text/link
-- **textBlockCentered.ts** - Optional section/title + body text
-- **textCardRow.ts** - 3 cards with icon, subtitle, description
-- **textColumns.ts** - Section/title on left, paragraphs on right
+- **caseStudyImage.ts** — the image primitive: image, alt, caption, a `framed`
+  toggle and its frame. Every block that holds an image holds one of these,
+  which is what lets a framed device shot go anywhere a plain image goes.
+- **imageFrame.ts** — frame settings: shape, inset, backdrop.
 
-### 2. React Components (9 blocks)
-All located in `src/components/blocks/`:
+### 2. Sanity block schemas (14 types)
+`portfolio-cms/schemaTypes/blocks/`
 
-- ProjectDetails.jsx
-- Hero.jsx
-- TextImageRow.jsx
-- ImageRow.jsx
-- ImageTextGrid.jsx
-- CallToAction.jsx
-- TextBlockCentered.jsx
-- TextCardRow.jsx
-- TextColumns.jsx
+| Schema | What it is |
+|---|---|
+| `hero.ts` | Optional icon + title |
+| `projectDetails.ts` | Role, Timeline, Team, Tools |
+| `textBlockCentered.ts` | Optional section/title + body text |
+| `textColumns.ts` | Section/title on left, paragraphs on right |
+| `textRowTwoColumn.ts` | Section/title header over two text columns |
+| `textCardRow.ts` | 3 cards with icon, subtitle, description |
+| `textImageRow.ts` | Title, paragraphs, optional subtitle, one image |
+| `imageFull.ts` | One image, full container width |
+| `framedImage.ts` | One image centred on a fixed-ratio surface |
+| `imageRow.ts` | 2-3 images with captions |
+| `imageTextGrid.ts` | 2-3 columns of image + text card |
+| `callToAction.ts` | Title, description, button text/link |
+| `blockGroup.ts` | A run of blocks sharing one gap |
+| `spacer.ts` | Fixed vertical gap |
 
-### 3. Core Infrastructure
+Every one of them is listed in the `body` array of `caseStudy.ts`. Registering
+a type in `index.ts` alone does **not** make it available to an editor — that
+was how `imageFull` and `textRowTwoColumn` sat unreachable for a while.
+
+### 3. React components
+`src/components/blocks/` — one wrapper per block, plus presentations under
+`presentations/` for the blocks Paper generates.
+
+Image rendering is centralised:
+
+- **CaseStudyMedia.jsx** — takes a `caseStudyImage` and decides plain vs framed.
+  Nothing else makes that decision.
+- **CaseStudyFrame.jsx** — the surface a framed image sits on.
+- **CaseStudyImage.jsx** — responsive `<img>` with srcset and a reserved aspect
+  ratio.
+- **config/imageFrame.js** — the option lists and `frameBoxStyle()`, shared by
+  the frame and its skeleton so the two agree on height.
+
+### 4. Core infrastructure
 
 **BlockRenderer** (`src/components/BlockRenderer.jsx`)
 - Registry-based component mapper
 - Gracefully skips unknown block types
-- Adding new blocks = one line in registry
+- Tags each block with `data-block-index` for the expand morph to measure
 
-**Sanity Client** (`src/lib/sanity.js`)
-- Configured with your projectId: `6vslo6fw`
-- Dataset: `production`
-- Image URL builder for responsive images
+**Skeletons** (`src/components/skeletons/blockSkeletons.jsx`)
+- One per block type, drawn from the shape query while the body loads
+
+**Sanity Client** (`src/lib/sanity.js`) — projectId `6vslo6fw`, dataset `production`
 
 **Data Layer** (`src/lib/queries.js`)
-- `getCaseStudyBySlug(slug)` - Fetch single case study
-- `getAllCaseStudies()` - List all case studies
+- `getCaseStudyBySlug(slug)` — full body, with every image's asset dereferenced
+  for its dimensions
+- `getCaseStudyShape(slug)` — block types only, for the skeleton
+- `getAllCaseStudies()` — home page list
 
-**Routing** (`src/App.jsx` + `src/main.jsx`)
-- `/` - Home page
-- `/case-study/:slug` - Dynamic case study pages
-
-**CaseStudy Page** (`src/pages/CaseStudy.jsx`)
-- Fetches data by slug
-- Renders cover image
-- Passes body array to BlockRenderer
-
-### 4. Document Schema
+### 5. Document schema
 
 **caseStudy** (`portfolio-cms/schemaTypes/caseStudy.ts`)
-- Metadata: title, slug, year, role, timeline, team, tools
-- coverImage (with hotspot)
-- body array that accepts ANY of the 9 block types
 
-## 🎯 Key Features
+Two field groups, and nothing else:
 
-### ✨ Pick-and-Choose Blocks
-Each case study can use a DIFFERENT subset of blocks. No fixed template!
+- **Content** — title, slug, body
+- **Home Card** — description, display order, cover image, optional cover video
 
-### 🔌 Extensible Design
+Role, timeline, team and tools live on the **Project Details** block, not on the
+document, so an editor is asked for them exactly once. `year` and the hero's
+`timeframe` were asked for and never rendered anywhere, so they are gone.
+
+## Key Features
+
+### Pick-and-choose blocks
+Each case study can use a different subset of blocks. No fixed template.
+
+### Framed images anywhere
+Toggling **Show in a frame** on any image slot — a cell of an image row, a
+column of an image + text grid, the image half of a text + image row, or the
+standalone Framed Image block — puts that image on a rounded surface. The
+surface is the responsive part; the image inside is centred and only ever
+scaled down to fit. It is never cropped.
+
+### Grouped spacing
+Body blocks sit 32px apart (`gap-8`, mirrored as `CASE_STUDY_LAYOUT.blockGap`).
+A **Group** wraps a run of blocks in its own gap — the only way to space blocks
+*closer* than the default, since a Spacer can only add to it.
+
+Groups paint no content: `BlockRenderer` renders one as a nested flex column
+and the group claims no `data-block-index`. That matters, because
+`measureVisibleCut` walks those indices flat and stops at the first block past
+the fold, and `AnimatedBlock` hides everything past the cut — both only hold
+while the numbering increases down the page. `assignBlockIndices` numbers the
+whole tree in document order to keep it that way, and
+`src/test/expandMorph.test.jsx` pins the behaviour.
+
+### Images that don't shift the page
+The case study query dereferences `asset->metadata.dimensions`, so every block
+knows an image's shape before its bytes land and reserves the height up front.
+
+### Extensible design
 To add a new block type:
-1. Create schema in `portfolio-cms/schemaTypes/blocks/<name>.ts`
-2. Export from `portfolio-cms/schemaTypes/index.ts`
-3. Create React component in `src/components/blocks/<Name>.jsx`
-4. Add one line to `src/components/BlockRenderer.jsx` registry
+1. Create the schema in `portfolio-cms/schemaTypes/blocks/<name>.ts`
+2. Export it from `portfolio-cms/schemaTypes/index.ts`
+3. Add it to the `body` array in `caseStudy.ts`
+4. Project its fields in `getCaseStudyBySlug`
+5. Create the React component in `src/components/blocks/<Name>.jsx`
+6. Add its skeleton to `blockSkeletons.jsx`
+7. Add one line to the `BlockRenderer.jsx` registry
 
-### 🖼️ Optimized Images
-All images use `@sanity/image-url` for automatic optimization and responsive sizing.
+If it holds an image, use a `caseStudyImage` field and `<CaseStudyMedia>` — the
+framed variant then works in the new slot for free.
 
-### 🎨 Design Fidelity
-Components built directly from your Paper designs using the exact JSX, styled with Tailwind CSS.
+## Migrating Existing Content
 
-## 📝 Next Steps
+These schema changes are not backwards compatible, which is deliberate — better
+to land them before the case studies are imported than after.
 
-1. **Start Sanity Studio:**
-   ```bash
-   cd portfolio-cms
-   npm run dev
-   ```
-   Opens at http://localhost:3333
+If any documents already exist in the dataset, they need a one-off migration:
 
-2. **Start React App:**
-   ```bash
-   npm run dev
-   ```
-   Opens at http://localhost:5173
+| Old path | New path |
+|---|---|
+| `caseStudy.year` / `.role` / `.timeline` / `.team` / `.tools` | gone — the values belong on a `projectDetails` block |
+| `hero.timeframe` | gone |
+| `textImageRow.image` | `textImageRow.media.image` |
+| `imageRow.images[].image` | `imageRow.images[].image` (now inside a `caseStudyImage`, so `caption` sits beside it as before) |
+| `imageTextGrid.columns[].image` | `imageTextGrid.columns[].media.image` |
+| `imageFull` | unchanged, plus an optional `alt` |
 
-3. **Create a Case Study:**
-   - Go to Sanity Studio
-   - Create new "Case Study"
-   - Add blocks to body array
-   - Publish
+`blockGroup` is additive — nothing existing has to move to adopt it.
 
-4. **View Your Case Study:**
-   ```
-   http://localhost:5173/case-study/your-slug
-   ```
+An `imageRow` item and a `caseStudyImage` happen to have the same field names
+for `image` and `caption`, so that one migrates by adding `_type` alone. The
+other two need the image nested under `media`.
 
-## 📂 File Structure
+## Running It
 
-```
-portfolio/
-├── src/
-│   ├── components/
-│   │   ├── blocks/          # 9 block components
-│   │   │   ├── ProjectDetails.jsx
-│   │   │   ├── Hero.jsx
-│   │   │   ├── TextImageRow.jsx
-│   │   │   ├── ImageRow.jsx
-│   │   │   ├── ImageTextGrid.jsx
-│   │   │   ├── CallToAction.jsx
-│   │   │   ├── TextBlockCentered.jsx
-│   │   │   ├── TextCardRow.jsx
-│   │   │   └── TextColumns.jsx
-│   │   └── BlockRenderer.jsx  # Registry mapper
-│   ├── lib/
-│   │   ├── sanity.js        # Client + image builder
-│   │   └── queries.js       # GROQ queries
-│   └── pages/
-│       └── CaseStudy.jsx    # Case study page
-│
-└── portfolio-cms/
-    └── schemaTypes/
-        ├── blocks/          # 9 block schemas
-        │   ├── projectDetails.ts
-        │   ├── hero.ts
-        │   ├── textImageRow.ts
-        │   ├── imageRow.ts
-        │   ├── imageTextGrid.ts
-        │   ├── callToAction.ts
-        │   ├── textBlockCentered.ts
-        │   ├── textCardRow.ts
-        │   └── textColumns.ts
-        ├── caseStudy.ts     # Document schema
-        └── index.ts         # Schema registry
+**Sanity Studio:**
+```bash
+cd portfolio-cms && npm run dev     # http://localhost:3333
 ```
 
-## 🎨 Design System
+**React app:**
+```bash
+npm run dev                          # http://localhost:5173
+```
 
-All components use:
-- **Font:** DM Sans (already loaded via Google Fonts)
-- **Spacing:** Tailwind utilities (gap, padding)
-- **Colors:** From your Paper designs
-- **Border radius:** 20px for images and cards
-- **Background:** Gray cards with subtle borders
+**Checks:**
+```bash
+npm run lint
+npm test
+npm run build
+cd portfolio-cms && npx sanity schema validate
+```
 
-## 🚀 Production Ready
+## Design System
 
-- ✅ Build tested and passes
-- ✅ TypeScript schemas for type safety
-- ✅ Image optimization built-in
-- ✅ Responsive design foundations
-- ✅ Clean component architecture
-- ✅ Graceful error handling
-
-The system is fully open-ended and ready for you to add more block types and case studies over time!
+- **Font:** DM Sans
+- **Colors / shadows:** theme-aware custom properties in `src/index.css`
+- **Border radius:** 20px for images, cards and frames
+- **Sizing:** container queries throughout — see `PAPER_CONTRACT.md`

@@ -1,5 +1,143 @@
 import { client } from './sanity'
 
+// Every image projection goes through this fragment.
+//
+// The dereference is the point: `asset->metadata.dimensions` is what lets a
+// block reserve an image's height before the bytes arrive. Without it the
+// browser learns each image's shape on load and the column jumps under the
+// reader.
+const IMAGE_FIELDS = `
+  ...,
+  asset-> {
+    _id,
+    url,
+    metadata {
+      dimensions { width, height, aspectRatio }
+    }
+  }
+`
+
+// A `caseStudyImage` value: the image plus how it should be presented.
+const MEDIA_FIELDS = `
+  alt,
+  caption,
+  framed,
+  frame,
+  image { ${IMAGE_FIELDS} }
+`
+
+// The per-type projections, shared by the body and by the blocks inside a
+// Group. Without this a grouped block would arrive carrying `_type` and nothing
+// else, because GROQ applies a projection only at the level it is written.
+//
+// Deliberately does not mention `blockGroup` — groups do not nest, and this is
+// what enforces it on the read side.
+const BLOCK_FIELDS = `
+  _type,
+  _key,
+
+  // projectDetails
+  _type == "projectDetails" => {
+    role,
+    timeline,
+    team,
+    tools
+  },
+
+  // hero
+  _type == "hero" => {
+    icon,
+    title
+  },
+
+  // textImageRow
+  _type == "textImageRow" => {
+    title,
+    paragraphs,
+    subtitle,
+    media { ${MEDIA_FIELDS} }
+  },
+
+  // imageRow
+  _type == "imageRow" => {
+    images[] {
+      _key,
+      ${MEDIA_FIELDS}
+    }
+  },
+
+  // imageTextGrid
+  _type == "imageTextGrid" => {
+    columns[] {
+      _key,
+      subtitle,
+      description,
+      media { ${MEDIA_FIELDS} }
+    }
+  },
+
+  // callToAction
+  _type == "callToAction" => {
+    title,
+    description,
+    buttonText,
+    buttonLink
+  },
+
+  // textBlockCentered
+  _type == "textBlockCentered" => {
+    section,
+    title,
+    body
+  },
+
+  // textCardRow
+  _type == "textCardRow" => {
+    cards[] {
+      _key,
+      icon,
+      subtitle,
+      description
+    }
+  },
+
+  // textColumns
+  _type == "textColumns" => {
+    section,
+    title,
+    paragraphs,
+    subtitle
+  },
+
+  // textRowTwoColumn
+  _type == "textRowTwoColumn" => {
+    section,
+    title,
+    leftParagraphs,
+    rightParagraphs
+  },
+
+  // imageFull
+  _type == "imageFull" => {
+    alt,
+    caption,
+    image { ${IMAGE_FIELDS} }
+  },
+
+  // framedImage
+  _type == "framedImage" => {
+    alt,
+    caption,
+    frame,
+    image { ${IMAGE_FIELDS} }
+  },
+
+  // spacer
+  _type == "spacer" => {
+    height
+  }
+`
+
 // Fetch a single case study by slug
 export async function getCaseStudyBySlug(slug) {
   const query = `
@@ -7,105 +145,15 @@ export async function getCaseStudyBySlug(slug) {
       _id,
       title,
       slug,
-      year,
-      role,
-      timeline,
-      team,
-      tools,
-      coverImage,
       body[] {
-        _type,
-        _key,
+        ${BLOCK_FIELDS},
 
-        // projectDetails
-        _type == "projectDetails" => {
-          role,
-          timeline,
-          team,
-          tools
-        },
-
-        // hero
-        _type == "hero" => {
-          icon,
-          title,
-          timeframe
-        },
-
-        // textImageRow
-        _type == "textImageRow" => {
-          title,
-          paragraphs,
-          subtitle,
-          image
-        },
-
-        // imageRow
-        _type == "imageRow" => {
-          images[] {
-            image,
-            caption
+        // blockGroup — a run of blocks sharing one gap
+        _type == "blockGroup" => {
+          gap,
+          blocks[] {
+            ${BLOCK_FIELDS}
           }
-        },
-
-        // imageTextGrid
-        _type == "imageTextGrid" => {
-          columns[] {
-            image,
-            subtitle,
-            description
-          }
-        },
-
-        // callToAction
-        _type == "callToAction" => {
-          title,
-          description,
-          buttonText,
-          buttonLink
-        },
-
-        // textBlockCentered
-        _type == "textBlockCentered" => {
-          section,
-          title,
-          body
-        },
-
-        // textCardRow
-        _type == "textCardRow" => {
-          cards[] {
-            icon,
-            subtitle,
-            description
-          }
-        },
-
-        // textColumns
-        _type == "textColumns" => {
-          section,
-          title,
-          paragraphs,
-          subtitle
-        },
-
-        // textRowTwoColumn
-        _type == "textRowTwoColumn" => {
-          section,
-          title,
-          leftParagraphs,
-          rightParagraphs
-        },
-
-        // imageFull
-        _type == "imageFull" => {
-          image,
-          caption
-        },
-
-        // spacer
-        _type == "spacer" => {
-          height
         }
       }
     }
@@ -121,7 +169,16 @@ export async function getCaseStudyShape(slug) {
       "blockTypes": body[]{
         _type,
         _key,
-        _type == "spacer" => { height }
+        _type == "spacer" => { height },
+        _type == "framedImage" => { frame },
+        _type == "blockGroup" => {
+          gap,
+          blocks[]{
+            _type,
+            _key,
+            _type == "framedImage" => { frame }
+          }
+        }
       }
     }
   `
@@ -176,21 +233,20 @@ export function setCachedShape(slug, data) {
   shapeCache.set(slug, data)
 }
 
-// Debug utilities - expose cache clearing on window
 export function clearAllCaches() {
-  console.log('[Cache] Clearing all caches')
   caseStudyCache.clear()
   shapeCache.clear()
 }
 
 export function clearCacheForSlug(slug) {
-  console.log('[Cache] Clearing cache for', slug)
   caseStudyCache.delete(slug)
   shapeCache.delete(slug)
 }
 
-// Expose to window for debugging
-if (typeof window !== 'undefined') {
+// Cache handles on `window`, for poking at content while writing it. Dev only —
+// a production bundle has no business exposing internals on the global object,
+// and the guard is static so the block is dropped at build time.
+if (import.meta.env.DEV && typeof window !== 'undefined') {
   window.__clearCaseStudyCache = clearAllCaches
   window.__clearCacheForSlug = clearCacheForSlug
   window.__inspectCache = () => ({

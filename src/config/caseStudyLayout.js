@@ -1,4 +1,8 @@
 export const CASE_STUDY_LAYOUT = {
+  // Gap between body blocks, in px. MIRRORED as `gap-8` on BlockRenderer's
+  // outer column; a Group overrides it for the blocks it holds.
+  blockGap: 32,
+
   compact: {
     containerWidth: '60vw',
     containerMaxWidth: '1048px',
@@ -77,9 +81,10 @@ export const CASE_STUDY_LAYOUT = {
     radius: '4px',
     imageRadius: '8px',
 
-    // Timing guards
-    delayInMs: 0,            // TEMP: set to 0 to always show skeleton (normally 200)
-    minVisibleMs: 2000,      // TEMP: hold for 2s to see it clearly (normally 400)
+    // Timing guards — see useDelayedLoading. Below delayInMs the skeleton never
+    // appears at all; once it does, minVisibleMs keeps it from blinking out.
+    delayInMs: 200,
+    minVisibleMs: 400,
 
     // Accessibility (reduced motion shows static base color)
     reducedMotionOpacity: 0.6,
