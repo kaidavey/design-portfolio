@@ -15,6 +15,7 @@ import TextCardRow from './blocks/TextCardRow'
 import TextColumns from './blocks/TextColumns'
 import TextRowTwoColumn from './blocks/TextRowTwoColumn'
 import ImageFull from './blocks/ImageFull'
+import FramedImage from './blocks/FramedImage'
 import Spacer from './blocks/Spacer'
 
 function AnimatedBlock({ children, index, isFirst = false }) {
@@ -180,6 +181,7 @@ const blockRegistry = {
   textColumns: TextColumns,
   textRowTwoColumn: TextRowTwoColumn,
   imageFull: ImageFull,
+  framedImage: FramedImage,
   spacer: Spacer,
 }
 

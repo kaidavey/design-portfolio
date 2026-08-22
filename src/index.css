@@ -66,6 +66,11 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  /* Tallest a framed image's surface may get. Portrait frames are width-capped
+     off this so they stay on screen instead of scrolling as a column of gray;
+     landscape frames never reach it. */
+  --frame-max-height: 70svh;
+
   /* Light theme colors (default) */
   --color-bg-primary: #fafafa;
   --color-bg-container: rgba(242, 242, 242, 0.8);

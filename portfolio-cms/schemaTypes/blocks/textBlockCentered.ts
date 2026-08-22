@@ -24,4 +24,10 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     },
   ],
+  preview: {
+    select: { section: 'section', title: 'title', body: 'body' },
+    prepare({ section, title, body }) {
+      return { title: title || section || 'Text Block', subtitle: body }
+    },
+  },
 })

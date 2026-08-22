@@ -9,28 +9,24 @@ export default defineType({
       name: 'images',
       title: 'Images',
       type: 'array',
-      of: [
-        {
-          type: 'object',
-          fields: [
-            {
-              name: 'image',
-              title: 'Image',
-              type: 'image',
-              options: {
-                hotspot: true,
-              },
-              validation: (Rule) => Rule.required(),
-            },
-            {
-              name: 'caption',
-              title: 'Caption',
-              type: 'string',
-            },
-          ],
-        },
-      ],
+      description:
+        'Two or three images side by side. Any of them can be framed — toggle "Show in a frame" on the image.',
+      of: [{ type: 'caseStudyImage' }],
       validation: (Rule) => Rule.required().min(2).max(3),
     },
   ],
+  preview: {
+    select: {
+      images: 'images',
+      media: 'images.0.image',
+    },
+    prepare({ images, media }) {
+      const count = images?.length ?? 0
+      return {
+        title: 'Image Row',
+        subtitle: `${count} image${count === 1 ? '' : 's'}`,
+        media,
+      }
+    },
+  },
 })

@@ -1,5 +1,31 @@
 import { client } from './sanity'
 
+// Every image projection goes through this fragment.
+//
+// The dereference is the point: `asset->metadata.dimensions` is what lets a
+// block reserve an image's height before the bytes arrive. Without it the
+// browser learns each image's shape on load and the column jumps under the
+// reader.
+const IMAGE_FIELDS = `
+  ...,
+  asset-> {
+    _id,
+    url,
+    metadata {
+      dimensions { width, height, aspectRatio }
+    }
+  }
+`
+
+// A `caseStudyImage` value: the image plus how it should be presented.
+const MEDIA_FIELDS = `
+  alt,
+  caption,
+  framed,
+  frame,
+  image { ${IMAGE_FIELDS} }
+`
+
 // Fetch a single case study by slug
 export async function getCaseStudyBySlug(slug) {
   const query = `
@@ -7,12 +33,6 @@ export async function getCaseStudyBySlug(slug) {
       _id,
       title,
       slug,
-      year,
-      role,
-      timeline,
-      team,
-      tools,
-      coverImage,
       body[] {
         _type,
         _key,
@@ -28,8 +48,7 @@ export async function getCaseStudyBySlug(slug) {
         // hero
         _type == "hero" => {
           icon,
-          title,
-          timeframe
+          title
         },
 
         // textImageRow
@@ -37,23 +56,24 @@ export async function getCaseStudyBySlug(slug) {
           title,
           paragraphs,
           subtitle,
-          image
+          media { ${MEDIA_FIELDS} }
         },
 
         // imageRow
         _type == "imageRow" => {
           images[] {
-            image,
-            caption
+            _key,
+            ${MEDIA_FIELDS}
           }
         },
 
         // imageTextGrid
         _type == "imageTextGrid" => {
           columns[] {
-            image,
+            _key,
             subtitle,
-            description
+            description,
+            media { ${MEDIA_FIELDS} }
           }
         },
 
@@ -75,6 +95,7 @@ export async function getCaseStudyBySlug(slug) {
         // textCardRow
         _type == "textCardRow" => {
           cards[] {
+            _key,
             icon,
             subtitle,
             description
@@ -99,8 +120,17 @@ export async function getCaseStudyBySlug(slug) {
 
         // imageFull
         _type == "imageFull" => {
-          image,
-          caption
+          alt,
+          caption,
+          image { ${IMAGE_FIELDS} }
+        },
+
+        // framedImage
+        _type == "framedImage" => {
+          alt,
+          caption,
+          frame,
+          image { ${IMAGE_FIELDS} }
         },
 
         // spacer
@@ -121,7 +151,8 @@ export async function getCaseStudyShape(slug) {
       "blockTypes": body[]{
         _type,
         _key,
-        _type == "spacer" => { height }
+        _type == "spacer" => { height },
+        _type == "framedImage" => { frame }
       }
     }
   `
@@ -176,21 +207,20 @@ export function setCachedShape(slug, data) {
   shapeCache.set(slug, data)
 }
 
-// Debug utilities - expose cache clearing on window
 export function clearAllCaches() {
-  console.log('[Cache] Clearing all caches')
   caseStudyCache.clear()
   shapeCache.clear()
 }
 
 export function clearCacheForSlug(slug) {
-  console.log('[Cache] Clearing cache for', slug)
   caseStudyCache.delete(slug)
   shapeCache.delete(slug)
 }
 
-// Expose to window for debugging
-if (typeof window !== 'undefined') {
+// Cache handles on `window`, for poking at content while writing it. Dev only —
+// a production bundle has no business exposing internals on the global object,
+// and the guard is static so the block is dropped at build time.
+if (import.meta.env.DEV && typeof window !== 'undefined') {
   window.__clearCaseStudyCache = clearAllCaches
   window.__clearCacheForSlug = clearCacheForSlug
   window.__inspectCache = () => ({

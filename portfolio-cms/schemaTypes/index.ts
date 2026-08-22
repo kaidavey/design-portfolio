@@ -1,3 +1,7 @@
+// Shared objects
+import imageFrame from './objects/imageFrame'
+import caseStudyImage from './objects/caseStudyImage'
+
 // Block types
 import projectDetails from './blocks/projectDetails'
 import hero from './blocks/hero'
@@ -10,12 +14,16 @@ import textCardRow from './blocks/textCardRow'
 import textColumns from './blocks/textColumns'
 import textRowTwoColumn from './blocks/textRowTwoColumn'
 import imageFull from './blocks/imageFull'
+import framedImage from './blocks/framedImage'
 import spacer from './blocks/spacer'
 
 // Document types
 import caseStudy from './caseStudy'
 
 export const schemaTypes = [
+  // Shared objects
+  imageFrame,
+  caseStudyImage,
   // Blocks
   projectDetails,
   hero,
@@ -28,6 +36,7 @@ export const schemaTypes = [
   textColumns,
   textRowTwoColumn,
   imageFull,
+  framedImage,
   spacer,
   // Documents
   caseStudy,

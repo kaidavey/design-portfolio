@@ -1,20 +1,36 @@
 import { defineType } from 'sanity'
 
+/**
+ * caseStudy — the document.
+ *
+ * This holds only what the document itself owns: how the study is identified,
+ * how it is ordered on the home page, how its card looks there, and the body.
+ *
+ * Everything that appears *inside* the study is a block. Role, timeline, team
+ * and tools belong to the Project Details block, so they are not asked for
+ * here — one field, one home.
+ */
 export default defineType({
   name: 'caseStudy',
   title: 'Case Study',
   type: 'document',
+  groups: [
+    { name: 'content', title: 'Content', default: true },
+    { name: 'card', title: 'Home Card' },
+  ],
   fields: [
     {
       name: 'title',
       title: 'Title',
       type: 'string',
+      group: 'content',
       validation: (Rule) => Rule.required(),
     },
     {
       name: 'slug',
       title: 'Slug',
       type: 'slug',
+      group: 'content',
       options: {
         source: 'title',
         maxLength: 96,
@@ -22,9 +38,32 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     },
     {
+      name: 'body',
+      title: 'Body',
+      type: 'array',
+      group: 'content',
+      of: [
+        { type: 'hero' },
+        { type: 'projectDetails' },
+        { type: 'textBlockCentered' },
+        { type: 'textColumns' },
+        { type: 'textRowTwoColumn' },
+        { type: 'textCardRow' },
+        { type: 'textImageRow' },
+        { type: 'imageFull' },
+        { type: 'framedImage' },
+        { type: 'imageRow' },
+        { type: 'imageTextGrid' },
+        { type: 'callToAction' },
+        { type: 'spacer' },
+      ],
+      validation: (Rule) => Rule.required().min(1),
+    },
+    {
       name: 'description',
       title: 'Short Description',
       type: 'string',
+      group: 'card',
       description: 'Brief description shown on the home page (recommended 50-100 characters)',
       validation: (Rule) => Rule.max(150),
     },
@@ -32,43 +71,15 @@ export default defineType({
       name: 'order',
       title: 'Display Order',
       type: 'number',
+      group: 'card',
       description: 'Controls the order in which case studies appear (lower numbers first)',
       validation: (Rule) => Rule.required().integer().min(0),
-    },
-    {
-      name: 'year',
-      title: 'Year',
-      type: 'number',
-      validation: (Rule) => Rule.required().integer().min(2000).max(2100),
-    },
-    {
-      name: 'role',
-      title: 'Role',
-      type: 'string',
-      validation: (Rule) => Rule.required(),
-    },
-    {
-      name: 'timeline',
-      title: 'Timeline',
-      type: 'string',
-      validation: (Rule) => Rule.required(),
-    },
-    {
-      name: 'team',
-      title: 'Team',
-      type: 'string',
-      validation: (Rule) => Rule.required(),
-    },
-    {
-      name: 'tools',
-      title: 'Tools',
-      type: 'string',
-      validation: (Rule) => Rule.required(),
     },
     {
       name: 'coverImage',
       title: 'Cover Image',
       type: 'image',
+      group: 'card',
       options: {
         hotspot: true,
       },
@@ -79,31 +90,15 @@ export default defineType({
       name: 'coverVideo',
       title: 'Cover Video (Optional)',
       type: 'mux.video',
+      group: 'card',
       description: 'Optional video enhancement. Recommended: 5-10 seconds, looping content at 720p.',
-    },
-    {
-      name: 'body',
-      title: 'Body',
-      type: 'array',
-      of: [
-        { type: 'projectDetails' },
-        { type: 'hero' },
-        { type: 'textImageRow' },
-        { type: 'imageRow' },
-        { type: 'imageTextGrid' },
-        { type: 'callToAction' },
-        { type: 'textBlockCentered' },
-        { type: 'textCardRow' },
-        { type: 'textColumns' },
-        { type: 'spacer' },
-      ],
     },
   ],
   preview: {
     select: {
       title: 'title',
       media: 'coverImage',
-      subtitle: 'year',
+      subtitle: 'slug.current',
     },
   },
 })

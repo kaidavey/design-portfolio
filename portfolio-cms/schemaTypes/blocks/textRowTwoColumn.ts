@@ -32,4 +32,10 @@ export default defineType({
       description: 'Displayed in muted color',
     },
   ],
+  preview: {
+    select: { section: 'section', title: 'title' },
+    prepare({ section, title }) {
+      return { title: title || section || 'Text Row', subtitle: 'Two Column' }
+    },
+  },
 })

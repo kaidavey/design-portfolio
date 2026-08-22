@@ -96,8 +96,7 @@ export default function TextImageRowPresentation({
   title,
   paragraphs = [],
   subtitle,
-  imageUrl,
-  imageAlt,
+  media,
 }) {
   return (
     <div className="flex flex-col @lg:flex-row items-start gap-8">
@@ -106,7 +105,7 @@ export default function TextImageRowPresentation({
         {paragraphs.map((p, i) => <p key={i}>{p}</p>)}
         {subtitle && <p className="text-gray-500">{subtitle}</p>}
       </div>
-      <img src={imageUrl} alt={imageAlt} className="flex-1 rounded-[20px]" />
+      <CaseStudyMedia media={media} maxWidth={900} fillClassName="flex-1 rounded-[20px]" />
     </div>
   )
 }
@@ -124,7 +123,6 @@ export default function TextImageRowPresentation({
 **File**: `src/components/blocks/<Name>.jsx`
 
 ```jsx
-import { urlFor } from '../../lib/sanity'
 import TextImageRowPresentation from './presentations/TextImageRowPresentation'
 
 /**
@@ -137,8 +135,7 @@ export default function TextImageRow({ block }) {
       title={block.title}
       paragraphs={block.paragraphs || []}
       subtitle={block.subtitle}
-      imageUrl={urlFor(block.image).width(800).url()}
-      imageAlt={block.title}
+      media={block.media}
     />
   )
 }
@@ -147,7 +144,8 @@ export default function TextImageRow({ block }) {
 **Wrapper Responsibilities:**
 - Import presentation component
 - Map `block.<field>` → plain props
-- Transform Sanity images via `urlFor()`
+- Pass images through as `caseStudyImage` values — `CaseStudyMedia` builds the
+  URLs, so no wrapper calls `urlFor()` for a content image
 - Handle optional fields (defaults)
 - Export for BlockRenderer
 
@@ -184,7 +182,6 @@ Paper must generate presentations matching these prop shapes exactly.
 {
   iconUrl?: string
   title: string
-  timeframe: string
 }
 ```
 
@@ -194,18 +191,14 @@ Paper must generate presentations matching these prop shapes exactly.
   title: string
   paragraphs: string[]
   subtitle?: string
-  imageUrl: string
-  imageAlt: string
+  media: CaseStudyImage   // see "The image primitive" below
 }
 ```
 
 ### 4. imageRow
 ```typescript
 {
-  images: Array<{
-    imageUrl: string
-    caption?: string
-  }>
+  images: CaseStudyImage[]
 }
 ```
 
@@ -213,7 +206,7 @@ Paper must generate presentations matching these prop shapes exactly.
 ```typescript
 {
   columns: Array<{
-    imageUrl: string
+    media: CaseStudyImage
     subtitle: string
     description: string
   }>
@@ -259,6 +252,87 @@ Paper must generate presentations matching these prop shapes exactly.
   subtitle?: string
 }
 ```
+
+### 10. textRowTwoColumn
+```typescript
+{
+  section?: string
+  title?: string
+  leftParagraphs: string[]
+  rightParagraphs: string[]   // rendered muted
+}
+```
+
+### 11. imageFull
+```typescript
+{
+  imageSource: SanityImage    // passed to CaseStudyImage, not a URL
+  imageAlt: string
+  caption?: string
+}
+```
+
+### 12. framedImage
+```typescript
+{
+  imageSource: SanityImage
+  imageAlt: string
+  caption?: string
+  frame?: ImageFrame
+}
+```
+
+---
+
+## The Image Primitive
+
+Every image in a case study is a `caseStudyImage`. That is what lets a framed
+device shot go anywhere a plain image goes — a column of an image row, a cell
+of an image + text grid, the image half of a text + image row.
+
+```typescript
+type CaseStudyImage = {
+  image: SanityImage       // dereferenced, carries asset.metadata.dimensions
+  alt?: string
+  caption?: string
+  framed?: boolean         // false → fills the slot; true → sits in a frame
+  frame?: ImageFrame
+}
+
+type ImageFrame = {
+  aspectRatio: '16/10' | '16/9' | '4/3' | '3/2' | '1/1' | '3/4' | '9/16'
+  padding: 'none' | 'sm' | 'md' | 'lg'
+  background: 'surface' | 'light' | 'dark'
+}
+```
+
+**Render one with `<CaseStudyMedia>`, never by hand.** It is the single place
+that decides plain vs framed:
+
+```jsx
+import CaseStudyMedia from '../../CaseStudyMedia'
+
+<CaseStudyMedia
+  media={media}
+  sizes="(max-width: 640px) 92vw, 448px"
+  maxWidth={900}
+  fillClassName="w-full rounded-[20px] object-cover"   // unframed only
+/>
+```
+
+### The two behaviours
+
+|  | Plain image | Framed image |
+|---|---|---|
+| Width | fills the slot | frame fills the slot |
+| Height | from the image's own proportions | from the frame's ratio |
+| Fit | `object-cover` — may crop | `object-contain` — **never** crops |
+| What resizes | the image | the frame; the image is only scaled down to fit |
+
+A frame is height-capped at `--frame-max-height` with its width derived from
+the ratio, so a portrait frame stays on screen instead of becoming a column of
+gray. `frameBoxStyle()` in `src/config/imageFrame.js` owns that maths — the
+frame and its skeleton both read it, so they agree on the height.
 
 ---
 
@@ -375,13 +449,15 @@ Paper-generated presentation components must:
 ### ✅ Presentation Component
 **File**: `src/components/blocks/presentations/TextImageRowPresentation.jsx`
 
+*(Abridged — the live file renders its image through `CaseStudyMedia`, per
+"The Image Primitive" above.)*
+
 ```jsx
 export default function TextImageRowPresentation({
   title,
   paragraphs = [],
   subtitle,
-  imageUrl,
-  imageAlt,
+  media,
 }) {
   return (
     <div className="flex flex-col @lg:flex-row items-start @lg:items-center gap-8 @lg:justify-between max-w-readable @lg:max-w-none mx-auto">
@@ -407,12 +483,13 @@ export default function TextImageRowPresentation({
         </div>
       </div>
 
-      {/* Image column */}
+      {/* Image column — plain or framed, CaseStudyMedia decides */}
       <div className="flex-1 w-full @lg:w-auto @lg:max-w-md">
-        <img
-          src={imageUrl}
-          alt={imageAlt}
-          className="w-full aspect-[16/10] rounded-[20px] object-cover"
+        <CaseStudyMedia
+          media={media}
+          sizes="(max-width: 640px) 92vw, 448px"
+          maxWidth={900}
+          fillClassName="w-full rounded-[20px] object-cover"
         />
       </div>
     </div>
@@ -432,7 +509,6 @@ export default function TextImageRowPresentation({
 **File**: `src/components/blocks/TextImageRow.jsx`
 
 ```jsx
-import { urlFor } from '../../lib/sanity'
 import TextImageRowPresentation from './presentations/TextImageRowPresentation'
 
 export default function TextImageRow({ block }) {
@@ -441,8 +517,7 @@ export default function TextImageRow({ block }) {
       title={block.title}
       paragraphs={block.paragraphs || []}
       subtitle={block.subtitle}
-      imageUrl={urlFor(block.image).width(800).url()}
-      imageAlt={block.title}
+      media={block.media}
     />
   )
 }
@@ -451,7 +526,8 @@ export default function TextImageRow({ block }) {
 **Notice**:
 - ✅ Imports presentation
 - ✅ Maps Sanity fields → plain props
-- ✅ Transforms image via urlFor
+- ✅ Passes the image through as a `caseStudyImage`, so `CaseStudyMedia` can
+  decide plain vs framed — the wrapper does not build URLs itself
 - ✅ Handles optional fields
 
 ### ✅ Registry Entry
@@ -512,7 +588,7 @@ Before generating a block component, verify:
 - [ ] No mount/entrance/exit animations
 - [ ] No Sanity imports
 - [ ] Text blocks use `max-w-readable` if appropriate
-- [ ] Images use `aspect-[16/10]` or similar for consistent sizing
+- [ ] Images go through `<CaseStudyMedia>`, never a bare `<img>` or `urlFor()`
 - [ ] Works in both compact (~800px) and expanded (~1344px) containers
 
 ---

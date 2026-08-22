@@ -31,4 +31,10 @@ export default defineType({
       description: 'Optional muted text below paragraphs',
     },
   ],
+  preview: {
+    select: { section: 'section', title: 'title' },
+    prepare({ section, title }) {
+      return { title: title || 'Text Columns', subtitle: section || 'Text Columns' }
+    },
+  },
 })

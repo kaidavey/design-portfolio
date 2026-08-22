@@ -1,5 +1,6 @@
 import { SkeletonShape, SkeletonLines } from './SkeletonPrimitives'
 import { CASE_STUDY_LAYOUT } from '../../config/caseStudyLayout'
+import { frameBoxStyle } from '../../config/imageFrame'
 
 const { imageRadius } = CASE_STUDY_LAYOUT.skeleton
 
@@ -46,7 +47,7 @@ function TextImageRowSkeleton() {
 function ImageRowSkeleton() {
   const count = 2 // Default to 2 images since we don't know from _type alone
   return (
-    <div className={`flex flex-col @md:flex-row items-center justify-center gap-${count === 3 ? '4' : '6'} w-full`}>
+    <div className="flex flex-col @md:flex-row items-start justify-center gap-6 w-full">
       {Array.from({ length: count }).map((_, index) => (
         <div key={index} className="flex flex-col items-start gap-4 flex-1 w-full">
           <SkeletonShape w="100%" h="auto" radius={imageRadius} style={{ aspectRatio: '4 / 3' }} />
@@ -61,7 +62,7 @@ function ImageRowSkeleton() {
 function ImageTextGridSkeleton() {
   const count = 2 // Default to 2 columns
   return (
-    <div className={`flex flex-col @md:flex-row items-center justify-center gap-${count === 3 ? '4' : '6'} w-full`}>
+    <div className="flex flex-col @md:flex-row items-stretch justify-center gap-6 w-full">
       {Array.from({ length: count }).map((_, index) => (
         <div key={index} className="flex flex-col items-start gap-4 self-stretch flex-1">
           <SkeletonShape w="100%" h="auto" radius={imageRadius} style={{ aspectRatio: '4 / 3' }} />
@@ -167,13 +168,28 @@ function TextRowTwoColumnSkeleton() {
   )
 }
 
-// ImageFull - Full-width image with optional caption
+// ImageFull - Full-width image with optional caption.
+// The real block takes its height from the image, which the shape query does
+// not carry, so 16/9 is the standing guess.
 function ImageFullSkeleton() {
   return (
     <div className="flex flex-col items-start gap-3 w-full">
-      <div className="w-full overflow-hidden rounded-xl">
-        <SkeletonShape w="100%" h="auto" radius="12px" style={{ aspectRatio: '16 / 9' }} />
+      <div className="w-full overflow-hidden rounded-[20px]">
+        <SkeletonShape w="100%" h="auto" radius="20px" style={{ aspectRatio: '16 / 9' }} />
       </div>
+      <SkeletonShape w="180px" h="1.0446rem" />
+    </div>
+  )
+}
+
+// FramedImage - Surface at the editor's chosen ratio, image centred inside.
+// The shape query carries the frame, so this one lands on the exact height.
+function FramedImageSkeleton({ block }) {
+  const { width, ...box } = frameBoxStyle(block?.frame?.aspectRatio)
+
+  return (
+    <div className="flex flex-col items-start gap-3 w-full">
+      <SkeletonShape w={width} h="auto" radius="20px" style={{ ...box, marginInline: 'auto' }} />
       <SkeletonShape w="180px" h="1.0446rem" />
     </div>
   )
@@ -196,5 +212,6 @@ export const skeletonRegistry = {
   textColumns: TextColumnsSkeleton,
   textRowTwoColumn: TextRowTwoColumnSkeleton,
   imageFull: ImageFullSkeleton,
+  framedImage: FramedImageSkeleton,
   spacer: SpacerSkeleton,
 }

@@ -30,4 +30,10 @@ export default defineType({
       description: 'Internal anchor link (e.g., #solution)',
     },
   ],
+  preview: {
+    select: { title: 'title', description: 'description' },
+    prepare({ title, description }) {
+      return { title: title || 'Call to Action', subtitle: description }
+    },
+  },
 })
