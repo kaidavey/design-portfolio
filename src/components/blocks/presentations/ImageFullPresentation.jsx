@@ -11,12 +11,20 @@ import CaseStudyImage from '../../CaseStudyImage'
  * Props: Plain, well-named JavaScript values
  * No Sanity coupling, no side effects
  */
-export default function ImageFullPresentation({ imageSource, imageAlt, caption }) {
+export default function ImageFullPresentation({
+  imageSource,
+  imageDarkSource,
+  imageDarkMode,
+  imageAlt,
+  caption,
+}) {
   return (
     <figure className="flex flex-col items-start gap-3 w-full m-0">
       <div className="w-full overflow-hidden rounded-[20px]">
         <CaseStudyImage
           source={imageSource}
+          darkSource={imageDarkSource}
+          darkMode={imageDarkMode}
           alt={imageAlt}
           sizes="(max-width: 1040px) 92vw, 907px"
           maxWidth={1800}

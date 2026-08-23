@@ -14,7 +14,12 @@ import CaseStudyFrame from './CaseStudyFrame'
  * Framed: the frame fills the slot and the image sits uncropped in the middle
  * of it.
  *
- * @param {object} media - A `caseStudyImage` value: { image, alt, framed, frame }
+ * Dark mode rides along on the same value: `imageDarkMode` says what should
+ * happen to the image on the dark page, and `imageDark` is the second upload
+ * when the answer is a separate file. Both are handed straight to
+ * `CaseStudyImage`, which is where the choice is interpreted.
+ *
+ * @param {object} media - A `caseStudyImage` value: { image, imageDark, imageDarkMode, alt, framed, frame }
  * @param {string} sizes - Sizes attribute describing the rendered width
  * @param {number} maxWidth - Largest srcset candidate to generate
  * @param {string} fillClassName - Classes for the unframed image
@@ -37,6 +42,8 @@ export default function CaseStudyMedia({
     return (
       <CaseStudyImage
         source={media.image}
+        darkSource={media.imageDark}
+        darkMode={media.imageDarkMode}
         alt={alt}
         sizes={sizes}
         maxWidth={maxWidth}
@@ -52,6 +59,8 @@ export default function CaseStudyMedia({
           keeps its proportions on the way down. Nothing here crops. */}
       <CaseStudyImage
         source={media.image}
+        darkSource={media.imageDark}
+        darkMode={media.imageDarkMode}
         alt={alt}
         sizes={sizes}
         maxWidth={maxWidth}

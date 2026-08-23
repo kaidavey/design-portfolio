@@ -1,4 +1,5 @@
 import { defineType } from 'sanity'
+import { themedImageFields } from '../objects/themedImage'
 
 export default defineType({
   name: 'textCardRow',
@@ -21,6 +22,7 @@ export default defineType({
                 hotspot: true,
               },
             },
+            ...themedImageFields('icon', { title: 'Icon' }),
             {
               name: 'subtitle',
               title: 'Subtitle',

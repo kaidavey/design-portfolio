@@ -1,4 +1,5 @@
 import { defineType } from 'sanity'
+import { themedImageFields } from '../objects/themedImage'
 
 /**
  * imageFull — one image, the full width of the container.
@@ -21,6 +22,7 @@ export default defineType({
       },
       validation: (Rule) => Rule.required(),
     },
+    ...themedImageFields('image'),
     {
       name: 'alt',
       title: 'Alt Text',

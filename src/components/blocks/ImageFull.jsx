@@ -8,6 +8,8 @@ export default function ImageFull({ block }) {
   return (
     <ImageFullPresentation
       imageSource={block.image}
+      imageDarkSource={block.imageDark}
+      imageDarkMode={block.imageDarkMode}
       imageAlt={block.alt || ''}
       caption={block.caption}
     />

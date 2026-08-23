@@ -1,4 +1,5 @@
 import { defineType } from 'sanity'
+import { themedImageFields } from './themedImage'
 
 /**
  * caseStudyImage — the single image primitive for case study content.
@@ -24,6 +25,7 @@ export default defineType({
       },
       validation: (Rule) => Rule.required(),
     },
+    ...themedImageFields('image'),
     {
       name: 'alt',
       title: 'Alt Text',
