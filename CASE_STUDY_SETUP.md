@@ -56,41 +56,33 @@ The site reads in light and dark, but an image is uploaded once. A diagram,
 chart or single-colour SVG drawn on white either disappears on the dark page or
 turns up as a white slab in the middle of it. So every image field in the
 system — content images, framed shots, the **Hero** mark, **Text Card Row**
-icons — has an **Image in dark mode** choice sitting beside it (**Icon in dark
-mode**, on the two icon fields).
+icons — has two optional dark mode fields beside it. **Leave both empty and
+nothing changes**, which is the right answer for most images: photography,
+screenshots that carry their own background, anything that reads fine either
+way.
 
-| Choice | What happens | Reach for it when |
+| Field | What it does | Reach for it when |
 |---|---|---|
-| **Use the same image** | Nothing. One file, both themes. | Photography, screenshots that already carry their own background, anything that reads fine either way. This is the default, and it is what every image already in the dataset does. |
-| **Invert it** | The image is flipped in dark mode — black lines go white, and colours are preserved rather than turned into their opposites. | Line art: diagrams, wireframes, flow charts, mono SVG marks. Costs nothing and needs no second upload, so try this first. |
-| **Use a separate dark version** | A second **Image (dark)** field appears. Upload the dark drawing and it is shown in place of the light one. | Screenshots of a dark-mode UI, anything with a photograph in it, and artwork whose dark version is a different drawing rather than the same one flipped. |
+| **Invert in dark mode** | Flips the image on the dark page — black lines go white, and colours are kept rather than turned into their opposites. | Line art: diagrams, wireframes, flow charts, mono SVG marks. Costs nothing and needs no second upload, so try this first. |
+| **Image (dark mode)** | Shows a second file you upload in place of the light one. Wins over the invert toggle. | Screenshots of a dark UI, anything with a photograph in it, and artwork whose dark version is a different drawing rather than the same one flipped. |
 
-Both swaps happen the instant the reader hits the theme toggle. Nothing
-reloads, the page does not jump, and the image does not blink — an inverted
-image changes in CSS, and an uploaded pair has its other half quietly fetched
-into cache as soon as the visible one has drawn.
+Either way the change happens the instant the reader hits the theme toggle.
+Nothing reloads, the page does not jump, and the image does not blink — an
+inverted image changes in CSS, and an uploaded pair has its other half quietly
+fetched into cache as soon as the visible one has drawn.
 
 Two things worth knowing:
 
-- **Invert is a filter, not a redraw.** It suits flat line art. On a photo or a
-  screenshot it will look like a photographic negative, which is why those want
-  a separate upload.
-- **Give the pair the same proportions.** The page reserves an image's height
-  from its dimensions before it loads. A dark version with a different shape
+- **Invert is a filter, not a redraw.** On a photo or a screenshot it will look
+  like a photographic negative, which is why those want a second upload.
+- **Give a pair the same proportions.** The page reserves an image's height
+  from its dimensions before it loads, so a dark version with a different shape
   will nudge the layout when the reader switches.
 
-If you pick **Use a separate dark version** and leave the upload empty, the
-studio will say so, and the page keeps showing the light image until you fill
-it in.
-
-### Backdrop vs dark image
-
-A framed image has both a **Backdrop** and an **Image in dark mode** choice,
-and they answer different questions. Backdrop is the surface *behind* the image
-— *Surface* follows the theme, *Light* and *Dark* stay put. **Image in dark
-mode** is about the image itself. A light screenshot on a fixed *Light*
-backdrop reads fine in both themes without any dark handling; a transparent PNG
-on a *Surface* backdrop usually needs it.
+A framed image also has a **Backdrop**, which is a different question: that is
+the surface *behind* the image. A light screenshot on a fixed *Light* backdrop
+reads fine in both themes and needs no dark handling at all; a transparent PNG
+on a *Surface* backdrop usually does.
 
 ### Spacing: Group vs Spacer
 
@@ -207,11 +199,11 @@ To add a new block type later:
    ```
 
 If the block holds an image, give it a `caseStudyImage` field and render it
-with `<CaseStudyMedia>` — that is what makes framed images and the dark mode
-choice work in the new slot for free. For a bare `image` field (a decorative
-icon, say), spread `themedImageFields('<fieldName>')` beside it in the schema,
-project `<fieldName>Dark` and `<fieldName>DarkMode` in the query, and render
-through `<CaseStudyImage>` or `<ThemedIcon>`.
+with `<CaseStudyMedia>` — that is what makes framed images and dark mode work
+in the new slot for free. For a bare `image` field (a decorative icon, say),
+spread `themedImageFields('<fieldName>')` beside it in the schema, project
+`<fieldName>Dark` and `<fieldName>DarkInvert` in the query, and render through
+`<CaseStudyImage>` or `<ThemedIcon>`.
 
 ## System Architecture
 

@@ -15,7 +15,7 @@ export default defineType({
         hotspot: true,
       },
     },
-    ...themedImageFields('icon', { title: 'Icon' }),
+    ...themedImageFields('icon', 'Icon'),
     {
       name: 'title',
       title: 'Title',

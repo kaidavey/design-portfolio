@@ -15,7 +15,7 @@ import CaseStudyImage from '../../CaseStudyImage'
 export default function FramedImagePresentation({
   imageSource,
   imageDarkSource,
-  imageDarkMode,
+  imageInvert,
   imageAlt,
   caption,
   frame,
@@ -26,7 +26,7 @@ export default function FramedImagePresentation({
         <CaseStudyImage
           source={imageSource}
           darkSource={imageDarkSource}
-          darkMode={imageDarkMode}
+          invert={imageInvert}
           alt={imageAlt}
           sizes="(max-width: 1040px) 92vw, 907px"
           maxWidth={1600}

@@ -20,16 +20,15 @@ const IMAGE_FIELDS = `
 `
 
 // A `caseStudyImage` value: the image plus how it should be presented.
-// `imageDarkMode` is the editor's answer to "what happens to this in dark
-// mode" and `imageDark` the second upload it may point at. Both are projected
-// everywhere the light image is, because the reader can flip the theme at any
-// point on the page and nothing is refetched when they do.
+// The optional dark mode fields are projected everywhere the light image is:
+// the reader can flip the theme at any point on the page, and nothing is
+// refetched when they do.
 const MEDIA_FIELDS = `
   alt,
   caption,
   framed,
   frame,
-  imageDarkMode,
+  imageDarkInvert,
   image { ${IMAGE_FIELDS} },
   imageDark { ${IMAGE_FIELDS} }
 `
@@ -56,7 +55,7 @@ const BLOCK_FIELDS = `
   _type == "hero" => {
     icon,
     iconDark,
-    iconDarkMode,
+    iconDarkInvert,
     title
   },
 
@@ -107,7 +106,7 @@ const BLOCK_FIELDS = `
       _key,
       icon,
       iconDark,
-      iconDarkMode,
+      iconDarkInvert,
       subtitle,
       description
     }
@@ -133,7 +132,7 @@ const BLOCK_FIELDS = `
   _type == "imageFull" => {
     alt,
     caption,
-    imageDarkMode,
+    imageDarkInvert,
     image { ${IMAGE_FIELDS} },
     imageDark { ${IMAGE_FIELDS} }
   },
@@ -143,7 +142,7 @@ const BLOCK_FIELDS = `
     alt,
     caption,
     frame,
-    imageDarkMode,
+    imageDarkInvert,
     image { ${IMAGE_FIELDS} },
     imageDark { ${IMAGE_FIELDS} }
   },

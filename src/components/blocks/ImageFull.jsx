@@ -9,7 +9,7 @@ export default function ImageFull({ block }) {
     <ImageFullPresentation
       imageSource={block.image}
       imageDarkSource={block.imageDark}
-      imageDarkMode={block.imageDarkMode}
+      imageInvert={block.imageDarkInvert}
       imageAlt={block.alt || ''}
       caption={block.caption}
     />

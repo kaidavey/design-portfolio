@@ -6,7 +6,7 @@ export default function Hero({ block }) {
       <ThemedIcon
         source={block.icon}
         darkSource={block.iconDark}
-        darkMode={block.iconDarkMode}
+        invert={block.iconDarkInvert}
         size={50}
         className="w-12.5 h-12.5 shrink-0"
       />

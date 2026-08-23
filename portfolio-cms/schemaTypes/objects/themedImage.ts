@@ -1,72 +1,41 @@
 import {defineField} from 'sanity'
 
 /**
- * themedImageFields — the dark mode half of every image in the system.
+ * themedImageFields — optional dark mode handling for one image field.
  *
- * A case study is read in two themes, but an image is uploaded once. A light
- * mode diagram, chart or single-colour SVG is usually black on white, so on the
- * dark page it either disappears or arrives as a white slab. These fields are
- * how an editor says what should happen to that image when the reader flips the
- * switch.
+ * Most images work in both themes and carry neither of these. The ones that do
+ * not are the ones drawn on white — diagrams, charts, mono SVG marks — which
+ * either vanish on the dark page or arrive as a white slab.
  *
- * Three answers, in rising order of effort:
+ * Two answers, and leaving both empty is the third. `invert` is the cheap one
+ * and right for line art: one file, flipped by CSS, colours kept. A dark upload
+ * is the honest one for screenshots and anything photographic, and wins when
+ * both are set.
  *
- * - `same`   — leave it alone. Right for photography and for anything that
- *              already carries its own background.
- * - `invert` — flip it in dark mode with a CSS filter. Costs nothing, needs no
- *              second upload, and is right for line art: diagrams, wireframes,
- *              flow charts, mono SVG marks. Colours are preserved by the
- *              hue-rotate that follows the invert, so a blue arrow stays blue.
- * - `upload` — a second file, drawn for dark. The only honest answer for
- *              screenshots, anything with a photograph in it, and artwork whose
- *              dark version is a different drawing rather than the same one
- *              flipped.
- *
- * The two fields always travel together and are always named off the light
- * image they belong to, so a block can hold more than one themed image without
- * the names colliding: `image` → `imageDarkMode` + `imageDark`, `icon` →
- * `iconDarkMode` + `iconDark`.
- *
- * @param base - Name of the light image field these attach to.
- * @param options.title - Noun used in the field titles, e.g. 'Image', 'Icon'.
+ * Named off the light field they belong to, so a block can hold more than one
+ * themed image without the names colliding: `image` → `imageDark` +
+ * `imageDarkInvert`, `icon` → `iconDark` + `iconDarkInvert`.
  */
-export function themedImageFields(base: string, options: {title?: string} = {}) {
-  const noun = options.title ?? 'Image'
-  const modeName = `${base}DarkMode`
-  const darkName = `${base}Dark`
+export function themedImageFields(base: string, noun = 'Image') {
+  const dark = `${base}Dark`
 
   return [
     defineField({
-      name: modeName,
-      title: `${noun} in dark mode`,
-      type: 'string',
-      description:
-        'What happens to this image when the reader switches to dark mode. Invert suits line art, diagrams and single-colour SVGs; upload a dark version for screenshots and anything with a photo in it.',
-      options: {
-        list: [
-          {title: 'Use the same image', value: 'same'},
-          {title: 'Invert it (line art, diagrams, mono SVGs)', value: 'invert'},
-          {title: 'Use a separate dark version', value: 'upload'},
-        ],
-        layout: 'radio',
-      },
-      initialValue: 'same',
-    }),
-    defineField({
-      name: darkName,
-      title: `${noun} (dark)`,
+      name: dark,
+      title: `${noun} (dark mode)`,
       type: 'image',
       options: {hotspot: true},
-      description: 'Shown in place of the light image while the site is in dark mode.',
-      hidden: ({parent}) => parent?.[modeName] !== 'upload',
-      validation: (Rule) =>
-        Rule.custom((value, context) => {
-          const parent = context.parent as Record<string, unknown> | undefined
-          if (parent?.[modeName] !== 'upload') return true
-          return value
-            ? true
-            : 'Add a dark version, or switch this image back to "Use the same image".'
-        }),
+      description: `Optional. Shown instead of the light ${noun.toLowerCase()} on the dark page — for screenshots and anything with a photo in it.`,
+    }),
+    defineField({
+      name: `${base}DarkInvert`,
+      title: 'Invert in dark mode',
+      type: 'boolean',
+      description:
+        'Flips this image on the dark page, keeping its colours. For line art: diagrams, wireframes, mono SVGs. No second upload needed.',
+      initialValue: false,
+      // Moot once there is a dark file to show instead.
+      hidden: ({parent}) => Boolean(parent?.[dark]),
     }),
   ]
 }

@@ -11,7 +11,7 @@ export default function TextCardRow({ block }) {
           <ThemedIcon
             source={card.icon}
             darkSource={card.iconDark}
-            darkMode={card.iconDarkMode}
+            invert={card.iconDarkInvert}
             size={24}
             className="shrink-0 size-6"
           />

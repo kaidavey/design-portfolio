@@ -9,7 +9,7 @@ export default function FramedImage({ block }) {
     <FramedImagePresentation
       imageSource={block.image}
       imageDarkSource={block.imageDark}
-      imageDarkMode={block.imageDarkMode}
+      imageInvert={block.imageDarkInvert}
       imageAlt={block.alt || ''}
       caption={block.caption}
       frame={block.frame}
