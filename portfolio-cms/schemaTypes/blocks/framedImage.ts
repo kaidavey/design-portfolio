@@ -1,4 +1,5 @@
 import { defineType } from 'sanity'
+import { themedImageFields } from '../objects/themedImage'
 
 /**
  * framedImage — one image centred inside a fixed-ratio surface.
@@ -22,6 +23,7 @@ export default defineType({
       },
       validation: (Rule) => Rule.required(),
     },
+    ...themedImageFields('image'),
     {
       name: 'alt',
       title: 'Alt Text',

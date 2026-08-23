@@ -128,6 +128,16 @@
   --color-skeleton-highlight: rgba(255, 255, 255, 0.18);
 }
 
+/* Dark mode inversion for line art — black-on-white diagrams, wireframes, mono
+   SVG marks. Doing it here rather than in JS is the point: the swap lands in
+   the same style recalculation that flips `data-theme`, so it costs no render
+   and nothing to load. The hue-rotate keeps it from being a crude negative —
+   invert alone turns a blue arrow orange, and half a turn puts it back.
+   Untransitioned on purpose: invert passes through flat grey at 0.5. */
+[data-theme='dark'] .themed-image-invert {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 *,
 *::before,
 *::after {

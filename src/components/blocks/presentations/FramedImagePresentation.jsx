@@ -12,12 +12,21 @@ import CaseStudyImage from '../../CaseStudyImage'
  * Props: Plain, well-named JavaScript values
  * No Sanity coupling, no side effects
  */
-export default function FramedImagePresentation({ imageSource, imageAlt, caption, frame }) {
+export default function FramedImagePresentation({
+  imageSource,
+  imageDarkSource,
+  imageInvert,
+  imageAlt,
+  caption,
+  frame,
+}) {
   return (
     <figure className="flex flex-col items-start gap-3 w-full m-0">
       <CaseStudyFrame frame={frame}>
         <CaseStudyImage
           source={imageSource}
+          darkSource={imageDarkSource}
+          invert={imageInvert}
           alt={imageAlt}
           sizes="(max-width: 1040px) 92vw, 907px"
           maxWidth={1600}

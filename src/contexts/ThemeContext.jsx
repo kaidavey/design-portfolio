@@ -49,3 +49,21 @@ export function useTheme() {
   }
   return context
 }
+
+/**
+ * The current theme, for components that only read it. Unlike `useTheme` this
+ * never throws: every image in a case study reads the theme, and losing a whole
+ * study to a missing provider would be a poor trade for a value the document
+ * element already carries. Outside a provider it reads `data-theme` once, which
+ * is enough for the harnesses that render a block on its own.
+ */
+export function useThemeMode() {
+  const context = useContext(ThemeContext)
+  if (context) return context.theme
+
+  if (typeof document !== 'undefined') {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
+  }
+
+  return 'light'
+}

@@ -11,6 +11,8 @@ const IMAGE_FIELDS = `
   asset-> {
     _id,
     url,
+    extension,
+    mimeType,
     metadata {
       dimensions { width, height, aspectRatio }
     }
@@ -18,12 +20,17 @@ const IMAGE_FIELDS = `
 `
 
 // A `caseStudyImage` value: the image plus how it should be presented.
+// The optional dark mode fields are projected everywhere the light image is:
+// the reader can flip the theme at any point on the page, and nothing is
+// refetched when they do.
 const MEDIA_FIELDS = `
   alt,
   caption,
   framed,
   frame,
-  image { ${IMAGE_FIELDS} }
+  imageDarkInvert,
+  image { ${IMAGE_FIELDS} },
+  imageDark { ${IMAGE_FIELDS} }
 `
 
 // The per-type projections, shared by the body and by the blocks inside a
@@ -47,6 +54,8 @@ const BLOCK_FIELDS = `
   // hero
   _type == "hero" => {
     icon,
+    iconDark,
+    iconDarkInvert,
     title
   },
 
@@ -96,6 +105,8 @@ const BLOCK_FIELDS = `
     cards[] {
       _key,
       icon,
+      iconDark,
+      iconDarkInvert,
       subtitle,
       description
     }
@@ -121,7 +132,9 @@ const BLOCK_FIELDS = `
   _type == "imageFull" => {
     alt,
     caption,
-    image { ${IMAGE_FIELDS} }
+    imageDarkInvert,
+    image { ${IMAGE_FIELDS} },
+    imageDark { ${IMAGE_FIELDS} }
   },
 
   // framedImage
@@ -129,7 +142,9 @@ const BLOCK_FIELDS = `
     alt,
     caption,
     frame,
-    image { ${IMAGE_FIELDS} }
+    imageDarkInvert,
+    image { ${IMAGE_FIELDS} },
+    imageDark { ${IMAGE_FIELDS} }
   },
 
   // spacer

@@ -1,4 +1,4 @@
-import { urlFor } from '../../lib/sanity'
+import ThemedIcon from '../ThemedIcon'
 
 export default function TextCardRow({ block }) {
   return (
@@ -8,13 +8,13 @@ export default function TextCardRow({ block }) {
           key={card._key || index}
           className="flex overflow-clip rounded-[20px] flex-col items-start gap-9 p-6 flex-1 w-full [box-shadow:var(--shadow-block-inset)] [background:var(--color-bg-block)] border border-solid [border-color:var(--color-border-block)] transition-all duration-300"
         >
-          {card.icon && (
-            <img
-              src={urlFor(card.icon).width(24).height(24).url()}
-              alt=""
-              className="shrink-0 size-6"
-            />
-          )}
+          <ThemedIcon
+            source={card.icon}
+            darkSource={card.iconDark}
+            invert={card.iconDarkInvert}
+            size={24}
+            className="shrink-0 size-6"
+          />
           <div className="flex flex-col items-start gap-2 self-stretch">
             <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-secondary)] text-body leading-[1.25rem]">
               {card.subtitle}

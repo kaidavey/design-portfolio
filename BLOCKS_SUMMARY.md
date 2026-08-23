@@ -9,6 +9,9 @@
   toggle and its frame. Every block that holds an image holds one of these,
   which is what lets a framed device shot go anywhere a plain image goes.
 - **imageFrame.ts** — frame settings: shape, inset, backdrop.
+- **themedImage.ts** — `themedImageFields(base)`, two optional dark mode fields:
+  `<base>Dark` (a second file) and `<base>DarkInvert` (a CSS flip). Spread into
+  `caseStudyImage`, `imageFull`, `framedImage`, and both icon fields.
 
 ### 2. Sanity block schemas (14 types)
 `portfolio-cms/schemaTypes/blocks/`
@@ -43,8 +46,12 @@ Image rendering is centralised:
 - **CaseStudyMedia.jsx** — takes a `caseStudyImage` and decides plain vs framed.
   Nothing else makes that decision.
 - **CaseStudyFrame.jsx** — the surface a framed image sits on.
-- **CaseStudyImage.jsx** — responsive `<img>` with srcset and a reserved aspect
-  ratio.
+- **CaseStudyImage.jsx** — responsive `<img>` with srcset, a reserved aspect
+  ratio, and the theme's variant of the image.
+- **ThemedIcon.jsx** — the small square marks Hero and Text Card Row carry, with
+  the same dark mode choice and none of the responsive machinery.
+- **hooks/useThemedImage.js** — picks the theme's file and warms the other one.
+  The only place dark mode handling is interpreted.
 - **config/imageFrame.js** — the option lists and `frameBoxStyle()`, shared by
   the frame and its skeleton so the two agree on height.
 
@@ -108,6 +115,29 @@ whole tree in document order to keep it that way, and
 The case study query dereferences `asset->metadata.dimensions`, so every block
 knows an image's shape before its bytes land and reserves the height up front.
 
+### Images that survive dark mode
+Every image field in the system — content images, framed shots, hero and card
+icons — carries two optional dark mode fields. Most images need neither:
+
+| Field | What happens | Right for |
+|---|---|---|
+| `<base>Dark` | a second file, shown instead on the dark page | screenshots, artwork whose dark version is a different drawing |
+| `<base>DarkInvert` | flipped in dark mode by CSS `invert(1) hue-rotate(180deg)` | diagrams, wireframes, flow charts, mono SVG marks |
+
+Neither swap involves a reload, a refetch, or a remount of the `<img>`:
+
+- The invert flag becomes a class the element always carries;
+  `[data-theme='dark']` scopes it, so the change lands in the same style
+  recalculation that flips the theme, with no render at all.
+- A pair re-renders `src`/`srcSet` off the theme context on the same element.
+  The twin is warmed into cache at low priority once the visible one paints
+  (`warmImage`), so the first toggle is a repaint rather than a round trip.
+
+### SVG served as SVG
+Sanity does not rasterise SVG — a `?w=` on one returns the same bytes. So
+`CaseStudyImage` emits a single plain `src` for an SVG asset instead of five
+srcset candidates naming one file.
+
 ### Extensible design
 To add a new block type:
 1. Create the schema in `portfolio-cms/schemaTypes/blocks/<name>.ts`
@@ -119,7 +149,9 @@ To add a new block type:
 7. Add one line to the `BlockRenderer.jsx` registry
 
 If it holds an image, use a `caseStudyImage` field and `<CaseStudyMedia>` — the
-framed variant then works in the new slot for free.
+framed variant and dark mode then work in the new slot for free. For a bare
+`image` field, spread `themedImageFields('<fieldName>')` beside it and render
+through `<CaseStudyImage>` or `<ThemedIcon>`.
 
 ## Migrating Existing Content
 
@@ -136,6 +168,9 @@ If any documents already exist in the dataset, they need a one-off migration:
 | `imageRow.images[].image` | `imageRow.images[].image` (now inside a `caseStudyImage`, so `caption` sits beside it as before) |
 | `imageTextGrid.columns[].image` | `imageTextGrid.columns[].media.image` |
 | `imageFull` | unchanged, plus an optional `alt` |
+
+The dark mode fields are additive on top of that: both are optional, and an
+image with neither renders in both themes exactly as before.
 
 `blockGroup` is additive — nothing existing has to move to adopt it.
 
