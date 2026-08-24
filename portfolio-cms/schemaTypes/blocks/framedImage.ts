@@ -1,13 +1,18 @@
 import { defineType } from 'sanity'
+import { imageHeightField } from '../objects/imageHeight'
 import { themedImageFields } from '../objects/themedImage'
 
 /**
- * framedImage — one image centred inside a fixed-ratio surface.
+ * framedImage — one image centred on a surface.
  *
- * The surface is what responds to the container: it keeps its shape and grows
- * and shrinks with the screen. The image inside keeps its own proportions and
- * is only ever scaled down far enough to fit, never cropped and never
- * stretched. Built for device shots — a phone screen, a MacBook lid.
+ * The surface stands exactly as tall as `height` asks and fills the width it is
+ * given, so it is the part that responds to the screen. The image inside keeps
+ * its own proportions and is only ever scaled down far enough to fit — never
+ * cropped, never stretched. Built for device shots: a phone screen, a MacBook
+ * lid.
+ *
+ * The surface wears the same skin as every other block, so a framed image reads
+ * as one of the family rather than a thing of its own.
  */
 export default defineType({
   name: 'framedImage',
@@ -30,6 +35,7 @@ export default defineType({
       type: 'string',
       description: 'Describes the image for screen readers. Leave blank only if purely decorative.',
     },
+    imageHeightField({ required: true }),
     {
       name: 'caption',
       title: 'Caption',
@@ -40,7 +46,7 @@ export default defineType({
       name: 'frame',
       title: 'Frame',
       type: 'imageFrame',
-      initialValue: { aspectRatio: '16/10', padding: 'md', background: 'surface' },
+      initialValue: { padding: 'md' },
     },
   ],
   preview: {
@@ -48,12 +54,12 @@ export default defineType({
       media: 'image',
       caption: 'caption',
       alt: 'alt',
-      aspectRatio: 'frame.aspectRatio',
+      height: 'height',
     },
-    prepare({ media, caption, alt, aspectRatio }) {
+    prepare({ media, caption, alt, height }) {
       return {
         title: caption || alt || 'Framed Image',
-        subtitle: `Framed${aspectRatio ? ` · ${aspectRatio.replace('/', ':')}` : ''}`,
+        subtitle: height ? `Framed · ${height}vh` : 'Framed',
         media,
       }
     },

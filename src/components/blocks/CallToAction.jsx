@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Button from '../core/Button'
+import { BLOCK_SURFACE } from '../../config/blockSurface'
 
 export default function CallToAction({ block }) {
   const [isVisible, setIsVisible] = useState(true)
@@ -9,7 +10,7 @@ export default function CallToAction({ block }) {
   }
 
   return (
-    <div className="flex flex-col @md:flex-row overflow-clip rounded-[20px] items-start @md:items-center gap-4 px-6 py-5 justify-between w-full [box-shadow:var(--shadow-block-inset)] [background:var(--color-bg-block)] border border-solid [border-color:var(--color-border-block)] antialiased transition-all duration-300">
+    <div className={`flex flex-col @md:flex-row items-start @md:items-center gap-4 px-6 py-5 justify-between w-full antialiased ${BLOCK_SURFACE}`}>
       <div className="flex flex-col items-start gap-2">
         <div className="tracking-[-0.02em] w-fit font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-secondary)] text-body leading-[1.25rem]">
           {block.title}

@@ -5,10 +5,13 @@
 ### 1. Shared Sanity objects
 `portfolio-cms/schemaTypes/objects/`
 
-- **caseStudyImage.ts** — the image primitive: image, alt, caption, a `framed`
-  toggle and its frame. Every block that holds an image holds one of these,
-  which is what lets a framed device shot go anywhere a plain image goes.
-- **imageFrame.ts** — frame settings: shape, inset, backdrop.
+- **caseStudyImage.ts** — the image primitive: image, alt, caption, height, a
+  `framed` toggle and its frame. Every block that holds an image holds one of
+  these, which is what lets a framed device shot go anywhere a plain image goes.
+- **imageFrame.ts** — the frame's inset. Nothing else: the skin is
+  `BLOCK_SURFACE` and is not configurable.
+- **imageHeight.ts** — the shared height field. One mechanism sizes every image
+  block: a share of the screen height, fixed, with the width filling the frame.
 - **themedImage.ts** — `themedImageFields(base)`, two optional dark mode fields:
   `<base>Dark` (a second file) and `<base>DarkInvert` (a CSS flip). Spread into
   `caseStudyImage`, `imageFull`, `framedImage`, and both icon fields.
@@ -25,8 +28,8 @@
 | `textRowTwoColumn.ts` | Section/title header over two text columns |
 | `textCardRow.ts` | 3 cards with icon, subtitle, description |
 | `textImageRow.ts` | Title, paragraphs, optional subtitle, one image |
-| `imageFull.ts` | One image, full container width |
-| `framedImage.ts` | One image centred on a fixed-ratio surface |
+| `imageFull.ts` | One image, full container width, at a fixed vh height |
+| `framedImage.ts` | One image centred on a surface, at a fixed vh height |
 | `imageRow.ts` | 2-3 images with captions |
 | `imageTextGrid.ts` | 2-3 columns of image + text card |
 | `callToAction.ts` | Title, description, button text/link |
@@ -52,8 +55,12 @@ Image rendering is centralised:
   the same dark mode choice and none of the responsive machinery.
 - **hooks/useThemedImage.js** — picks the theme's file and warms the other one.
   The only place dark mode handling is interpreted.
-- **config/imageFrame.js** — the option lists and `frameBoxStyle()`, shared by
-  the frame and its skeleton so the two agree on height.
+- **config/imageFrame.js** — the inset list and `imageHeightStyle()`, shared by
+  the blocks and their skeletons so the two agree on height.
+- **config/blockSurface.js** — `BLOCK_SURFACE`, the one card skin worn by the
+  Text Block, Text Card Row, Image + Text Grid cards, Call to Action and the
+  Framed Image frame. It lived in five places and the frame drifted; now there
+  is one string to change.
 
 ### 4. Core infrastructure
 
@@ -111,6 +118,17 @@ while the numbering increases down the page. `assignBlockIndices` numbers the
 whole tree in document order to keep it that way, and
 `src/test/expandMorph.test.jsx` pins the behaviour.
 
+### Images that hold their height
+Every image block takes a height in vh, so one tall screenshot can no longer
+swallow the compact case study. `imageHeightStyle()` renders it as `svh` rather
+than `vh` — identical on a desktop, but on a phone `vh` is measured against the
+largest viewport, so a vh-sized block resizes every time the browser chrome
+hides on scroll. It also clamps out-of-range values, so a stray number cannot
+collapse a block.
+
+A plain image crops to that box around its hotspot; a framed one sits whole and
+centred on the surface.
+
 ### Images that don't shift the page
 The case study query dereferences `asset->metadata.dimensions`, so every block
 knows an image's shape before its bytes land and reserves the height up front.
@@ -167,7 +185,9 @@ If any documents already exist in the dataset, they need a one-off migration:
 | `textImageRow.image` | `textImageRow.media.image` |
 | `imageRow.images[].image` | `imageRow.images[].image` (now inside a `caseStudyImage`, so `caption` sits beside it as before) |
 | `imageTextGrid.columns[].image` | `imageTextGrid.columns[].media.image` |
-| `imageFull` | unchanged, plus an optional `alt` |
+| `imageFull` | plus `alt` and a required `height` |
+| `framedImage.frame.aspectRatio` | gone — replaced by the block's `height` |
+| `framedImage.frame.background` | gone — the frame wears the shared block skin |
 
 The dark mode fields are additive on top of that: both are optional, and an
 image with neither renders in both themes exactly as before.

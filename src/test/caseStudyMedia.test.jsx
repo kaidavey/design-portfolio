@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import CaseStudyMedia from '../components/CaseStudyMedia'
 import CaseStudyImage from '../components/CaseStudyImage'
 import BlockRenderer from '../components/BlockRenderer'
-import { FRAME_DEFAULTS } from '../config/imageFrame'
+import { BLOCK_SURFACE } from '../config/blockSurface'
 
 /**
  * Image blocks — plain vs framed.
@@ -47,9 +47,15 @@ function media(overrides = {}) {
   return { image: imageAsset(), alt: 'A screen', ...overrides }
 }
 
-/** The frame is the element carrying an inline aspect-ratio. */
+/** The frame is the surface a contained image sits on. */
 function frameOf(container) {
-  return container.querySelector('[style*="aspect-ratio"]:not(img)')
+  const image = container.querySelector('img.object-contain')
+  return image?.parentElement ?? null
+}
+
+/** Every frame in the tree, in document order. */
+function framesOf(container) {
+  return [...container.querySelectorAll('img.object-contain')].map((img) => img.parentElement)
 }
 
 describe('CaseStudyImage', () => {
@@ -85,10 +91,10 @@ describe('CaseStudyMedia', () => {
     expect(screen.getByAltText('A screen')).toHaveClass('object-cover')
   })
 
-  test('a framed image sits uncropped inside a frame that owns the shape', () => {
+  test('a framed image sits uncropped on a surface that owns the height', () => {
     const { container } = render(
       <CaseStudyMedia
-        media={media({ framed: true, frame: { aspectRatio: '4/3', padding: 'lg', background: 'dark' } })}
+        media={media({ framed: true, height: 45, frame: { padding: 'lg' } })}
         maxWidth={800}
         fillClassName="w-full object-cover"
       />
@@ -96,7 +102,9 @@ describe('CaseStudyMedia', () => {
 
     const frame = frameOf(container)
     expect(frame).not.toBeNull()
-    expect(frame.style.aspectRatio).toBe('4/3')
+    // svh, not vh: on a phone vh is measured against the largest viewport, so a
+    // vh-sized block resizes every time the browser chrome hides on scroll.
+    expect(frame.style.height).toBe('45svh')
 
     const img = screen.getByAltText('A screen')
     // Contained, not covered — cropping a device shot is the one thing a frame
@@ -106,41 +114,37 @@ describe('CaseStudyMedia', () => {
     expect(img).toHaveClass('max-h-full')
   })
 
-  test('falls back to the default shape when a block carries no frame settings', () => {
+  test('wears the same surface as every other block', () => {
+    const { container } = render(
+      <CaseStudyMedia media={media({ framed: true, height: 40 })} maxWidth={800} />
+    )
+
+    // The whole point of the shared constant: a frame cannot drift away from
+    // the skin a Text Block or a Call to Action wears.
+    for (const className of BLOCK_SURFACE.split(' ')) {
+      expect(frameOf(container)).toHaveClass(className)
+    }
+  })
+
+  test('takes its height from the slot when the editor set none', () => {
     const { container } = render(<CaseStudyMedia media={media({ framed: true })} maxWidth={800} />)
 
-    expect(frameOf(container).style.aspectRatio).toBe(FRAME_DEFAULTS.aspectRatio)
+    // Inside a row or grid the slot governs the height, so the frame imposes
+    // nothing of its own.
+    expect(frameOf(container).style.height).toBe('')
   })
 
-  test('ignores a shape that is not on the schema list', () => {
-    const { container } = render(
-      <CaseStudyMedia media={media({ framed: true, frame: { aspectRatio: '13/7' } })} maxWidth={800} />
+  test('clamps a height outside the range the schema allows', () => {
+    const { container: tall } = render(
+      <CaseStudyMedia media={media({ framed: true, height: 400 })} maxWidth={800} />
+    )
+    const { container: short } = render(
+      <CaseStudyMedia media={media({ framed: true, height: 1 })} maxWidth={800} />
     )
 
-    // A bad ratio would collapse the frame to zero height, so it degrades to
-    // the default instead of passing straight through to CSS.
-    expect(frameOf(container).style.aspectRatio).toBe(FRAME_DEFAULTS.aspectRatio)
-  })
-
-  test('caps a portrait frame by height so it never becomes a column of gray', () => {
-    const { container } = render(
-      <CaseStudyMedia media={media({ framed: true, frame: { aspectRatio: '9/16' } })} maxWidth={800} />
-    )
-
-    const frame = frameOf(container)
-    // Height is capped first and the width follows from the ratio, so the shape
-    // stays exact instead of the cap flattening it.
-    expect(frame.style.maxHeight).toBe('var(--frame-max-height)')
-    expect(frame.style.width).toBe('min(100%, calc(var(--frame-max-height) * 0.5625))')
-  })
-
-  test('a landscape frame still fills the container it is given', () => {
-    const { container } = render(
-      <CaseStudyMedia media={media({ framed: true, frame: { aspectRatio: '16/9' } })} maxWidth={800} />
-    )
-
-    // min() resolves to 100% at any realistic viewport for a wide frame.
-    expect(frameOf(container).style.width).toContain('min(100%')
+    // A stray value must not collapse a block or run it off the screen.
+    expect(frameOf(tall).style.height).toBe('100svh')
+    expect(frameOf(short).style.height).toBe('10svh')
   })
 
   test('renders nothing when the media slot is empty', () => {
@@ -150,6 +154,39 @@ describe('CaseStudyMedia', () => {
 })
 
 describe('image blocks', () => {
+  test('a plain image at a fixed height fills the box and crops to it', () => {
+    render(
+      <BlockRenderer
+        blocks={[
+          { _key: 'a', _type: 'imageFull', image: imageAsset(), alt: 'A screen', height: 35 },
+        ]}
+      />
+    )
+
+    const img = screen.getByAltText('A screen')
+    // Fixed height plus full width means something has to give, and for a plain
+    // image that is the crop — the alternative is letterboxing a bleed image.
+    expect(img).toHaveClass('object-cover')
+    expect(img.parentElement.style.height).toBe('35svh')
+    // The intrinsic ratio would fight the fixed height, so it is not applied.
+    expect(img.style.aspectRatio).toBe('')
+  })
+
+  test('crops a fixed-height image around its hotspot', () => {
+    const withHotspot = { ...imageAsset(), hotspot: { x: 0.25, y: 0.8 } }
+
+    render(
+      <BlockRenderer
+        blocks={[
+          { _key: 'a', _type: 'imageFull', image: withHotspot, alt: 'A screen', height: 35 },
+        ]}
+      />
+    )
+
+    // The hotspot is the editor's answer to what has to survive the crop.
+    expect(screen.getByAltText('A screen').style.objectPosition).toBe('25.00% 80.00%')
+  })
+
   test('the standalone image block spans the container and keeps its own height', () => {
     const { container } = render(
       <BlockRenderer
@@ -165,7 +202,7 @@ describe('image blocks', () => {
     expect(screen.getByText('Shipped')).toBeInTheDocument()
   })
 
-  test('the framed image block renders a frame', () => {
+  test('the framed image block stands at the height it was given', () => {
     const { container } = render(
       <BlockRenderer
         blocks={[
@@ -174,18 +211,19 @@ describe('image blocks', () => {
             _type: 'framedImage',
             image: imageAsset(),
             alt: 'A phone',
-            frame: { aspectRatio: '1/1', padding: 'sm', background: 'surface' },
+            height: 55,
+            frame: { padding: 'sm' },
           },
         ]}
       />
     )
 
-    expect(frameOf(container).style.aspectRatio).toBe('1/1')
+    expect(frameOf(container).style.height).toBe('55svh')
     expect(screen.getByAltText('A phone')).toHaveClass('object-contain')
   })
 
   test('a frame can go in any slot a plain image can', () => {
-    const framed = media({ framed: true, alt: 'Framed one', frame: { aspectRatio: '9/16' } })
+    const framed = media({ framed: true, alt: 'Framed one', height: 30 })
     const plain = media({ alt: 'Plain one' })
 
     const { container } = render(
@@ -212,7 +250,7 @@ describe('image blocks', () => {
     )
 
     // One frame per framed slot: image row, grid column, text + image row.
-    expect(container.querySelectorAll('[style*="aspect-ratio"]:not(img)')).toHaveLength(3)
+    expect(framesOf(container)).toHaveLength(3)
     expect(screen.getAllByAltText('Framed one')).toHaveLength(3)
     expect(screen.getAllByAltText('Plain one')).toHaveLength(2)
   })

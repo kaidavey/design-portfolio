@@ -25,6 +25,7 @@ const IMAGE_FIELDS = `
 // refetched when they do.
 const MEDIA_FIELDS = `
   alt,
+  height,
   caption,
   framed,
   frame,
@@ -132,6 +133,7 @@ const BLOCK_FIELDS = `
   _type == "imageFull" => {
     alt,
     caption,
+    height,
     imageDarkInvert,
     image { ${IMAGE_FIELDS} },
     imageDark { ${IMAGE_FIELDS} }
@@ -141,6 +143,7 @@ const BLOCK_FIELDS = `
   _type == "framedImage" => {
     alt,
     caption,
+    height,
     frame,
     imageDarkInvert,
     image { ${IMAGE_FIELDS} },
@@ -185,13 +188,14 @@ export async function getCaseStudyShape(slug) {
         _type,
         _key,
         _type == "spacer" => { height },
-        _type == "framedImage" => { frame },
+        _type == "imageFull" => { height },
+        _type == "framedImage" => { height },
         _type == "blockGroup" => {
           gap,
           blocks[]{
             _type,
             _key,
-            _type == "framedImage" => { frame }
+            _type == "framedImage" => { height }
           }
         }
       }

@@ -1,4 +1,5 @@
 import ThemedIcon from '../ThemedIcon'
+import { BLOCK_SURFACE } from '../../config/blockSurface'
 
 export default function TextCardRow({ block }) {
   return (
@@ -6,7 +7,7 @@ export default function TextCardRow({ block }) {
       {(block.cards || []).map((card, index) => (
         <div
           key={card._key || index}
-          className="flex overflow-clip rounded-[20px] flex-col items-start gap-9 p-6 flex-1 w-full [box-shadow:var(--shadow-block-inset)] [background:var(--color-bg-block)] border border-solid [border-color:var(--color-border-block)] transition-all duration-300"
+          className={`flex flex-col items-start gap-9 p-6 flex-1 w-full ${BLOCK_SURFACE}`}
         >
           <ThemedIcon
             source={card.icon}

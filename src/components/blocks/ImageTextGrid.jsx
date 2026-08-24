@@ -1,4 +1,5 @@
 import CaseStudyMedia from '../CaseStudyMedia'
+import { BLOCK_SURFACE } from '../../config/blockSurface'
 
 /**
  * ImageTextGrid - Two or three columns, each an image above a text card.
@@ -30,7 +31,7 @@ export default function ImageTextGrid({ block }) {
               {column.media.caption}
             </div>
           )}
-          <div className="flex overflow-clip rounded-[20px] flex-col items-start gap-9 p-6 self-stretch [box-shadow:var(--shadow-block-inset)] [background:var(--color-bg-block)] border border-solid [border-color:var(--color-border-block)] transition-all duration-300">
+          <div className={`flex flex-col items-start gap-9 p-6 self-stretch ${BLOCK_SURFACE}`}>
             <div className="flex flex-col items-start gap-2 self-stretch">
               <div className="tracking-[-0.02em] self-stretch font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-secondary)] text-body leading-[1.25rem]">
                 {column.subtitle}

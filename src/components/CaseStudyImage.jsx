@@ -12,6 +12,21 @@ function sourcesFor(image, widths, maxWidth) {
 }
 
 /**
+ * Where a cropped image should hold on to.
+ *
+ * A block with a fixed height crops whatever does not fit, and the hotspot is
+ * the editor's answer to what has to survive that crop. Sanity stores it as
+ * fractions of the image, which is exactly what object-position wants as a
+ * percentage. Without one the browser's own default — dead centre — stands.
+ */
+function hotspotPosition(image) {
+  const { x, y } = image?.hotspot || {}
+  if (typeof x !== 'number' || typeof y !== 'number') return null
+
+  return { objectPosition: `${(x * 100).toFixed(2)}% ${(y * 100).toFixed(2)}%` }
+}
+
+/**
  * CaseStudyImage - Responsive image component with srcset
  *
  * Centralizes responsive image delivery for case study content blocks.
@@ -75,7 +90,9 @@ export default function CaseStudyImage({
       className={`${className} ${invertClass}`.trim()}
       style={{
         ...style,
-        ...(aspectRatio && { aspectRatio: aspectRatio.toString() }),
+        // A fixed height owns the box, so the intrinsic ratio must not fight it.
+        ...(aspectRatio && !style.height && { aspectRatio: aspectRatio.toString() }),
+        ...hotspotPosition(shown),
       }}
     />
   )

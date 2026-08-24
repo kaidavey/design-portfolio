@@ -1,5 +1,6 @@
 import CaseStudyImage from './CaseStudyImage'
 import CaseStudyFrame from './CaseStudyFrame'
+import { imageHeightStyle } from '../config/imageFrame'
 
 /**
  * CaseStudyMedia - Renders one `caseStudyImage` value.
@@ -17,7 +18,7 @@ import CaseStudyFrame from './CaseStudyFrame'
  * Optional dark mode handling rides along on the same value and is passed
  * straight through to `CaseStudyImage`.
  *
- * @param {object} media - A `caseStudyImage` value: { image, imageDark, imageDarkInvert, alt, framed, frame }
+ * @param {object} media - A `caseStudyImage` value: { image, imageDark, imageDarkInvert, alt, framed, frame, height }
  * @param {string} sizes - Sizes attribute describing the rendered width
  * @param {number} maxWidth - Largest srcset candidate to generate
  * @param {string} fillClassName - Classes for the unframed image
@@ -36,6 +37,10 @@ export default function CaseStudyMedia({
 
   const alt = media.alt || ''
 
+  // Optional here, unlike the standalone blocks: inside a row or a grid the
+  // slot already governs how tall an image stands, so a height is an override.
+  const box = imageHeightStyle(media.height)
+
   if (!media.framed) {
     return (
       <CaseStudyImage
@@ -45,14 +50,15 @@ export default function CaseStudyMedia({
         alt={alt}
         sizes={sizes}
         maxWidth={maxWidth}
-        className={fillClassName}
+        className={`${fillClassName} ${box ? 'object-cover' : ''}`.trim()}
+        style={box ?? undefined}
         loading={loading}
       />
     )
   }
 
   return (
-    <CaseStudyFrame frame={media.frame} className={frameClassName}>
+    <CaseStudyFrame frame={media.frame} height={media.height} className={frameClassName}>
       {/* max-w/max-h cap the image at the frame's inner box; object-contain
           keeps its proportions on the way down. Nothing here crops. */}
       <CaseStudyImage

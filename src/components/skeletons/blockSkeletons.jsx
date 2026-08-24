@@ -1,6 +1,6 @@
 import { SkeletonShape, SkeletonLines } from './SkeletonPrimitives'
 import { CASE_STUDY_LAYOUT } from '../../config/caseStudyLayout'
-import { frameBoxStyle } from '../../config/imageFrame'
+import { imageHeightStyle } from '../../config/imageFrame'
 
 const { imageRadius } = CASE_STUDY_LAYOUT.skeleton
 
@@ -169,27 +169,34 @@ function TextRowTwoColumnSkeleton() {
 }
 
 // ImageFull - Full-width image with optional caption.
-// The real block takes its height from the image, which the shape query does
-// not carry, so 16/9 is the standing guess.
-function ImageFullSkeleton() {
+// The block's height is explicit now, so the placeholder lands on it exactly.
+// 16/9 only stands in for the older blocks that never got one.
+function ImageFullSkeleton({ block }) {
+  const box = imageHeightStyle(block?.height)
+
   return (
     <div className="flex flex-col items-start gap-3 w-full">
-      <div className="w-full overflow-hidden rounded-[20px]">
-        <SkeletonShape w="100%" h="auto" radius="20px" style={{ aspectRatio: '16 / 9' }} />
+      <div className="w-full overflow-clip rounded-[20px]">
+        <SkeletonShape
+          w="100%"
+          h={box ? box.height : 'auto'}
+          radius="20px"
+          style={box ? undefined : { aspectRatio: '16 / 9' }}
+        />
       </div>
       <SkeletonShape w="180px" h="1.0446rem" />
     </div>
   )
 }
 
-// FramedImage - Surface at the editor's chosen ratio, image centred inside.
-// The shape query carries the frame, so this one lands on the exact height.
+// FramedImage - Surface at the editor's height, image centred inside.
+// The shape query carries that height, so this one lands on it exactly.
 function FramedImageSkeleton({ block }) {
-  const { width, ...box } = frameBoxStyle(block?.frame?.aspectRatio)
+  const box = imageHeightStyle(block?.height)
 
   return (
     <div className="flex flex-col items-start gap-3 w-full">
-      <SkeletonShape w={width} h="auto" radius="20px" style={{ ...box, marginInline: 'auto' }} />
+      <SkeletonShape w="100%" h={box ? box.height : '40svh'} radius="20px" />
       <SkeletonShape w="180px" h="1.0446rem" />
     </div>
   )
