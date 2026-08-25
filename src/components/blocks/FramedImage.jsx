@@ -12,6 +12,7 @@ export default function FramedImage({ block }) {
       imageInvert={block.imageDarkInvert}
       imageAlt={block.alt || ''}
       caption={block.caption}
+      height={block.height}
       frame={block.frame}
     />
   )

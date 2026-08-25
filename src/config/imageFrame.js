@@ -1,64 +1,46 @@
 /**
  * Frame presentation config.
  *
- * These mirror the option lists in `portfolio-cms/schemaTypes/objects/imageFrame.ts`.
- * If you add a shape, an inset step or a backdrop there, add it here too — a
+ * Mirrors the options in `portfolio-cms/schemaTypes/objects/imageFrame.ts`. A
  * value the frame does not recognise falls back to the default rather than
  * rendering something broken.
+ *
+ * Unlike other surfaced blocks, the frame has no border, background, or inset
+ * shadow. It's a clean rounded container that lets the image speak for itself.
+ * Only the padding is configurable.
  */
 
 export const FRAME_DEFAULTS = {
-  aspectRatio: '16/10',
   padding: 'md',
-  background: 'surface',
 }
 
-// An unrecognised ratio would collapse the frame to zero height.
-export const FRAME_ASPECT_RATIOS = new Set([
-  '16/10',
-  '16/9',
-  '4/3',
-  '3/2',
-  '1/1',
-  '3/4',
-  '9/16',
-])
-
-// Inset steps. Two values each so the gap around the image opens up as the
-// frame does, instead of a phone shot floating in a sea of gray when expanded.
+// Padding steps for the frame around images.
 export const FRAME_PADDING = {
   none: '',
   sm: 'p-3 @md:p-4',
-  md: 'p-6 @md:p-10',
+  md: 'p-6',
   lg: 'p-10 @md:p-16',
 }
 
-// 'surface' wears the same skin as every other block, so it follows the theme.
-// 'light' and 'dark' are fixed stages for shots that need a specific backdrop.
-export const FRAME_BACKGROUND = {
-  surface:
-    '[background:var(--color-bg-block)] [border-color:var(--color-border-block)] [box-shadow:var(--shadow-block-inset)]',
-  light: 'bg-[#f2f2f2] border-[#dedede]',
-  dark: 'bg-[#1a1a1a] border-[#222222]',
-}
+/** Matches the schema's bounds, so a stray value cannot collapse a block. */
+export const MIN_IMAGE_HEIGHT_VH = 10
+export const MAX_IMAGE_HEIGHT_VH = 100
 
 /**
- * The box a frame occupies at a given shape.
+ * The fixed height an image block stands at, as a CSS length.
  *
- * A portrait frame at full container width is taller than the screen — a 9:16
- * frame in the expanded column measures well over 2000px, and the reader
- * scrolls through a column of gray to reach the next block. Height is capped
- * first and the width follows from the ratio, which keeps the shape exact
- * instead of letting the cap flatten it. Landscape frames never reach the cap
- * and still fill the container.
+ * `svh` rather than `vh` on purpose: they are identical on a desktop, but on a
+ * phone `vh` is measured against the *largest* viewport, so an image sized in
+ * vh grows and shrinks every time the browser chrome hides on scroll. `svh` is
+ * the small-viewport unit and holds still, which is the whole point of asking
+ * for a fixed height.
+ *
+ * Returns null when no height is set — the caller then sizes from the image.
  */
-export function frameBoxStyle(aspectRatio) {
-  const shape = FRAME_ASPECT_RATIOS.has(aspectRatio) ? aspectRatio : FRAME_DEFAULTS.aspectRatio
-  const [width, height] = shape.split('/').map(Number)
+export function imageHeightStyle(height) {
+  if (typeof height !== 'number' || !Number.isFinite(height)) return null
 
-  return {
-    aspectRatio: shape,
-    width: `min(100%, calc(var(--frame-max-height) * ${width / height}))`,
-    maxHeight: 'var(--frame-max-height)',
-  }
+  const clamped = Math.min(Math.max(height, MIN_IMAGE_HEIGHT_VH), MAX_IMAGE_HEIGHT_VH)
+
+  return { height: `${clamped}svh` }
 }

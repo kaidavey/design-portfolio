@@ -23,15 +23,22 @@ Your portfolio now has a complete block-based content system! Each case study is
 
 ### Image vs Framed Image
 
-**Image** bleeds to the full width of the container. Its height comes from the
-image's own proportions — nothing is cropped and no ratio is imposed. Use it
-for photography and wide artwork.
+Both take a **Height**, given as a share of the screen height — 40 means 40vh.
+That height is the fixed part: it does not change when the window does. The
+width always fills the case study frame.
 
-**Framed Image** puts the image on a rounded surface instead. The surface is
-the responsive part: it keeps the shape you choose and grows and shrinks with
-the screen, while the image inside stays centred at its own proportions and is
-only ever scaled down far enough to fit. Use it for phone screens, laptop
-shots, and anything else that should not run edge to edge.
+**Image** bleeds to the full width of the container and fills that height,
+cropped to it. Set the image's **hotspot** to say what has to survive the crop.
+Use it for photography and wide artwork.
+
+**Framed Image** puts the image on a rounded surface instead. The surface takes
+the height and the width; the image inside stays centred at its own proportions
+and is only ever scaled down far enough to fit — never cropped. Use it for phone
+screens, laptop shots, and anything else that should not run edge to edge.
+
+The surface is the same one a Text Block or a Call to Action wears: same radius,
+background, border and inset highlight, following the theme. That is fixed on
+purpose, so a case study reads as one system.
 
 A framed image is not limited to its own block. Every image slot in the system
 — both or all three cells of an **Image Row**, any column of an **Image + Text
@@ -43,12 +50,12 @@ Frame options:
 
 | Option | What it does |
 |---|---|
-| **Frame Shape** | The shape of the surface, not the image. 16:10 through 9:16. |
+| **Height** | How tall the surface stands, in vh. Required on the standalone blocks. |
 | **Inset** | Breathing room between the image and the edge of the frame. |
-| **Backdrop** | *Surface* follows the site theme; *Light* and *Dark* stay fixed. |
 
-Portrait frames are capped by height and sized from the ratio, so a 9:16 frame
-stays on screen instead of turning into a long column of gray.
+Inside an Image Row or an Image + Text Grid, Height is optional — the slot
+already governs how tall an image stands, so setting one there is an override
+rather than the rule.
 
 ### Images in dark mode
 

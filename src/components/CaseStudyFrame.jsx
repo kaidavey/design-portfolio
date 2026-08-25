@@ -1,32 +1,27 @@
-import {
-  FRAME_DEFAULTS,
-  FRAME_PADDING,
-  FRAME_BACKGROUND,
-  frameBoxStyle,
-} from '../config/imageFrame'
+import { FRAME_DEFAULTS, FRAME_PADDING, imageHeightStyle } from '../config/imageFrame'
 
 /**
  * CaseStudyFrame - The surface a framed image sits on.
  *
- * The frame is the responsive part. It fills the width it is given and keeps
- * the shape the editor chose, so it grows and shrinks as the shell moves
- * between compact and expanded and as the viewport changes. Whatever is inside
- * is centred and left alone — scaled down only far enough to fit, never
- * cropped and never stretched.
+ * It fills the width it is given and stands exactly as tall as `height` asks,
+ * so it is the part that responds when the shell moves between compact and
+ * expanded. Whatever is inside is centred and left alone — scaled down only far
+ * enough to fit, never cropped and never stretched.
  *
- * Sizing is container-relative throughout (see PAPER_CONTRACT.md): the inset
- * steps up at the container's @md breakpoint, not the viewport's.
+ * Unlike other surfaced blocks, the frame has no border, background, or inset
+ * shadow. It's a clean rounded container that lets the image speak for itself.
+ *
+ * With no height it falls back to sizing from its content, which is what an
+ * image inside a row or grid wants — there the slot governs the height.
  */
-export default function CaseStudyFrame({ frame, className = '', children }) {
-  const { aspectRatio, padding, background } = { ...FRAME_DEFAULTS, ...(frame || {}) }
-
+export default function CaseStudyFrame({ frame, height, className = '', children }) {
+  const { padding } = { ...FRAME_DEFAULTS, ...(frame || {}) }
   const paddingClass = FRAME_PADDING[padding] ?? FRAME_PADDING[FRAME_DEFAULTS.padding]
-  const backgroundClass = FRAME_BACKGROUND[background] ?? FRAME_BACKGROUND[FRAME_DEFAULTS.background]
 
   return (
     <div
-      className={`flex items-center justify-center overflow-hidden rounded-[20px] mx-auto border border-solid transition-all duration-300 ${paddingClass} ${backgroundClass} ${className}`}
-      style={frameBoxStyle(aspectRatio)}
+      className={`flex items-center justify-center w-full ${paddingClass} overflow-clip rounded-[20px] ${className}`}
+      style={imageHeightStyle(height) ?? undefined}
     >
       {children}
     </div>

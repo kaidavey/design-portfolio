@@ -1,6 +1,8 @@
+import { BLOCK_SURFACE } from '../../config/blockSurface'
+
 export default function TextBlockCentered({ block }) {
   return (
-    <div className="flex overflow-clip rounded-[20px] flex-col items-center gap-4 py-12 px-6 @md:px-25 justify-center [box-shadow:var(--shadow-block-inset)] [background:var(--color-bg-block)] border border-solid [border-color:var(--color-border-block)] antialiased w-full transition-all duration-300">
+    <div className={`flex flex-col items-center gap-4 py-12 px-6 @md:px-25 justify-center antialiased w-full ${BLOCK_SURFACE}`}>
       {(block.section || block.title) && (
         <div className="flex flex-col items-center gap-1 w-full">
           {block.section && (

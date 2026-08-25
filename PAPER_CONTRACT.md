@@ -297,12 +297,11 @@ type CaseStudyImage = {
   caption?: string
   framed?: boolean         // false → fills the slot; true → sits in a frame
   frame?: ImageFrame
+  height?: number          // vh; fixed height, width fills the frame
 }
 
 type ImageFrame = {
-  aspectRatio: '16/10' | '16/9' | '4/3' | '3/2' | '1/1' | '3/4' | '9/16'
   padding: 'none' | 'sm' | 'md' | 'lg'
-  background: 'surface' | 'light' | 'dark'
 }
 ```
 
@@ -325,14 +324,16 @@ import CaseStudyMedia from '../../CaseStudyMedia'
 |  | Plain image | Framed image |
 |---|---|---|
 | Width | fills the slot | frame fills the slot |
-| Height | from the image's own proportions | from the frame's ratio |
-| Fit | `object-cover` — may crop | `object-contain` — **never** crops |
+| Height | `height` vh, else its own proportions | `height` vh, else the slot |
+| Fit | `object-cover` — crops around the hotspot | `object-contain` — **never** crops |
 | What resizes | the image | the frame; the image is only scaled down to fit |
 
-A frame is height-capped at `--frame-max-height` with its width derived from
-the ratio, so a portrait frame stays on screen instead of becoming a column of
-gray. `frameBoxStyle()` in `src/config/imageFrame.js` owns that maths — the
-frame and its skeleton both read it, so they agree on the height.
+`imageHeightStyle()` in `src/config/imageFrame.js` renders the height and clamps
+it — the blocks and their skeletons both read it, so they agree.
+
+The frame's skin is `BLOCK_SURFACE` from `src/config/blockSurface.js`, the same
+string every other surfaced block wears. Do not restate those classes in a
+presentation: import the constant, or a frame drifts out of step again.
 
 ---
 
