@@ -1,5 +1,4 @@
 import { FRAME_DEFAULTS, FRAME_PADDING, imageHeightStyle } from '../config/imageFrame'
-import { BLOCK_SURFACE } from '../config/blockSurface'
 
 /**
  * CaseStudyFrame - The surface a framed image sits on.
@@ -9,9 +8,8 @@ import { BLOCK_SURFACE } from '../config/blockSurface'
  * expanded. Whatever is inside is centred and left alone — scaled down only far
  * enough to fit, never cropped and never stretched.
  *
- * The skin is `BLOCK_SURFACE`, the same string a Text Block or a Call to Action
- * wears. It is not configurable: a case study reads as one system, and a frame
- * with a backdrop of its own broke that.
+ * Unlike other surfaced blocks, the frame has no border, background, or inset
+ * shadow. It's a clean rounded container that lets the image speak for itself.
  *
  * With no height it falls back to sizing from its content, which is what an
  * image inside a row or grid wants — there the slot governs the height.
@@ -22,7 +20,7 @@ export default function CaseStudyFrame({ frame, height, className = '', children
 
   return (
     <div
-      className={`flex items-center justify-center w-full ${paddingClass} ${BLOCK_SURFACE} ${className}`}
+      className={`flex items-center justify-center w-full ${paddingClass} overflow-clip rounded-[20px] ${className}`}
       style={imageHeightStyle(height) ?? undefined}
     >
       {children}

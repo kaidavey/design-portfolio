@@ -25,7 +25,7 @@ export default function FramedImagePresentation({
   height,
 }) {
   return (
-    <figure className="flex flex-col items-start gap-3 w-full m-0">
+    <figure className="flex flex-col items-start gap-[22px] w-full m-0">
       <CaseStudyFrame frame={frame} height={height}>
         <CaseStudyImage
           source={imageSource}

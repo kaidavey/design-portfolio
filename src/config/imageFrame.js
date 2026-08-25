@@ -5,20 +5,20 @@
  * value the frame does not recognise falls back to the default rather than
  * rendering something broken.
  *
- * The frame's skin is not configurable — it is `BLOCK_SURFACE`, the same string
- * every other surfaced block wears. Only the inset varies.
+ * Unlike other surfaced blocks, the frame has no border, background, or inset
+ * shadow. It's a clean rounded container that lets the image speak for itself.
+ * Only the padding is configurable.
  */
 
 export const FRAME_DEFAULTS = {
   padding: 'md',
 }
 
-// Inset steps. Two values each so the gap around the image opens up as the
-// frame does, instead of a phone shot floating in a sea of gray when expanded.
+// Padding steps for the frame around images.
 export const FRAME_PADDING = {
   none: '',
   sm: 'p-3 @md:p-4',
-  md: 'p-6 @md:p-10',
+  md: 'p-6',
   lg: 'p-10 @md:p-16',
 }
 
