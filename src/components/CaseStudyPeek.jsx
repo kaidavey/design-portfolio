@@ -147,7 +147,17 @@ const CaseStudyPeek = forwardRef(function CaseStudyPeek(
       initial={{ opacity: concealed ? 0 : 1 }}
       // Expand handoff: fade out (x handled in style with magnetism)
       animate={{ opacity: isAnimating || concealed ? 0 : 1 }}
-      transition={{ duration: peek.fadeOutDuration, ease: nm.ease }}
+      // Asymmetric on purpose. Going out is the expand morph's leisurely fade;
+      // coming back is the open morph landing, and the slots have to resolve
+      // with the proxy rather than after it — trailing motion once the card has
+      // arrived is the one thing that still reads as slow.
+      transition={{
+        duration:
+          isAnimating || concealed
+            ? peek.fadeOutDuration
+            : config.openMorph.proxyFadeDuration,
+        ease: nm.ease,
+      }}
       onClick={interactive ? onClick : undefined}
       role={study ? 'button' : undefined}
       aria-label={study ? `View ${study.title}` : undefined}

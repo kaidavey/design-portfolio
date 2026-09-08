@@ -57,7 +57,7 @@ export const CASE_STUDY_LAYOUT = {
       // target, which is what the rest of the clock is keyed to; `bounce` is
       // deliberately small, enough to feel elastic on arrival without the
       // overshoot unseating the corners against the real container beneath.
-      spring: { type: 'spring', visualDuration: 0.4, bounce: 0.16 },
+      spring: { type: 'spring', visualDuration: 0.3, bounce: 0.15 },
       // Proxy fades out over the real container, which has been sitting at the
       // destination rect, concealed, for the whole flight.
       //
@@ -65,15 +65,15 @@ export const CASE_STUDY_LAYOUT = {
       // proxy and the container beneath are identical but for their geometry,
       // so a proxy going translucent while still short of the target shows the
       // real container's edge through it as a doubled border.
-      proxyFadeDuration: 0.14,
+      proxyFadeDuration: 0.09,
       revealLeadMs: 40,
       // Fraction of the flight at which the artwork starts dissolving. Early,
       // and over quickly: the card should read as the container for most of its
       // travel, not resolve into one at the last moment. This is the only lever
       // that brings the gray forward — see proxyFadeDuration for why the other
       // one is pinned to arrival.
-      artworkFadeStart: 0.15,
-      artworkFadeDuration: 0.16,
+      artworkFadeStart: 0.12,
+      artworkFadeDuration: 0.12,
       ease: [0.4, 0, 0.2, 1],
     },
 
@@ -81,15 +81,15 @@ export const CASE_STUDY_LAYOUT = {
     // Same spring, same pinned proxy fade, same reasoning throughout — only
     // the artwork runs the other way, resolving instead of dissolving.
     closeMorph: {
-      spring: { type: 'spring', visualDuration: 0.4, bounce: 0.16 },
-      proxyFadeDuration: 0.14,
+      spring: { type: 'spring', visualDuration: 0.3, bounce: 0.15 },
+      proxyFadeDuration: 0.09,
       revealLeadMs: 40,
       // Late, mirroring the open morph's early dissolve: the card is the
       // container for most of the way down and only becomes the cover as it
       // arrives. Finishing before the proxy starts fading is what makes the
       // handoff to the real cover a non-event.
       artworkFadeStart: 0.45,
-      artworkFadeDuration: 0.16,
+      artworkFadeDuration: 0.12,
       ease: [0.4, 0, 0.2, 1],
     },
 
