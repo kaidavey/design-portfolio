@@ -1,9 +1,15 @@
+import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useCaseStudies } from '../hooks/useCaseStudies'
+import { prefetchCaseStudy } from '../lib/queries'
+import { stageOpenMorph } from '../lib/openMorphBaton'
+import { HOME_LAYOUT } from '../config/homeLayout'
 import Shell from '../components/Shell'
 import NowPlaying from '../components/NowPlaying'
 import CaseStudyCover from '../components/CaseStudyCover'
 import ProgressiveBlur from '../components/core/ProgressiveBlur'
+
+const COVER_RADIUS = parseFloat(HOME_LAYOUT.cover.borderRadius)
 
 // Home header slot: Bio + Status
 function HomeHeader() {
@@ -47,6 +53,72 @@ function HomeHeader() {
   )
 }
 
+/**
+ * One case study on the grid, and the departure end of the open morph.
+ *
+ * The cover is measured on the click itself rather than up front: it moves
+ * with scroll, with the viewport, and with its own hover scale, and only the
+ * rect it occupied at the moment of the click is the one the morph should
+ * leave from.
+ */
+function CaseStudyCard({ caseStudy }) {
+  const coverRef = useRef(null)
+  const slug = caseStudy.slug.current
+
+  // A modified click opens a new tab, where there is no morph to hand off to,
+  // and a staged origin would then be waiting to fire on some later visit.
+  function handleClick(event) {
+    if (event.defaultPrevented || event.button !== 0) return
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    stageOpenMorph(slug, coverRef.current, COVER_RADIUS)
+  }
+
+  // Warm the body before the morph needs it: the proxy lands on the container
+  // roughly half a second from here, and what it uncovers should be the study,
+  // not its skeleton.
+  const warm = () => prefetchCaseStudy(slug)
+
+  return (
+    <Link
+      to={`/work/${slug}`}
+      className="group flex flex-col items-start gap-4"
+      onClick={handleClick}
+      onPointerEnter={warm}
+      onPointerDown={warm}
+      onFocus={warm}
+    >
+      {/* Cover - supports both image and video */}
+      {caseStudy.coverImage && (
+        <CaseStudyCover
+          ref={coverRef}
+          coverImage={caseStudy.coverImage}
+          coverVideo={caseStudy.coverVideo}
+          alt={caseStudy.title}
+          sizes="(max-width: 640px) 92vw, (max-width: 900px) 45vw, 440px"
+          maxWidth={880}
+        />
+      )}
+
+      {/* Title below - not in a card */}
+      <div className="flex items-start gap-2">
+        <h2 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-primary)] text-meta-value leading-[1.375rem]">
+          {caseStudy.title}
+        </h2>
+        {caseStudy.description && (
+          <>
+            <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-muted)] text-meta-value leading-[1.375rem]">
+              /
+            </span>
+            <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-muted)] text-meta-value leading-[1.375rem]">
+              {caseStudy.description}
+            </span>
+          </>
+        )}
+      </div>
+    </Link>
+  )
+}
+
 export default function Home() {
   const { caseStudies, loading } = useCaseStudies()
 
@@ -70,39 +142,7 @@ export default function Home() {
       ) : (
         <div className="grid grid-cols-1 @md:grid-cols-2 gap-9 pt-[36px] pb-[128px]">
           {caseStudies.map((caseStudy) => (
-            <Link
-              key={caseStudy._id}
-              to={`/work/${caseStudy.slug.current}`}
-              className="group flex flex-col items-start gap-4"
-            >
-              {/* Cover - supports both image and video */}
-              {caseStudy.coverImage && (
-                <CaseStudyCover
-                  coverImage={caseStudy.coverImage}
-                  coverVideo={caseStudy.coverVideo}
-                  alt={caseStudy.title}
-                  sizes="(max-width: 640px) 92vw, (max-width: 900px) 45vw, 440px"
-                  maxWidth={880}
-                />
-              )}
-
-              {/* Title below - not in a card */}
-              <div className="flex items-start gap-2">
-                <h2 className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-primary)] text-meta-value leading-[1.375rem]">
-                  {caseStudy.title}
-                </h2>
-                {caseStudy.description && (
-                  <>
-                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-muted)] text-meta-value leading-[1.375rem]">
-                      /
-                    </span>
-                    <span className="tracking-[-0.02em] font-['DM_Sans',system-ui,sans-serif] font-medium [color:var(--color-text-muted)] text-meta-value leading-[1.375rem]">
-                      {caseStudy.description}
-                    </span>
-                  </>
-                )}
-              </div>
-            </Link>
+            <CaseStudyCard key={caseStudy._id} caseStudy={caseStudy} />
           ))}
         </div>
       )}

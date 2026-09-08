@@ -41,6 +41,26 @@ export const CASE_STUDY_LAYOUT = {
       },
     },
 
+    // Open morph: the home cover grows into the container slot. Apple's app
+    // open — the artwork travels, dissolves into the surface it becomes, and
+    // the window it left behind is never seen waiting at the destination.
+    openMorph: {
+      // Geometry rides a spring. `visualDuration` is when it first reaches the
+      // target, which is what the rest of the clock is keyed to; `bounce` is
+      // deliberately small, enough to feel elastic on arrival without the
+      // overshoot unseating the corners against the real container beneath.
+      spring: { type: 'spring', visualDuration: 0.55, bounce: 0.18 },
+      // Proxy fades out over the real container, which has been sitting at the
+      // destination rect, concealed, for the whole flight.
+      proxyFadeDuration: 0.22,
+      revealLeadMs: 40,
+      // Fraction of the flight at which the cover starts dissolving, so the
+      // proxy arrives wearing the container's skin rather than the artwork.
+      coverFadeStart: 0.45,
+      coverFadeDuration: 0.3,
+      ease: [0.4, 0, 0.2, 1],
+    },
+
     // Navigation morph: peek cover grows into the container slot while the
     // outgoing study's cover shrinks into the opposite peek slot. All timing
     // lives here; the component reads, never hardcodes.

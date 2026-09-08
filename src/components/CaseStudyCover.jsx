@@ -27,6 +27,9 @@ import { useInView } from '../hooks/useInView'
  * @param {number} maxWidth - Max width for image optimization
  * @param {string} className - Additional CSS classes
  * @param {Object} style - Inline styles
+ * @param {Object} ref - Optional object ref onto the cover box, for callers
+ *   that need to measure it (see openMorphBaton). Adopted as the container ref
+ *   rather than merged, so there is only ever one node reference to keep true.
  */
 export default function CaseStudyCover({
   coverImage,
@@ -36,8 +39,10 @@ export default function CaseStudyCover({
   maxWidth,
   className = '',
   style = {},
+  ref,
 }) {
-  const containerRef = useRef(null)
+  const localRef = useRef(null)
+  const containerRef = ref ?? localRef
   const videoRef = useRef(null)
 
   const [failed, setFailed] = useState(false)

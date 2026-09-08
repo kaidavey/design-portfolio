@@ -384,6 +384,52 @@ Blocks start at `opacity: 0`. If the IntersectionObserver never fires (misconfig
 
 ---
 
+## Open Morph — Home Cover → Case Study Container
+
+Clicking a cover on Home grows it into the compact case study container: the
+artwork travels, dissolves into the surface it becomes, and the container is
+never seen waiting at the destination. Apple's app open.
+
+**Files**
+
+| File | Owns |
+| --- | --- |
+| `lib/openMorphBaton.js` | departure geometry, measured on the click |
+| `config/caseStudyLayout.js` → `compact.openMorph` | spring and timing |
+| `config/openMorphTimeline.js` | phases, and the clock derived from them |
+| `hooks/useOpenMorph.js` | phase sequencing, destination measurement |
+| `components/caseStudy/OpenMorphOverlay.jsx` | the flying proxy |
+
+**Mechanism.** Same proxy pattern as the nav morph, for the same reasons. A
+leaf card wearing the container's skin animates real `top/left/width/height`
+between the two rects — never `scale`, because the endpoints differ in both
+aspect ratio and corner radius, and scaling shears the corners. The proxy is
+opaque for the whole flight, so the real container is revealed beneath it as a
+hard cut with nothing to crossfade.
+
+**Three things this depends on, in order of how quietly they break:**
+
+1. **The origin is read during render, not in an effect.** The container has to
+   be concealed on the first commit. An effect runs one frame too late, and
+   that frame paints the destination at full size before the proxy has left.
+2. **The proxy departs with the cover's own `currentSrc`.** Rebuilding a URL
+   from the Sanity asset yields a different, uncached one, and the first frame
+   of the animation is then a blank card.
+3. **The cover's hover scale is carried into the proxy** (`group-hover:scale-105`,
+   which Tailwind v4 writes as the standalone `scale` property, not a matrix).
+   Departing at scale 1 from a hovered cover pops on frame one.
+
+**Reduced motion.** `useOpenMorph` asks for `prefers-reduced-motion` directly,
+as `useNavMorph` does. This is the documented exception to rule 4 below:
+`MotionConfig reducedMotion="user"` stands down transform and layout
+animations only, and both morphs travel on `top/left/width/height`.
+
+**Concealment is `visibility`, never `opacity`.** `opacity < 1` creates a
+backdrop root and a stacking context, either of which disturbs the container
+skin's `backdrop-filter`. See the constraint above.
+
+---
+
 ## What Is NOT Animated (Deliberately Deferred)
 
 This foundation pass establishes Motion infrastructure **without changing existing behavior**. The following are explicitly deferred to future work:
@@ -393,7 +439,7 @@ This foundation pass establishes Motion infrastructure **without changing existi
 1. **Gray container entrance/exit** — the frosted case study card appears instantly. Future: slide up from bottom or fade in.
 2. **Compact/expanded transition** — the expand button toggles state instantly. Future: smooth resize/reflow with `layoutId`.
 3. **ProgressiveBlur** — no entrance animation. It appears/disappears with scroll state via conditional rendering.
-4. **Home page project cards** — CSS hover transitions only. Future: may convert to Motion for gesture-aware springs.
+4. **Home page project cards** — CSS hover transitions only; clicking one runs the open morph documented above.
 5. **Breadcrumbs, nav buttons** — CSS `transition-colors` only.
 
 ### Why Deferred?

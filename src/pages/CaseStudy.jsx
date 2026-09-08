@@ -7,11 +7,13 @@ import { EXPAND, EXPAND_PHASE } from '../config/expandTransition'
 import { NAV_PHASE } from '../config/navMorphTimeline'
 import { useExpandMorph } from '../hooks/useExpandMorph.js'
 import { useNavMorph } from '../hooks/useNavMorph'
+import { useOpenMorph } from '../hooks/useOpenMorph'
 import Shell from '../components/Shell'
 import CaseStudyBody from '../components/CaseStudyBody'
 import ProgressiveBlur from '../components/core/ProgressiveBlur'
 import CaseStudyPeek from '../components/CaseStudyPeek'
 import NavMorphOverlay from '../components/caseStudy/NavMorphOverlay'
+import OpenMorphOverlay from '../components/caseStudy/OpenMorphOverlay'
 import { ExpandMorphLayer, ExpandedLayer } from '../components/caseStudy/ExpandLayers'
 import { BlockEntranceProvider } from '../context/BlockEntranceContext'
 import Tooltip from '../components/core/Tooltip'
@@ -24,6 +26,7 @@ const EXPANDED = CASE_STUDY_LAYOUT.expanded
 // ---------------------------------------------------------------------------
 // COMPARTMENTS
 //
+//   useOpenMorph     + OpenMorphOverlay  home cover -> compact container
 //   useNavMorph      + NavMorphOverlay   side-to-side shuffle
 //   useExpandMorph   + ExpandLayers      compact -> expanded
 //
@@ -116,6 +119,10 @@ export default function CaseStudy() {
   const nextSlug = nextStudy?.slug.current ?? null
   const currentStudy = caseStudies[currentIndex]
 
+  // Arrival from Home. Reads its origin during render, so the container is
+  // already concealed on the first commit — see useOpenMorph.
+  const openMorph = useOpenMorph({ slug, containerRef, config: COMPACT })
+
   const { navMorph, navPhase, blocksSuppressed, beginNavMorph } = useNavMorph({
     containerRef,
     prevPeekCardRef,
@@ -188,10 +195,10 @@ export default function CaseStudy() {
     // navMorph and isAnimating are read by the navigate guards — omitting them
     // leaves stale closures that ignore an in-flight morph.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasNeighbors, prevSlug, nextSlug, navMorph, isAnimating])
+  }, [hasNeighbors, prevSlug, nextSlug, navMorph, isAnimating, openMorph.concealed])
 
   function navigateToPrev(opts = {}) {
-    if (!prevSlug || isAnimating || navMorph) return
+    if (!prevSlug || isAnimating || navMorph || openMorph.concealed) return
     const { useMorph = true } = opts
     if (useMorph && showCompact) beginNavMorph(-1)
     setDirection(-1)
@@ -199,7 +206,7 @@ export default function CaseStudy() {
   }
 
   function navigateToNext(opts = {}) {
-    if (!nextSlug || isAnimating || navMorph) return
+    if (!nextSlug || isAnimating || navMorph || openMorph.concealed) return
     const { useMorph = true } = opts
     if (useMorph && showCompact) beginNavMorph(1)
     setDirection(1)
@@ -377,6 +384,7 @@ export default function CaseStudy() {
                 config={COMPACT}
                 isAnimating={isAnimating}
                 navMorph={navMorph}
+                concealed={openMorph.concealed}
                 onClick={() => navigateToPrev()}
               />
 
@@ -395,6 +403,12 @@ export default function CaseStudy() {
                   // see clipAnimate above.
                   overflow: isAnimating ? 'visible' : 'hidden',
                   pointerEvents: isAnimating ? 'none' : 'auto',
+                  // Concealed, not unmounted: the proxy needs this rect to fly
+                  // to, and the body behind it needs the flight to load and
+                  // lay out in. `visibility` rather than `opacity` because it
+                  // costs no stacking context and no backdrop root, either of
+                  // which would disturb the skin's backdrop-filter.
+                  visibility: openMorph.concealed ? 'hidden' : 'visible',
                 }}
                 initial={false}
                 animate={clipAnimate}
@@ -469,11 +483,20 @@ export default function CaseStudy() {
                 config={COMPACT}
                 isAnimating={isAnimating}
                 navMorph={navMorph}
+                concealed={openMorph.concealed}
                 onClick={() => navigateToNext()}
               />
             </div>
 
             {navMorph && <NavMorphOverlay navMorph={navMorph} config={COMPACT} />}
+
+            {openMorph.active && (
+              <OpenMorphOverlay
+                origin={openMorph.origin}
+                dest={openMorph.dest}
+                config={COMPACT}
+              />
+            )}
 
             {isScrolled && (
               <motion.div
