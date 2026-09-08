@@ -124,11 +124,19 @@ describe('open morph timeline', () => {
     expect(timeline.proxyFadeDelayS * 1000).toBeGreaterThanOrEqual(timeline.revealAtMs)
   })
 
-  test('dissolves the artwork before arrival, so the proxy lands as bare skin', () => {
+  test('dissolves the artwork in the first half, not on the doorstep', () => {
+    // The card should read as the container for most of its travel. Landing
+    // the dissolve at arrival — which merely satisfies "before the proxy
+    // fades" — is the drift this guards against.
     const coverFadeEndsMs = (timeline.coverFadeDelayS + om.coverFadeDuration) * 1000
 
-    expect(timeline.coverFadeDelayS * 1000).toBeLessThan(timeline.flightMs)
-    expect(coverFadeEndsMs).toBeLessThanOrEqual(timeline.proxyFadeDelayS * 1000)
+    expect(coverFadeEndsMs).toBeLessThan(timeline.flightMs * 0.7)
+  })
+
+  test('never fades the proxy before it has arrived', () => {
+    // Once the artwork is gone the proxy and the container beneath differ only
+    // in geometry, so going translucent early doubles the border.
+    expect(timeline.proxyFadeDelayS * 1000).toBeGreaterThanOrEqual(timeline.flightMs)
   })
 
   test('holds the overlay until its own fade is finished', () => {

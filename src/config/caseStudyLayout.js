@@ -49,15 +49,23 @@ export const CASE_STUDY_LAYOUT = {
       // target, which is what the rest of the clock is keyed to; `bounce` is
       // deliberately small, enough to feel elastic on arrival without the
       // overshoot unseating the corners against the real container beneath.
-      spring: { type: 'spring', visualDuration: 0.55, bounce: 0.18 },
+      spring: { type: 'spring', visualDuration: 0.4, bounce: 0.16 },
       // Proxy fades out over the real container, which has been sitting at the
       // destination rect, concealed, for the whole flight.
-      proxyFadeDuration: 0.22,
+      //
+      // It cannot start any earlier than arrival. Once the artwork is gone the
+      // proxy and the container beneath are identical but for their geometry,
+      // so a proxy going translucent while still short of the target shows the
+      // real container's edge through it as a doubled border.
+      proxyFadeDuration: 0.14,
       revealLeadMs: 40,
-      // Fraction of the flight at which the cover starts dissolving, so the
-      // proxy arrives wearing the container's skin rather than the artwork.
-      coverFadeStart: 0.45,
-      coverFadeDuration: 0.3,
+      // Fraction of the flight at which the cover starts dissolving. Early, and
+      // over quickly: the card should read as the container for most of its
+      // travel, not resolve into one at the last moment. This is the only lever
+      // that brings the gray forward — see proxyFadeDuration for why the other
+      // one is pinned to arrival.
+      coverFadeStart: 0.15,
+      coverFadeDuration: 0.16,
       ease: [0.4, 0, 0.2, 1],
     },
 
