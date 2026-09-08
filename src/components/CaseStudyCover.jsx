@@ -28,8 +28,11 @@ import { useInView } from '../hooks/useInView'
  * @param {string} className - Additional CSS classes
  * @param {Object} style - Inline styles
  * @param {Object} ref - Optional object ref onto the cover box, for callers
- *   that need to measure it (see openMorphBaton). Adopted as the container ref
+ *   that need to measure it (see morphBaton). Adopted as the container ref
  *   rather than merged, so there is only ever one node reference to keep true.
+ * @param {Object} rest - Anything else lands on the cover box. Home tags it
+ *   with a data attribute so the close morph can find the cover it is flying
+ *   to without threading a ref down through the grid.
  */
 export default function CaseStudyCover({
   coverImage,
@@ -40,6 +43,7 @@ export default function CaseStudyCover({
   className = '',
   style = {},
   ref,
+  ...rest
 }) {
   const localRef = useRef(null)
   const containerRef = ref ?? localRef
@@ -165,6 +169,7 @@ export default function CaseStudyCover({
   return (
     <div
       ref={containerRef}
+      {...rest}
       className={`relative w-full overflow-hidden [background-color:var(--color-bg-container-solid)] shadow-md hover:shadow-xl transition-all duration-300 ${className}`}
       style={{
         aspectRatio: 'var(--home-cover-aspect-ratio, 4 / 2.75)',

@@ -2,6 +2,8 @@ import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useCaseStudies } from '../../hooks/useCaseStudies'
+import { stageCloseMorph } from '../../lib/morphBaton'
+import { CASE_STUDY_LAYOUT } from '../../config/caseStudyLayout'
 import AnimatedIcon from './AnimatedIcon'
 import Tooltip from './Tooltip'
 
@@ -15,6 +17,22 @@ export default function NavBar() {
   const isWorkPage = location.pathname.startsWith('/work/')
 
   const handleHomeClick = () => {
+    // Going home from a case study runs the open morph backwards: the
+    // container shrinks into the cover it came from. The container is found by
+    // data attribute rather than handed down — the dock is shared chrome and
+    // has no business holding a ref into whichever page is mounted under it.
+    //
+    // Staging fails harmlessly when there is nothing to depart from: expanded
+    // mode has no compact container, and a container concealed mid-morph is
+    // refused. Home then simply appears, as it did before.
+    if (isWorkPage) {
+      stageCloseMorph(
+        location.pathname.split('/')[2],
+        document.querySelector('[data-morph-container]'),
+        parseFloat(CASE_STUDY_LAYOUT.compact.containerBorderRadius)
+      )
+    }
+
     navigate('/')
   }
 

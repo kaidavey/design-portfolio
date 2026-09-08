@@ -7,14 +7,15 @@ import { EXPAND, EXPAND_PHASE } from '../config/expandTransition'
 import { NAV_PHASE } from '../config/navMorphTimeline'
 import { useExpandMorph } from '../hooks/useExpandMorph.js'
 import { useNavMorph } from '../hooks/useNavMorph'
-import { useOpenMorph } from '../hooks/useOpenMorph'
+import { useMorphArrival } from '../hooks/useMorphArrival'
 import Shell from '../components/Shell'
 import CaseStudyBody from '../components/CaseStudyBody'
 import ProgressiveBlur from '../components/core/ProgressiveBlur'
 import CaseStudyPeek from '../components/CaseStudyPeek'
 import NavMorphOverlay from '../components/caseStudy/NavMorphOverlay'
-import OpenMorphOverlay from '../components/caseStudy/OpenMorphOverlay'
+import MorphOverlay from '../components/MorphOverlay'
 import { ExpandMorphLayer, ExpandedLayer } from '../components/caseStudy/ExpandLayers'
+import { readOpenMorph } from '../lib/morphBaton'
 import { BlockEntranceProvider } from '../context/BlockEntranceContext'
 import Tooltip from '../components/core/Tooltip'
 import { MorphCutProvider } from '../context/MorphCutContext'
@@ -26,7 +27,7 @@ const EXPANDED = CASE_STUDY_LAYOUT.expanded
 // ---------------------------------------------------------------------------
 // COMPARTMENTS
 //
-//   useOpenMorph     + OpenMorphOverlay  home cover -> compact container
+//   useMorphArrival  + MorphOverlay      home cover <-> compact container
 //   useNavMorph      + NavMorphOverlay   side-to-side shuffle
 //   useExpandMorph   + ExpandLayers      compact -> expanded
 //
@@ -120,8 +121,14 @@ export default function CaseStudy() {
   const currentStudy = caseStudies[currentIndex]
 
   // Arrival from Home. Reads its origin during render, so the container is
-  // already concealed on the first commit — see useOpenMorph.
-  const openMorph = useOpenMorph({ slug, containerRef, config: COMPACT })
+  // already concealed on the first commit — see useMorphArrival. The departure
+  // in the other direction is staged by the dock's Home button, which finds
+  // this container by the data attribute below.
+  const openMorph = useMorphArrival({
+    read: () => readOpenMorph(slug),
+    measureDest: () => containerRef.current?.getBoundingClientRect(),
+    config: COMPACT.openMorph,
+  })
 
   const { navMorph, navPhase, blocksSuppressed, beginNavMorph } = useNavMorph({
     containerRef,
@@ -391,6 +398,7 @@ export default function CaseStudy() {
               <motion.div
                 ref={containerRef}
                 className="relative"
+                data-morph-container=""
                 style={{
                   width: COMPACT.containerWidth,
                   maxWidth: COMPACT.containerMaxWidth,
@@ -491,10 +499,15 @@ export default function CaseStudy() {
             {navMorph && <NavMorphOverlay navMorph={navMorph} config={COMPACT} />}
 
             {openMorph.active && (
-              <OpenMorphOverlay
-                origin={openMorph.origin}
-                dest={openMorph.dest}
-                config={COMPACT}
+              <MorphOverlay
+                from={openMorph.origin}
+                to={{ ...openMorph.dest, radius: parseFloat(COMPACT.containerBorderRadius) }}
+                artwork={{
+                  src: openMorph.origin.src,
+                  scaleFrom: openMorph.origin.artworkScale,
+                }}
+                config={COMPACT.openMorph}
+                skin={COMPACT}
               />
             )}
 

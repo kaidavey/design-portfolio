@@ -201,6 +201,15 @@ export async function getCaseStudyShape(slug) {
   return await client.fetch(query, { slug })
 }
 
+// The ordered list, cached for the session like the bodies below.
+//
+// Not an optimisation. Home has to render its grid on its FIRST commit when
+// the reader comes back from a case study — the close morph measures the cover
+// it is flying to in a mount layout effect, and a grid that is still a loading
+// message has no cover to measure. It also takes the "Hold tight..." flash off
+// every return trip.
+let caseStudyListCache = null
+
 // Fetch all case studies (for listing page)
 //
 // The cover video projection keeps only the two fields playback needs —
@@ -208,6 +217,8 @@ export async function getCaseStudyShape(slug) {
 // card on the page. The coalesce covers assets written before the Mux plugin
 // lifted playbackId out of `data`.
 export async function getAllCaseStudies() {
+  if (caseStudyListCache) return caseStudyListCache
+
   const query = `
     *[_type == "caseStudy"] | order(order asc) {
       _id,
@@ -225,12 +236,17 @@ export async function getAllCaseStudies() {
     }
   `
 
-  return client.fetch(query)
+  caseStudyListCache = await client.fetch(query)
+  return caseStudyListCache
 }
 
 // Simple cache for prefetching
 const caseStudyCache = new Map()
 const shapeCache = new Map()
+
+export function getCachedCaseStudies() {
+  return caseStudyListCache
+}
 
 export function getCachedCaseStudy(slug) {
   return caseStudyCache.get(slug)
@@ -251,6 +267,7 @@ export function setCachedShape(slug, data) {
 export function clearAllCaches() {
   caseStudyCache.clear()
   shapeCache.clear()
+  caseStudyListCache = null
 }
 
 export function clearCacheForSlug(slug) {
