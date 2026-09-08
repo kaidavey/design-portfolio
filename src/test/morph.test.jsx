@@ -1,5 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
+  morphRect,
   stageOpenMorph,
   stageCloseMorph,
   readOpenMorph,
@@ -21,6 +22,22 @@ import { CASE_STUDY_LAYOUT } from '../config/caseStudyLayout'
  * the page through the gap.
  */
 
+/**
+ * A rect that answers like the real thing: geometry exposed as accessors on
+ * the prototype, nothing own. jsdom's getBoundingClientRect hands back a plain
+ * object, so without this the trap morphRect exists to close cannot be
+ * reproduced here — which is exactly how it reached a browser.
+ */
+function domRectLike(values) {
+  const proto = {}
+
+  for (const [key, value] of Object.entries(values)) {
+    Object.defineProperty(proto, key, { get: () => value, enumerable: false })
+  }
+
+  return Object.create(proto)
+}
+
 /** A stand-in for a rendered cover: a measurable box around an <img>. */
 function coverElement({ rect, src = 'cover.jpg', scale = 'none', transform = 'none' } = {}) {
   const el = document.createElement('div')
@@ -30,15 +47,8 @@ function coverElement({ rect, src = 'cover.jpg', scale = 'none', transform = 'no
   el.appendChild(img)
   document.body.appendChild(el)
 
-  el.getBoundingClientRect = () => ({
-    top: 0,
-    left: 0,
-    width: 440,
-    height: 302,
-    right: 440,
-    bottom: 302,
-    ...rect,
-  })
+  el.getBoundingClientRect = () =>
+    domRectLike({ top: 0, left: 0, width: 440, height: 302, right: 440, bottom: 302, ...rect })
 
   vi.spyOn(window, 'getComputedStyle').mockImplementation((node) =>
     node === img ? { scale, transform } : { scale: 'none', transform: 'none', visibility: 'visible' }
@@ -52,15 +62,8 @@ function containerElement({ rect, visibility = 'visible' } = {}) {
   const el = document.createElement('div')
   document.body.appendChild(el)
 
-  el.getBoundingClientRect = () => ({
-    top: 72,
-    left: 288,
-    width: 864,
-    height: 675,
-    right: 1152,
-    bottom: 747,
-    ...rect,
-  })
+  el.getBoundingClientRect = () =>
+    domRectLike({ top: 72, left: 288, width: 864, height: 675, right: 1152, bottom: 747, ...rect })
 
   vi.spyOn(window, 'getComputedStyle').mockImplementation(() => ({ visibility }))
 
@@ -71,6 +74,29 @@ beforeEach(() => clearMorph())
 afterEach(() => {
   vi.restoreAllMocks()
   document.body.innerHTML = ''
+})
+
+describe('morphRect', () => {
+  test('copies a DOMRect into something that can actually be spread', () => {
+    const el = { getBoundingClientRect: () => domRectLike({ top: 12, left: 34, width: 482, height: 331 }) }
+
+    // The trap, stated: a DOMRect owns nothing, so spreading it yields nothing
+    // and every geometry target silently becomes undefined.
+    expect(Object.keys(el.getBoundingClientRect())).toEqual([])
+
+    expect({ ...morphRect(el, { radius: 30 }) }).toEqual({
+      top: 12,
+      left: 34,
+      width: 482,
+      height: 331,
+      radius: 30,
+    })
+  })
+
+  test('is null for anything that cannot be measured', () => {
+    expect(morphRect(null, { radius: 30 })).toBeNull()
+    expect(morphRect({ getBoundingClientRect: () => domRectLike({ width: 0 }) }, {})).toBeNull()
+  })
 })
 
 describe('open morph baton', () => {
@@ -171,6 +197,13 @@ describe('baton, either direction', () => {
 
     now.mockReturnValue(1001)
     expect(readOpenMorph('atlas')).toBeNull()
+  })
+
+  test('stages an origin the overlay can spread', () => {
+    stageOpenMorph('atlas', coverElement(), 30)
+    stageCloseMorph('atlas', containerElement(), 60)
+
+    expect({ ...readCloseMorph() }).toMatchObject({ width: 864, height: 675, radius: 60 })
   })
 
   test('survives being read twice, as StrictMode will', () => {

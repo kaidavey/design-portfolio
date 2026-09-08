@@ -56,10 +56,28 @@ function currentScale(el) {
   return matrix ? parseFloat(matrix[1].split(',')[0]) || 1 : 1
 }
 
-/** A viewport rect, or null if the element cannot be measured. */
-function rectOf(el) {
+/**
+ * A morph rect: plain, spreadable, and carrying whatever else this end of the
+ * flight needs to be described by. Null when the element cannot be measured.
+ *
+ * The plainness is the whole point, and it is load-bearing. `getBoundingClientRect()`
+ * returns a DOMRect, whose values are accessors on the prototype rather than
+ * own properties, so `{ ...rect }` is `{}` and `{ ...rect, radius }` is just
+ * `{ radius }` — no error, no warning, and a proxy that sits perfectly still
+ * for an entire flight while its corner radius animates on its own. Both ends
+ * of both morphs are built through here so that cannot happen again.
+ */
+export function morphRect(el, extra) {
   const rect = el?.getBoundingClientRect()
-  return rect?.width ? rect : null
+  if (!rect?.width) return null
+
+  return {
+    top: rect.top,
+    left: rect.left,
+    width: rect.width,
+    height: rect.height,
+    ...extra,
+  }
 }
 
 /**
@@ -70,30 +88,20 @@ function rectOf(el) {
  * first frame is a blank card while a second, uncached URL downloads.
  */
 export function stageOpenMorph(slug, coverEl, radius) {
-  const rect = rectOf(coverEl)
-  if (!slug || !rect) return false
+  const image = coverEl?.querySelector('img')
 
-  const image = coverEl.querySelector('img')
+  const origin = morphRect(coverEl, {
+    radius,
+    src: image?.currentSrc || image?.src || null,
+    // Departing at scale 1 while the hovered cover sits at 1.05 pops on the
+    // most scrutinised frame of the whole animation. Carry the hover scale
+    // over and let it relax during the flight.
+    artworkScale: currentScale(image),
+  })
+  if (!slug || !origin) return false
 
   homeScroll = window.scrollY
-
-  baton = {
-    direction: 'open',
-    slug,
-    at: performance.now(),
-    origin: {
-      top: rect.top,
-      left: rect.left,
-      width: rect.width,
-      height: rect.height,
-      radius,
-      src: image?.currentSrc || image?.src || null,
-      // Departing at scale 1 while the hovered cover sits at 1.05 pops on the
-      // most scrutinised frame of the whole animation. Carry the hover scale
-      // over and let it relax during the flight.
-      artworkScale: currentScale(image),
-    },
-  }
+  baton = { direction: 'open', slug, at: performance.now(), origin }
 
   return true
 }
@@ -107,22 +115,11 @@ export function stageOpenMorph(slug, coverEl, radius) {
  * as a card appearing from nowhere.
  */
 export function stageCloseMorph(slug, containerEl, radius) {
-  const rect = rectOf(containerEl)
-  if (!slug || !rect) return false
+  const origin = morphRect(containerEl, { radius })
+  if (!slug || !origin) return false
   if (getComputedStyle(containerEl).visibility === 'hidden') return false
 
-  baton = {
-    direction: 'close',
-    slug,
-    at: performance.now(),
-    origin: {
-      top: rect.top,
-      left: rect.left,
-      width: rect.width,
-      height: rect.height,
-      radius,
-    },
-  }
+  baton = { direction: 'close', slug, at: performance.now(), origin }
 
   return true
 }

@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useCaseStudies } from '../hooks/useCaseStudies'
 import { prefetchCaseStudy } from '../lib/queries'
-import { stageOpenMorph, readCloseMorph } from '../lib/morphBaton'
+import { stageOpenMorph, readCloseMorph, morphRect } from '../lib/morphBaton'
 import { useMorphArrival } from '../hooks/useMorphArrival'
 import { HOME_LAYOUT } from '../config/homeLayout'
 import { CASE_STUDY_LAYOUT } from '../config/caseStudyLayout'
@@ -48,19 +48,12 @@ function measureCoverDestination({ slug, homeScroll }) {
   restoreScroll(homeScroll)
 
   const cover = document.querySelector(`[data-cover-slug="${CSS.escape(slug)}"]`)
-  const rect = cover?.getBoundingClientRect()
-  if (!rect?.width) return null
+  const image = cover?.querySelector('img')
 
-  const image = cover.querySelector('img')
-
-  return {
-    top: rect.top,
-    left: rect.left,
-    width: rect.width,
-    height: rect.height,
+  return morphRect(cover, {
     radius: COVER_RADIUS,
     src: image?.currentSrc || image?.src || null,
-  }
+  })
 }
 
 // Home header slot: Bio + Status

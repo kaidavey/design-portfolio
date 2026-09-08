@@ -27,7 +27,9 @@ function prefersReducedMotion() {
  * way to get stuck concealed.
  *
  * @param {() => object|null} read - takes the staged departure, or null
- * @param {(origin) => object|null} measureDest - the destination this page offers
+ * @param {(origin) => object|null} measureDest - the destination this page
+ *   offers, built with morphRect. A bare DOMRect is not a substitute; see
+ *   morphRect for what it silently costs.
  * @param {object} config - one of CASE_STUDY_LAYOUT.compact.{open,close}Morph
  */
 export function useMorphArrival({ read, measureDest, config }) {
@@ -44,6 +46,16 @@ export function useMorphArrival({ read, measureDest, config }) {
     if (!measured) {
       setPhase(MORPH_PHASE.DONE)
       return
+    }
+
+    // A DOMRect answers `.width` but owns no enumerable properties, so it
+    // survives every check here and then vanishes the moment anything spreads
+    // it. The proxy holds still for the whole flight and nothing reports why.
+    if (import.meta.env.DEV && !Object.hasOwn(measured, 'width')) {
+      console.warn(
+        '[morph] measureDest returned something with no own geometry — a raw ' +
+          'DOMRect? Build it with morphRect(), or the proxy will not travel.'
+      )
     }
 
     setDest(measured)

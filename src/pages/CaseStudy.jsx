@@ -15,7 +15,7 @@ import CaseStudyPeek from '../components/CaseStudyPeek'
 import NavMorphOverlay from '../components/caseStudy/NavMorphOverlay'
 import MorphOverlay from '../components/MorphOverlay'
 import { ExpandMorphLayer, ExpandedLayer } from '../components/caseStudy/ExpandLayers'
-import { readOpenMorph } from '../lib/morphBaton'
+import { readOpenMorph, morphRect } from '../lib/morphBaton'
 import { BlockEntranceProvider } from '../context/BlockEntranceContext'
 import Tooltip from '../components/core/Tooltip'
 import { MorphCutProvider } from '../context/MorphCutContext'
@@ -126,7 +126,10 @@ export default function CaseStudy() {
   // this container by the data attribute below.
   const openMorph = useMorphArrival({
     read: () => readOpenMorph(slug),
-    measureDest: () => containerRef.current?.getBoundingClientRect(),
+    measureDest: () =>
+      morphRect(containerRef.current, {
+        radius: parseFloat(COMPACT.containerBorderRadius),
+      }),
     config: COMPACT.openMorph,
   })
 
@@ -501,7 +504,7 @@ export default function CaseStudy() {
             {openMorph.active && (
               <MorphOverlay
                 from={openMorph.origin}
-                to={{ ...openMorph.dest, radius: parseFloat(COMPACT.containerBorderRadius) }}
+                to={openMorph.dest}
                 artwork={{
                   src: openMorph.origin.src,
                   scaleFrom: openMorph.origin.artworkScale,
