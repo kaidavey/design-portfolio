@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react'
-import { getAllCaseStudies, getCaseStudyBySlug, getCaseStudyShape, getCachedCaseStudy, getCachedShape, setCachedCaseStudy, setCachedShape, prefetchCaseStudy } from '../lib/queries'
+import { getAllCaseStudies, getCachedCaseStudies, getCaseStudyBySlug, getCaseStudyShape, getCachedCaseStudy, getCachedShape, setCachedCaseStudy, setCachedShape, prefetchCaseStudy } from '../lib/queries'
 
 // Hook to fetch all case studies (ordered list)
 export function useCaseStudies() {
-  const [caseStudies, setCaseStudies] = useState([])
-  const [loading, setLoading] = useState(true)
+  // Seeded synchronously, like useCaseStudy below. Home's grid has to exist on
+  // its first commit for the close morph to have a cover to fly to.
+  const [caseStudies, setCaseStudies] = useState(() => getCachedCaseStudies() ?? [])
+  const [loading, setLoading] = useState(() => !getCachedCaseStudies())
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    if (getCachedCaseStudies()) return
+
     async function loadCaseStudies() {
       try {
         setLoading(true)
