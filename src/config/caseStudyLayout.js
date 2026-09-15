@@ -13,6 +13,10 @@ export const CASE_STUDY_LAYOUT = {
     containerBorderWidth: '1px',
     containerBorderColor: 'var(--color-border)',
     containerBackgroundColor: 'var(--color-bg-container)',
+    // What the container's translucency resolves to when there is a page
+    // behind it. The flying proxies paint this underneath the real background
+    // so they are genuinely opaque — see MorphOverlay.
+    containerBackgroundSolid: 'var(--color-bg-container-solid)',
     containerBackdropBlur: '8px',
     containerBoxShadow: 'var(--shadow-container-inset)',
     contentPaddingTop: '80px',
@@ -39,6 +43,54 @@ export const CASE_STUDY_LAYOUT = {
         springEnter: { stiffness: 120, damping: 28 },  // fast approach (sped up)
         springExit: { stiffness: 120, damping: 28 },   // slow retreat (sped up)
       },
+    },
+
+    // Open morph: the home cover grows into the container slot. Apple's app
+    // open — the artwork travels, dissolves into the surface it becomes, and
+    // the window it left behind is never seen waiting at the destination.
+    //
+    // `closeMorph` below is the same flight run backwards. The two are
+    // deliberately separate blocks rather than one shared one: they are read
+    // by different pages, and the artwork crossing is not symmetric in time.
+    openMorph: {
+      // Geometry rides a spring. `visualDuration` is when it first reaches the
+      // target, which is what the rest of the clock is keyed to; `bounce` is
+      // deliberately small, enough to feel elastic on arrival without the
+      // overshoot unseating the corners against the real container beneath.
+      spring: { type: 'spring', visualDuration: 0.3, bounce: 0.15 },
+      // Proxy fades out over the real container, which has been sitting at the
+      // destination rect, concealed, for the whole flight.
+      //
+      // It cannot start any earlier than arrival. Once the artwork is gone the
+      // proxy and the container beneath are identical but for their geometry,
+      // so a proxy going translucent while still short of the target shows the
+      // real container's edge through it as a doubled border.
+      proxyFadeDuration: 0.09,
+      revealLeadMs: 40,
+      // Fraction of the flight at which the artwork starts dissolving. Early,
+      // and over quickly: the card should read as the container for most of its
+      // travel, not resolve into one at the last moment. This is the only lever
+      // that brings the gray forward — see proxyFadeDuration for why the other
+      // one is pinned to arrival.
+      artworkFadeStart: 0.12,
+      artworkFadeDuration: 0.12,
+      ease: [0.4, 0, 0.2, 1],
+    },
+
+    // Close morph: the container shrinks back into the cover it came from.
+    // Same spring, same pinned proxy fade, same reasoning throughout — only
+    // the artwork runs the other way, resolving instead of dissolving.
+    closeMorph: {
+      spring: { type: 'spring', visualDuration: 0.3, bounce: 0.15 },
+      proxyFadeDuration: 0.09,
+      revealLeadMs: 40,
+      // Late, mirroring the open morph's early dissolve: the card is the
+      // container for most of the way down and only becomes the cover as it
+      // arrives. Finishing before the proxy starts fading is what makes the
+      // handoff to the real cover a non-event.
+      artworkFadeStart: 0.45,
+      artworkFadeDuration: 0.12,
+      ease: [0.4, 0, 0.2, 1],
     },
 
     // Navigation morph: peek cover grows into the container slot while the

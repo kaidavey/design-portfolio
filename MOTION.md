@@ -384,6 +384,76 @@ Blocks start at `opacity: 0`. If the IntersectionObserver never fires (misconfig
 
 ---
 
+## Route Morphs — Home Cover ⇄ Case Study Container
+
+Clicking a cover on Home grows it into the compact case study container; the
+dock's Home button shrinks it back into the cover it came from. Apple's app
+open and close.
+
+**Files**
+
+| File | Owns |
+| --- | --- |
+| `lib/morphBaton.js` | the departure rect, carried across the route change |
+| `config/caseStudyLayout.js` → `compact.{open,close}Morph` | spring and timing, per direction |
+| `config/morphTimeline.js` | phases, and the clock derived from them |
+| `hooks/useMorphArrival.js` | phase sequencing, destination measurement |
+| `components/MorphOverlay.jsx` | the flying proxy |
+
+**Mechanism.** Same proxy pattern as the nav morph, for the same reasons. A
+leaf card wearing the container's skin animates real `top/left/width/height`
+between the two rects — never `scale`, because the endpoints differ in both
+aspect ratio and corner radius, and scaling shears the corners. The proxy is
+opaque for the whole flight, so the destination is revealed beneath it as a
+hard cut with nothing to crossfade.
+
+The two directions are one mechanism with the ends swapped. Whichever page is
+being left stages its rect; whichever page is arrived at measures its own
+destination and flies to it. Only the departure travels — the artwork always
+comes from the arriving page's DOM.
+
+**Things this depends on, in order of how quietly they break:**
+
+1. **The origin is read during render, not in an effect.** The destination has
+   to be concealed on the first commit. An effect runs one frame too late, and
+   that frame paints it at full size before the proxy has left.
+2. **The proxy paints bytes the browser already has** — the cover's own
+   `currentSrc`, in both directions. Rebuilding a URL from the Sanity asset
+   yields a different, uncached one, and the artwork is then a blank frame.
+3. **The cover's hover scale is carried outbound** (`group-hover:scale-105`,
+   which Tailwind v4 writes as the standalone `scale` property, not a matrix).
+   Departing at scale 1 from a hovered cover pops on frame one.
+4. **The proxy is made opaque, not assumed to be.** The container's background
+   is 80% alpha over a `backdrop-filter` the proxy deliberately does not carry;
+   closing, it flies over a full grid of covers and would show every one of
+   them through itself. `containerBackgroundSolid` goes underneath.
+5. **The case study list is cached** (`queries.js`). Home must render its grid
+   on its FIRST commit for the inbound morph to have a cover to measure.
+6. **Home's scroll is restored as a cut.** `index.css` sets
+   `scroll-behavior: smooth` on `html`, so a plain `scrollTo` animates and the
+   cover slides while the proxy is trying to land on it.
+
+**What only the artwork controls.** Opening, it dissolves early so the proxy
+arrives as bare container skin; closing, it resolves late so the proxy arrives
+as the cover. The proxy's own fade is pinned to arrival in both directions and
+is not a timing knob: once the artwork has finished crossing, the proxy and the
+thing beneath it differ only in geometry, so going translucent early shows that
+thing's edge through it as a doubled border.
+
+**Reduced motion.** `useMorphArrival` asks for `prefers-reduced-motion`
+directly, as `useNavMorph` does. This is the documented exception to rule 4
+below: `MotionConfig reducedMotion="user"` stands down transform and layout
+animations only, and these morphs travel on `top/left/width/height`.
+
+**Concealment is `visibility`, never `opacity`.** `opacity < 1` creates a
+backdrop root and a stacking context, either of which disturbs the container
+skin's `backdrop-filter`. See the constraint above.
+
+**Not covered.** Browser Back from a case study cuts, as it always did — there
+is no click to measure the container on before the route changes.
+
+---
+
 ## What Is NOT Animated (Deliberately Deferred)
 
 This foundation pass establishes Motion infrastructure **without changing existing behavior**. The following are explicitly deferred to future work:
@@ -393,7 +463,7 @@ This foundation pass establishes Motion infrastructure **without changing existi
 1. **Gray container entrance/exit** — the frosted case study card appears instantly. Future: slide up from bottom or fade in.
 2. **Compact/expanded transition** — the expand button toggles state instantly. Future: smooth resize/reflow with `layoutId`.
 3. **ProgressiveBlur** — no entrance animation. It appears/disappears with scroll state via conditional rendering.
-4. **Home page project cards** — CSS hover transitions only. Future: may convert to Motion for gesture-aware springs.
+4. **Home page project cards** — CSS hover transitions only; clicking one runs the route morph documented above.
 5. **Breadcrumbs, nav buttons** — CSS `transition-colors` only.
 
 ### Why Deferred?

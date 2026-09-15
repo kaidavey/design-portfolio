@@ -7,12 +7,15 @@ import { EXPAND, EXPAND_PHASE } from '../config/expandTransition'
 import { NAV_PHASE } from '../config/navMorphTimeline'
 import { useExpandMorph } from '../hooks/useExpandMorph.js'
 import { useNavMorph } from '../hooks/useNavMorph'
+import { useMorphArrival } from '../hooks/useMorphArrival'
 import Shell from '../components/Shell'
 import CaseStudyBody from '../components/CaseStudyBody'
 import ProgressiveBlur from '../components/core/ProgressiveBlur'
 import CaseStudyPeek from '../components/CaseStudyPeek'
 import NavMorphOverlay from '../components/caseStudy/NavMorphOverlay'
+import MorphOverlay from '../components/MorphOverlay'
 import { ExpandMorphLayer, ExpandedLayer } from '../components/caseStudy/ExpandLayers'
+import { readOpenMorph, morphRect } from '../lib/morphBaton'
 import { BlockEntranceProvider } from '../context/BlockEntranceContext'
 import Tooltip from '../components/core/Tooltip'
 import { MorphCutProvider } from '../context/MorphCutContext'
@@ -24,6 +27,7 @@ const EXPANDED = CASE_STUDY_LAYOUT.expanded
 // ---------------------------------------------------------------------------
 // COMPARTMENTS
 //
+//   useMorphArrival  + MorphOverlay      home cover <-> compact container
 //   useNavMorph      + NavMorphOverlay   side-to-side shuffle
 //   useExpandMorph   + ExpandLayers      compact -> expanded
 //
@@ -116,6 +120,19 @@ export default function CaseStudy() {
   const nextSlug = nextStudy?.slug.current ?? null
   const currentStudy = caseStudies[currentIndex]
 
+  // Arrival from Home. Reads its origin during render, so the container is
+  // already concealed on the first commit — see useMorphArrival. The departure
+  // in the other direction is staged by the dock's Home button, which finds
+  // this container by the data attribute below.
+  const openMorph = useMorphArrival({
+    read: () => readOpenMorph(slug),
+    measureDest: () =>
+      morphRect(containerRef.current, {
+        radius: parseFloat(COMPACT.containerBorderRadius),
+      }),
+    config: COMPACT.openMorph,
+  })
+
   const { navMorph, navPhase, blocksSuppressed, beginNavMorph } = useNavMorph({
     containerRef,
     prevPeekCardRef,
@@ -188,10 +205,10 @@ export default function CaseStudy() {
     // navMorph and isAnimating are read by the navigate guards — omitting them
     // leaves stale closures that ignore an in-flight morph.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasNeighbors, prevSlug, nextSlug, navMorph, isAnimating])
+  }, [hasNeighbors, prevSlug, nextSlug, navMorph, isAnimating, openMorph.concealed])
 
   function navigateToPrev(opts = {}) {
-    if (!prevSlug || isAnimating || navMorph) return
+    if (!prevSlug || isAnimating || navMorph || openMorph.concealed) return
     const { useMorph = true } = opts
     if (useMorph && showCompact) beginNavMorph(-1)
     setDirection(-1)
@@ -199,7 +216,7 @@ export default function CaseStudy() {
   }
 
   function navigateToNext(opts = {}) {
-    if (!nextSlug || isAnimating || navMorph) return
+    if (!nextSlug || isAnimating || navMorph || openMorph.concealed) return
     const { useMorph = true } = opts
     if (useMorph && showCompact) beginNavMorph(1)
     setDirection(1)
@@ -377,12 +394,14 @@ export default function CaseStudy() {
                 config={COMPACT}
                 isAnimating={isAnimating}
                 navMorph={navMorph}
+                concealed={openMorph.concealed}
                 onClick={() => navigateToPrev()}
               />
 
               <motion.div
                 ref={containerRef}
                 className="relative"
+                data-morph-container=""
                 style={{
                   width: COMPACT.containerWidth,
                   maxWidth: COMPACT.containerMaxWidth,
@@ -395,6 +414,12 @@ export default function CaseStudy() {
                   // see clipAnimate above.
                   overflow: isAnimating ? 'visible' : 'hidden',
                   pointerEvents: isAnimating ? 'none' : 'auto',
+                  // Concealed, not unmounted: the proxy needs this rect to fly
+                  // to, and the body behind it needs the flight to load and
+                  // lay out in. `visibility` rather than `opacity` because it
+                  // costs no stacking context and no backdrop root, either of
+                  // which would disturb the skin's backdrop-filter.
+                  visibility: openMorph.concealed ? 'hidden' : 'visible',
                 }}
                 initial={false}
                 animate={clipAnimate}
@@ -469,11 +494,25 @@ export default function CaseStudy() {
                 config={COMPACT}
                 isAnimating={isAnimating}
                 navMorph={navMorph}
+                concealed={openMorph.concealed}
                 onClick={() => navigateToNext()}
               />
             </div>
 
             {navMorph && <NavMorphOverlay navMorph={navMorph} config={COMPACT} />}
+
+            {openMorph.active && (
+              <MorphOverlay
+                from={openMorph.origin}
+                to={openMorph.dest}
+                artwork={{
+                  src: openMorph.origin.src,
+                  scaleFrom: openMorph.origin.artworkScale,
+                }}
+                config={COMPACT.openMorph}
+                skin={COMPACT}
+              />
+            )}
 
             {isScrolled && (
               <motion.div

@@ -61,7 +61,7 @@ const cardVariants = {
 }
  
 const CaseStudyPeek = forwardRef(function CaseStudyPeek(
-  { side, study, config, isAnimating, navMorph, onClick },
+  { side, study, config, isAnimating, navMorph, concealed = false, onClick },
   cardRef
 ) {
   const peek = config.peek
@@ -136,9 +136,28 @@ const CaseStudyPeek = forwardRef(function CaseStudyPeek(
         x: slotX,
         y: slotY,
       }}
+      // `concealed` is the open morph holding the slot back: the proxy is
+      // still in flight toward the container, and a peek already parked at the
+      // edge would give the destination away. Cleared on arrival, so the slots
+      // settle in behind the card that has just landed.
+      //
+      // The explicit `initial` is what makes that a fade rather than a pop —
+      // without it the slot mounts at the animate value and has nowhere to
+      // come from.
+      initial={{ opacity: concealed ? 0 : 1 }}
       // Expand handoff: fade out (x handled in style with magnetism)
-      animate={{ opacity: isAnimating ? 0 : 1 }}
-      transition={{ duration: peek.fadeOutDuration, ease: nm.ease }}
+      animate={{ opacity: isAnimating || concealed ? 0 : 1 }}
+      // Asymmetric on purpose. Going out is the expand morph's leisurely fade;
+      // coming back is the open morph landing, and the slots have to resolve
+      // with the proxy rather than after it — trailing motion once the card has
+      // arrived is the one thing that still reads as slow.
+      transition={{
+        duration:
+          isAnimating || concealed
+            ? peek.fadeOutDuration
+            : config.openMorph.proxyFadeDuration,
+        ease: nm.ease,
+      }}
       onClick={interactive ? onClick : undefined}
       role={study ? 'button' : undefined}
       aria-label={study ? `View ${study.title}` : undefined}
