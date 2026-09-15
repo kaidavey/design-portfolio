@@ -8,6 +8,7 @@ import { NAV_PHASE } from '../config/navMorphTimeline'
 import { useExpandMorph } from '../hooks/useExpandMorph.js'
 import { useNavMorph } from '../hooks/useNavMorph'
 import { useMorphArrival } from '../hooks/useMorphArrival'
+import { useSwipeNav } from '../hooks/useSwipeNav'
 import Shell from '../components/Shell'
 import CaseStudyBody from '../components/CaseStudyBody'
 import ProgressiveBlur from '../components/core/ProgressiveBlur'
@@ -160,6 +161,16 @@ export default function CaseStudy() {
     showExpanded,
     showCompact,
   } = expand
+
+  // Trackpad swipe. Drives the peeks out as the fingers travel, and at the
+  // limit commits through the same path as the arrows and keys.
+  const swipeProgress = useSwipeNav({
+    active: showCompact,
+    enabled: hasNeighbors && !isAnimating && !navMorph && !openMorph.concealed,
+    onSwipe: (dir) => (dir > 0 ? navigateToNext() : navigateToPrev()),
+    resetKey: slug,
+    config: COMPACT.swipe,
+  })
 
   useNeighborPrefetch(prevSlug, nextSlug)
 
@@ -394,6 +405,7 @@ export default function CaseStudy() {
                 config={COMPACT}
                 isAnimating={isAnimating}
                 navMorph={navMorph}
+                swipeProgress={swipeProgress}
                 concealed={openMorph.concealed}
                 onClick={() => navigateToPrev()}
               />
@@ -494,6 +506,7 @@ export default function CaseStudy() {
                 config={COMPACT}
                 isAnimating={isAnimating}
                 navMorph={navMorph}
+                swipeProgress={swipeProgress}
                 concealed={openMorph.concealed}
                 onClick={() => navigateToNext()}
               />

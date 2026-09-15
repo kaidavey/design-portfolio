@@ -45,6 +45,28 @@ export const CASE_STUDY_LAYOUT = {
       },
     },
 
+    // Trackpad swipe: the neighbour peek follows a two-finger horizontal swipe
+    // out from the edge, and reaching the limit commits to the nav morph. See
+    // useSwipeNav.
+    swipe: {
+      // Wheel delta, px, the fingers travel to reach the limit. Less than this
+      // and the peek springs home on release.
+      threshold: 150,
+      // How much further the peek has come out at the limit, on top of
+      // revealWidth. Kept short: the morph grows the card from wherever this
+      // leaves it, and the further out it has come, the more the handoff from
+      // finger-driven to eased motion shows. Must stay inside the 18vw gutter
+      // beside the container regardless.
+      maxPull: '4vw',
+      // Quiet gap that counts as the fingers lifting. Trackpads report a
+      // gesture as a wheel stream at frame rate, momentum included, and never
+      // say when it ends.
+      idleMs: 160,
+      // Travel before a gesture is claimed as horizontal or vertical.
+      axisLockPx: 6,
+      releaseSpring: { type: 'spring', stiffness: 420, damping: 38 },
+    },
+
     // Open morph: the home cover grows into the container slot. Apple's app
     // open — the artwork travels, dissolves into the surface it becomes, and
     // the window it left behind is never seen waiting at the destination.

@@ -61,7 +61,7 @@ const cardVariants = {
 }
  
 const CaseStudyPeek = forwardRef(function CaseStudyPeek(
-  { side, study, config, isAnimating, navMorph, concealed = false, onClick },
+  { side, study, config, isAnimating, navMorph, swipeProgress, concealed = false, onClick },
   cardRef
 ) {
   const peek = config.peek
@@ -91,12 +91,19 @@ const CaseStudyPeek = forwardRef(function CaseStudyPeek(
     slug: slugKey,
   })
 
-  // Combine magnetism peek with expand-exit slide
+  // Trackpad swipe: this side's neighbour follows the fingers out, reaching
+  // maxPull as the gesture commits. The nav morph measures the card from here,
+  // so the grow departs from wherever the swipe has pulled it.
+  const maxPull = resolveToPx(config.swipe.maxPull)
+
+  // Combine magnetism peek and swipe pull with expand-exit slide
   const slotX = useTransform(() => {
     if (isAnimating) {
       return side === 'prev' ? -200 : 200
     }
-    return peekX.get()
+    const p = swipeProgress.get()
+    const pull = side === 'prev' ? Math.max(0, -p) : Math.max(0, p)
+    return peekX.get() - edgeSign * pull * maxPull
   })
 
   const slotY = useTransform(() => {

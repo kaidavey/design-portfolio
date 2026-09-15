@@ -454,6 +454,41 @@ is no click to measure the container on before the route changes.
 
 ---
 
+## Trackpad Swipe — Compact Case Studies
+
+A two-finger horizontal swipe pulls the neighbour peek out from the edge in
+step with the fingers; at the limit it commits, and the nav morph grows the
+peek into the container from wherever the swipe left it.
+
+| File | Owns |
+| --- | --- |
+| `hooks/useSwipeNav.js` | wheel stream → signed progress (-1 prev … +1 next), commit, spring home |
+| `config/caseStudyLayout.js` → `compact.swipe` | limit, pull distance, release timing |
+| `components/CaseStudyPeek.jsx` | maps progress onto the slot's `x`, on top of magnetism |
+
+**A trackpad gesture is a wheel stream with no end event.** A quiet gap of
+`idleMs` stands in for the fingers lifting. macOS keeps the stream going
+through momentum, so a flick carries past the limit on its own — and one
+gesture, momentum included, commits at most once.
+
+**The axis is claimed once per gesture**, from the first `axisLockPx` of
+travel. Vertical scrolls inside the container drift sideways; without the
+lock they tug at the peeks.
+
+**The morph measures the pulled-out peek, and the pull holds until the route
+changes.** `beginNavMorph` reads the card's rect synchronously inside the
+commit, transforms included, so the proxy departs from exactly where the card
+is drawn. The card itself stays mounted until the new slug commits — a router
+transition, which can land a frame or two after the morph starts — so the pull
+is held under the proxy until then (`resetKey`). Springing home at the commit
+slides the card out from under the proxy while it is still visible.
+
+**Back/Forward.** Chrome and Safari read an unclaimed horizontal swipe as
+history navigation. `overscroll-behavior-x: none` is set on `<html>` only while
+the compact view is mounted, so Home keeps the gesture.
+
+---
+
 ## What Is NOT Animated (Deliberately Deferred)
 
 This foundation pass establishes Motion infrastructure **without changing existing behavior**. The following are explicitly deferred to future work:
