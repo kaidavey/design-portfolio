@@ -38,8 +38,7 @@ let baton = null
 let homeScroll = 0
 
 /**
- * Scale currently applied by CSS — the cover is mid `group-hover:scale-105`,
- * and mid its 300ms transition into it if the click was quick.
+ * Scale currently applied by CSS, if any.
  *
  * Tailwind v4 writes the standalone `scale` property, not a transform matrix,
  * so that is what is read first; the matrix is the fallback for anything that
@@ -93,9 +92,6 @@ export function stageOpenMorph(slug, coverEl, radius) {
   const origin = morphRect(coverEl, {
     radius,
     src: image?.currentSrc || image?.src || null,
-    // Departing at scale 1 while the hovered cover sits at 1.05 pops on the
-    // most scrutinised frame of the whole animation. Carry the hover scale
-    // over and let it relax during the flight.
     artworkScale: currentScale(image),
   })
   if (!slug || !origin) return false

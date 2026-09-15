@@ -102,9 +102,8 @@ function HomeHeader() {
  * One case study on the grid, and the departure end of the open morph.
  *
  * The cover is measured on the click itself rather than up front: it moves
- * with scroll, with the viewport, and with its own hover scale, and only the
- * rect it occupied at the moment of the click is the one the morph should
- * leave from.
+ * with scroll and with the viewport, and only the rect it occupied at the
+ * moment of the click is the one the morph should leave from.
  */
 function CaseStudyCard({ caseStudy, concealed }) {
   const coverRef = useRef(null)

@@ -170,7 +170,7 @@ export default function CaseStudyCover({
     <div
       ref={containerRef}
       {...rest}
-      className={`relative w-full overflow-hidden [background-color:var(--color-bg-container-solid)] shadow-md hover:shadow-xl transition-all duration-300 ${className}`}
+      className={`relative w-full overflow-hidden [background-color:var(--color-bg-container-solid)] shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${className}`}
       style={{
         aspectRatio: 'var(--home-cover-aspect-ratio, 4 / 2.75)',
         borderRadius: 'var(--home-cover-border-radius, 30px)',
@@ -182,7 +182,7 @@ export default function CaseStudyCover({
         alt={alt}
         sizes={sizes}
         maxWidth={maxWidth}
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        className="w-full h-full object-cover"
       />
 
       {shouldLoad && (
@@ -194,7 +194,7 @@ export default function CaseStudyCover({
           playsInline
           aria-hidden="true"
           tabIndex={-1}
-          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-[transform,opacity] duration-300"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
           style={{ opacity: isPlaying ? 1 : 0 }}
         />
       )}
